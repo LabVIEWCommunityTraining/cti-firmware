@@ -1,0 +1,1 @@
+#Defines default features for CTI firmware

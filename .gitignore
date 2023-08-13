@@ -30,3 +30,4 @@
 *.exe
 *.out
 *.app
+/platform/rp2040/build
