@@ -10,16 +10,21 @@ get_filename_component(CTI_INCLUDE_DIR "../../include" ABSOLUTE)
 if (NOT CTI_PLATFORM)
     message("No CTI_PLATFORM set, defaulting to ${DEFAULT_CTI_PLATFORM}")
     set(CTI_PLATFORM ${DEFAULT_CTI_PLATFORM})
+else()
+    message("CTI_PLATFORM is ${CTI_PLATFORM}")
 endif()
 
 if(NOT CTI_BOARD)
     message("No CTI_BOARD set, defaulting to ${DEFAULT_CTI_BOARD}")
     set(CTI_BOARD ${DEFAULT_CTI_BOARD})
+else()
+    message("CTI_BOARD is ${CTI_BOARD}")
 endif()
 
 if(NOT CTI_BOARD_DIR)
-    set(CTI_BOARD_DIR ${CMAKE_SOURCE_DIR}/boards/${CTI_BOARD})
+    get_filename_component(CTI_BOARD_DIR "${CMAKE_CURRENT_LIST_DIR}/../${CTI_PLATFORM}/boards/${CTI_BOARD}" ABSOLUTE)
 endif()
+message("CTI_BOARD_DIR is ${CTI_BOARD_DIR}")
 if(NOT EXISTS ${CTI_BOARD_DIR}/cti_board.cmake)
     message(FATAL_ERROR "Invalid CTI_BOARD specified: ${CTI_BOARD}, no cti_board.cmake found in ${CTI_BOARD_DIR}")
 endif()
@@ -56,6 +61,8 @@ function(create_cti_build prefix target output)
     set(CTI_TARGET "cti_${prefix}_${CTI_PLATFORM}_${CTI_BOARD}")
     set(CTI_OUTPUT "${CTI_TARGET}_${CTI_VERSION}")
 
+    message("\n--Creating build ${CTI_TARGET}--")
+
     set(${target} "${CTI_TARGET}" PARENT_SCOPE)
     set(${output} "${CTI_OUTPUT}" PARENT_SCOPE)
 
@@ -74,6 +81,8 @@ function(create_cti_build prefix target output)
         ${CTI_SOURCE_CORE}
         ${CTI_SOURCE_PLATFORM}
     )
+
+    message("CTI_INCLUDE is ${CTI_INCLUDE}")
 
     target_include_directories(${CTI_TARGET}
         PUBLIC ${CTI_INCLUDE}

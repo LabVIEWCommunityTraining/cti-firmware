@@ -1,0 +1,1 @@
+get_filename_component(CTI_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/../include" ABSOLUTE)

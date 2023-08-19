@@ -1,7 +1,7 @@
 #include "cti/platform.h"
 #include <pico/stdlib.h>
 
-const uint led = 25;
+const uint8_t led = 25;
 
 int PlatformIO::_getchar_timeout_us(uint32_t timeout_us) {
     int c;

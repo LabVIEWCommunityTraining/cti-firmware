@@ -1,6 +1,7 @@
 #include "cti/visa.h"
 #include "cti/udaq.h"
 
-void main() {
+int main() {
     
+    return 0;
 }
