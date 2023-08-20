@@ -1,8 +1,15 @@
 #ifndef platform_h_
 #define platform_h_
 
+#include "version.h"
+
 #include <cstdint>
 #include <cstdio>
+
+#define CTI_VENDOR "CTI"
+
+
+namespace CTI {
 
 #ifndef PlatformTickType
     typedef int64_t platform_tick_t;
@@ -10,7 +17,14 @@
     typedef PlatformTickType platform_tick_t;
 #endif
 
-
+class PlatformInfo {    
+public:
+    PlatformInfo();
+    const char* Vendor() const;
+    const char* SerialNum() const;
+    const char* Model() const;
+    const char* Version() const;
+};
 
 class PlatformMemory {
 public:
@@ -25,11 +39,13 @@ private:
 };
 
 class PlatformIO {
+public:
     PlatformIO();
     void Print(int32_t len, const char* str);
     void Print(const char* str);
     void Print(char c);
     void Printf(const char* format, ...) const;
+    void Flush();
     void ReadStdin(char** buffer, size_t maxLen);
     void InitStatusLED();
     void StatusLED(bool val);
@@ -55,11 +71,17 @@ public:
     static void Setup();
     static void Shutdown();
 
+    PlatformInfo Info;
     PlatformMemory Mem;
     PlatformIO IO;
     PlatformTimer Timer;
+
+private:
+    void init();
 };
 
 extern Platform gPlatform;
+
+}; //namespace CTI
 
 #endif //platform_h_

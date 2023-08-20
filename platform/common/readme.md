@@ -1,0 +1,3 @@
+# platform/common
+
+This folder contains common build configuration across all targets. These include programming language standards, configuring the source code common to all platforms, versioning of the builds, and timestamping the builds. CTI defines that can be used within source code to identify aspects of the build configuration are also setup here. Anything that isn't common to all platforms will be in a platform specific folder such as [rp2040](../rp2040) which utilizes the arm-none-eabi and pico-sdk toolchain.

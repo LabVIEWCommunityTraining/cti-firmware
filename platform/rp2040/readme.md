@@ -16,3 +16,5 @@ Building is accomplished in the terminal and not within VS Code, at least until 
 > ``cmake -G "MinGW Makefiles" ..``
 6. Run the build
 > ``make``
+
+With a successful build you will have a `cti_visa-udaq_pi_pico_#.#.#.uf2` file that you can deploy to a rp2040 target.

@@ -94,8 +94,9 @@ endif ()
 
 #Add the source files specific to rp2040 to the build
 target_sources(${VISA_UDAQ_TARGET} PRIVATE
-    main-visa-udaq.cpp
+    platform/pi_pico_platform.cpp
     platform/pi_pico_io.cpp
+    platform/pi_pico_timer.cpp
 )
 
 # These are the components we're using from the pico-sdk

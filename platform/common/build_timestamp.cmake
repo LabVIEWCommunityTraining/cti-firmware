@@ -1,4 +1,4 @@
-set(BUILD_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/CTI/build.h")
+set(BUILD_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/build/build.h")
 
 string(TIMESTAMP CTI_BUILD_DATE "%Y%m%d" UTC)
 string(TIMESTAMP CTI_BUILD_TIME "%H%M%S" UTC)

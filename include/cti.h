@@ -12,5 +12,6 @@ to create firmware providing a specific mode."
 
 #include "cti/version.h"
 #include "cti/platform.h"
+#include "visa/core.h"
 
 #endif //cti_h_
