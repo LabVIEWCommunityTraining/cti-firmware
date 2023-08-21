@@ -42,7 +42,20 @@ namespace Visa{
         return SCPI_RES_OK;
     }
 
+    scpi_result_t scpi_LED(scpi_t * context) {
+        bool val;
+        
+        if (!SCPI_ParamBool(context, &val, true))  {
+            return SCPI_RES_ERR;
+        }
+
+        gPlatform.IO.StatusLED(val);
+
+        return SCPI_RES_OK;
+    }
+
     void initCommonCommands(Visa* visa) {
+        //standard SCPI commands
         visa->addCommand({"*CLS", SCPI_CoreCls, 0});
         visa->addCommand({"*ESE", SCPI_CoreEse, 0});
         visa->addCommand({"*ESE?", SCPI_CoreEseQ, 0});
@@ -56,6 +69,9 @@ namespace Visa{
         visa->addCommand({"*STB?", SCPI_CoreStbQ, 0});
         //visa->addCommand({"*TST?", My_CoreTstQ, 0});
         visa->addCommand({"*WAI", SCPI_CoreWai, 0});
+
+        //custom commands
+        visa->addCommand({"SET:LED", scpi_LED, 0});
     }
 
     Visa::Visa() {
