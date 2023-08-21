@@ -1,1 +1,2 @@
-[Platforms](./platform/readme.md)
+- [Hardware Platforms & Firmware Building](./platform)
+- [Software Source](./source)

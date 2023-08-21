@@ -8,7 +8,6 @@
 
 #define CTI_VENDOR "CTI"
 
-
 namespace CTI {
 
 #ifndef PlatformTickType
@@ -46,6 +45,10 @@ public:
     void Print(char c);
     void Printf(const char* format, ...) const;
     void Flush();
+
+    int FGetC() { return fgetc(stdin); };
+    int FPutC(int c) { return fputc(c, stdout); };
+
     void ReadStdin(char** buffer, size_t maxLen);
     void InitStatusLED();
     void StatusLED(bool val);
@@ -53,6 +56,13 @@ public:
 private:
     char _fgetc(FILE *file);
     int _getchar_timeout_us(uint32_t timeout_us);
+};
+
+class PlatformEngine {
+public:
+    virtual int Ready() = 0;
+    virtual void MainLoop() = 0;
+    virtual const char* StatusText(int status) { return ""; };
 };
 
 class PlatformTimer {
@@ -68,6 +78,7 @@ public:
 
 class Platform {
 public:
+    static void Preinit();
     static void Setup();
     static void Shutdown();
 
@@ -75,9 +86,10 @@ public:
     PlatformMemory Mem;
     PlatformIO IO;
     PlatformTimer Timer;
+    PlatformEngine* pEngine;
 
 private:
-    void init();
+    void Init();
 };
 
 extern Platform gPlatform;

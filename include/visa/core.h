@@ -2,6 +2,7 @@
 #define visa_core_h_
 
 #include "scpi/scpi.h"
+#include "cti/platform.h"
 
 #include <vector>
 
@@ -20,12 +21,15 @@ namespace Visa {
         AlreadyReady
     } Status;
     
-    class Visa {
+    class Visa : public PlatformEngine {
     public:
         Visa();
         
         Status addCommand(scpi_command_t command);
-        Status ready();
+
+        virtual int Ready();
+        virtual void MainLoop();
+        virtual const char* StatusText(int status);
 
     private:
         bool _ready;
@@ -43,7 +47,8 @@ namespace Visa {
 } //namespace Visa
 
     //make gVisa accessible as CTI::gVisa and not nested within Visa namespace.
-    //the idea is that all higher level code uses the CTI namespace
+    //the idea is that all higher level code uses the CTI namespace.
+    // this will also be pointed to by gPlatform.pEngine
     extern Visa::Visa gVisa;
 
 } //namespace CTI

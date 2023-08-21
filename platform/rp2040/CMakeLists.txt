@@ -40,74 +40,31 @@ set(DEFAULT_CTI_BOARD pi_pico)
 #bring in all the common CTI cmake functionality
 include(../common/cti.cmake)
 
-message("\n-- Configuring VISA_UDAQ firmware--\n")
+#bring in the pi pico source and build config
+include(rp2040.inc.cmake)
+
+message("\n-- Configuring firmware--\n")
+
+# We expect RP2040_STDIO to be set to 'usb', 'uart', or 'none'
+# If not defined we default to usb.
+# Can be set to uart to allow using usb port for other tasks
+# and requires setting additional RP2040_STDIO_UART_XX values below
+if (NOT DEFINED RP2040_STDIO)
+    set(RP2040_STDIO "usb")
+    message("No STDIO mapping specified, defaulting to usb")
+endif ()
+
+message("STDIO configured over ${RP2040_STDIO}")
 
 #from the above common cti.cmake, creates an executable build spec
 #with the Pi Pico, both VISA and uDAQ modes are built in together
 #so the executable is prefixed as such. ("visa-udaq")
-# VISA_UDAQ_TARGET and VISA_UDAQ_OUTPUT are output variables from the command
-create_cti_build("visa-udaq" VISA_UDAQ_TARGET VISA_UDAQ_OUTPUT)
+# VISA_TARGET and VISA_OUTPUT are output variables from the command
+create_cti_build("visa" VISA_TARGET VISA_OUTPUT)
 
-#create_cti_build will set the specific VISA_UDAQ_OUTPUT variable to the filename without the extension
-message("Output will be ${VISA_UDAQ_OUTPUT}.uf2")
-
-#tell the pico-sdk to generate the additional Pi Pico output files (uf2)
-#for the created executable build spec target
-pico_add_extra_outputs(${VISA_UDAQ_TARGET})
-
-# We expect VISA_UDAQ_STDIO to be set to 'usb', 'uart', or 'none'
-# If not defined we default to usb.
-# Can be set to uart to allow using usb port for other tasks
-# and requires setting additional VISA_UDAQ_STDIO_UART_XX values below
-if (NOT DEFINED VISA_UDAQ_STDIO)
-    set(VISA_UDAQ_STDIO "usb")
-    message("No STDIO mapping specified, defaulting to usb")
-endif ()
-
-message("STDIO configured over ${VISA_UDAQ_STDIO}")
-
-#Sets the driver to use for stdio
-if (VISA_UDAQ_STDIO STREQUAL "usb")
-    pico_enable_stdio_usb(${VISA_UDAQ_TARGET} 1)
-    pico_enable_stdio_uart(${VISA_UDAQ_TARGET} 0)
-elseif (VISA_UDAQ_STDIO STREQUAL "uart")
-
-    # The following VIREO_STDIO_UART_XX values configure the port when pico_stdio_uart is used above
-    # Default is pins on the bottom right of the Pico pinout diagram, similar to small arduino board RX/TX layout
-    if (NOT DEFINED VISA_UDAQ_STDIO_UART_PORT)
-        set(VISA_UDAQ_STDIO_UART_PORT uart0)
-    endif ()
-
-    if (NOT DEFINED VISA_UDAQ_STDIO_UART_BAUD)
-        set(VISA_UDAQ_STDIO_UART_BAUD 115200)
-    endif ()
-
-    # Note: RX and TX values can be set to -1 to disable that stdio direction
-    if (NOT DEFINED VISA_UDAQ_STDIO_UART_RX)
-        set(VISA_UDAQ_STDIO_UART_RX 21)
-    endif()
-
-    if (NOT DEFINED VISA_UDAQ_STDIO_UART_TX)
-        set(VISA_UDAQ_STDIO_UART_TX 22)
-    endif ()
-endif ()
-
-#Add the source files specific to rp2040 to the build
-target_sources(${VISA_UDAQ_TARGET} PRIVATE
-    platform/pi_pico_platform.cpp
-    platform/pi_pico_io.cpp
-    platform/pi_pico_timer.cpp
+#enable visa firmware mode for this firmware
+target_compile_definitions(${VISA_TARGET}
+    PUBLIC CTI_VISA=1
 )
-
-# These are the components we're using from the pico-sdk
-# building a list variable to use with target_link_library command below.
-set(PICO_SDK_COMPONENTS
-    pico_stdlib
-    hardware_i2c
-)
-
-target_link_libraries(${VISA_UDAQ_TARGET}
-    ${PICO_SDK_COMPONENTS}
-)
-
-message("\n")
+configure_rp2040(${VISA_TARGET})
+message("CTI-Visa output will be ${VISA_OUTPUT}.uf2")

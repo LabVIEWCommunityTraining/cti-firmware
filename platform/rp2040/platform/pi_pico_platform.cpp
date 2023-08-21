@@ -10,7 +10,7 @@ using namespace CTI;
 const uint32_t unique_id_len = PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1;
 char unique_id[unique_id_len] = "0000000000000000";
 
-void platform_init() {
+void Platform::Preinit() {
     pico_get_unique_board_id_string(unique_id, unique_id_len);
 
     stdio_usb_init();
@@ -25,12 +25,8 @@ void platform_init() {
     }
 }
 
-void Platform::init() {
+void Platform::Init() {
 }
 
-const char* PlatformInfo::Model() const { return "RP2040_Visa-uDAQ"; };
-
-//TODO: Proper rp2040 unique ID
-const char* PlatformInfo::SerialNum() const {
-    return unique_id;
-};
+const char* PlatformInfo::Model() const { return "RP2040-Visa"; };
+const char* PlatformInfo::SerialNum() const { return unique_id; };

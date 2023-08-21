@@ -80,7 +80,7 @@ namespace Visa{
         return Success;
     }
 
-    Status Visa::ready() {
+    int Visa::Ready() {
         //mark _ready as true which means the command list is finalized
         _ready = true;
 
@@ -100,7 +100,28 @@ namespace Visa{
             _error_queue, SCPI_ERROR_QUEUE_SIZE);
         
 
-        return Success;
+        return (int)Success;
+    }
+
+    void Visa::MainLoop() {
+        char inputBuffer[255];
+        int inputPosition = 0;
+
+        while(true) {
+            char c = gPlatform.IO.FGetC();
+
+            if (c == '\r')
+                gPlatform.IO.FPutC('\n');
+            else
+                gPlatform.IO.FPutC(c);
+
+            gPlatform.IO.Flush();
+            SCPI_Input(&_context, &c, 1);
+        }
+    }
+
+    const char* Visa::StatusText(int status) {
+        return "";
     }
 } //namespace Visa
 

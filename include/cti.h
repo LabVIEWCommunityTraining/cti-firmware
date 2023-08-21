@@ -7,11 +7,12 @@ to create firmware providing a specific mode."
 #ifndef cti_h_
 #define cti_h_
 
+#include "cti/common.h"
+
 #define CTI_PLATFORM CTI_STR(_CTI_PLATFORM)
 #define CTI_BOARD CTI_STR(_CTI_BOARD)
 
 #include "cti/version.h"
 #include "cti/platform.h"
-#include "visa/core.h"
 
 #endif //cti_h_
