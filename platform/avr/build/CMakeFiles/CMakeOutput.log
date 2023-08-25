@@ -1,0 +1,278 @@
+The target system is: Generic -  - avr
+The host system is: Windows - 10.0.22621 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/dev/cti/avr/bin/avr-gcc.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/3.25.1/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: C:/dev/cti/avr/bin/avr-g++.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/3.25.1/CompilerIdCXX/a.out"
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-e36ujc
+
+Run Build Command(s):C:/dev/mingw-w64/bin/mingw32-make.exe -f Makefile cmTC_7cd2e/fast && C:/dev/mingw-w64/bin/mingw32-make.exe  -f CMakeFiles\cmTC_7cd2e.dir\build.make CMakeFiles/cmTC_7cd2e.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-e36ujc'
+Building C object CMakeFiles/cmTC_7cd2e.dir/CMakeCCompilerABI.c.obj
+C:\dev\cti\avr\bin\avr-gcc.exe   -v -o CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj -c "C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCCompilerABI.c"
+Using built-in specs.
+Reading specs from c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/device-specs/specs-avr2
+COLLECT_GCC=C:\dev\cti\avr\bin\avr-gcc.exe
+Target: avr
+Configured with: /home/toolsbuild/workspace/avr8-gnu-toolchain/src/gcc/configure LDFLAGS=-L/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs/lib CPPFLAGS= --target=avr --host=x86_64-w64-mingw32 --build=x86_64-pc-linux-gnu --prefix=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64 --libdir=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64/lib --enable-languages=c,c++ --with-dwarf2 --enable-doc --disable-shared --disable-libada --disable-libssp --disable-nls --with-avrlibc=yes --with-mpfr=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-gmp=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-mpc=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --enable-win32-registry=avrtoolchain --with-pkgversion=AVR_8_bit_GNU_Toolchain_3.7.0_1796 --with-bugurl=http://www.microchip.com
+Thread model: single
+gcc version 7.3.0 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) 
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj' '-c' '-specs=device-specs/specs-avr2'
+ c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/cc1.exe -quiet -v -iprefix c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/ C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCCompilerABI.c -mn-flash=1 -mskip-bug -quiet -dumpbase CMakeCCompilerABI.c -auxbase-strip CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj -version -o C:\Users\derri\AppData\Local\Temp\ccFpGZtS.s
+GNU C11 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)
+	compiled by GNU C version 4.7.4, GMP version 5.0.2, MPFR version 3.0.0, MPC version 0.9, isl version none
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/sys-include"
+ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include"
+ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include-fixed"
+ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/sys-include"
+ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include
+ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include-fixed
+ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include
+End of search list.
+GNU C11 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)
+	compiled by GNU C version 4.7.4, GMP version 5.0.2, MPFR version 3.0.0, MPC version 0.9, isl version none
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: e1a7222c35fe9d2fadcbe136f9368039
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj' '-c' '-specs=device-specs/specs-avr2'
+ c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/as.exe -mmcu=avr2 -o CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj C:\Users\derri\AppData\Local\Temp\ccFpGZtS.s
+COMPILER_PATH=c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/;c:/dev/cti/avr/bin/../libexec/gcc/;c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/
+LIBRARY_PATH=c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/;c:/dev/cti/avr/bin/../lib/gcc/;c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj' '-c' '-specs=device-specs/specs-avr2'
+Linking C static library libcmTC_7cd2e.a
+"C:\Program Files\CMake\bin\cmake.exe" -P CMakeFiles\cmTC_7cd2e.dir\cmake_clean_target.cmake
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTC_7cd2e.dir\link.txt --verbose=1
+C:\dev\cti\avr\bin\avr-ar.exe qc libcmTC_7cd2e.a CMakeFiles/cmTC_7cd2e.dir/CMakeCCompilerABI.c.obj
+C:\dev\cti\avr\bin\avr-ranlib.exe libcmTC_7cd2e.a
+mingw32-make.exe[1]: Leaving directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-e36ujc'
+
+
+
+Parsed C implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include]
+    add: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include-fixed]
+    add: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/include]
+  end of search list found
+  collapse include dir [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include] ==> [C:/dev/cti/avr/lib/gcc/avr/7.3.0/include]
+  collapse include dir [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include-fixed] ==> [C:/dev/cti/avr/lib/gcc/avr/7.3.0/include-fixed]
+  collapse include dir [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/include] ==> [C:/dev/cti/avr/avr/include]
+  implicit include dirs: [C:/dev/cti/avr/lib/gcc/avr/7.3.0/include;C:/dev/cti/avr/lib/gcc/avr/7.3.0/include-fixed;C:/dev/cti/avr/avr/include]
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(avr-ld\.exe|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-e36ujc]
+  ignore line: []
+  ignore line: [Run Build Command(s):C:/dev/mingw-w64/bin/mingw32-make.exe -f Makefile cmTC_7cd2e/fast && C:/dev/mingw-w64/bin/mingw32-make.exe  -f CMakeFiles\cmTC_7cd2e.dir\build.make CMakeFiles/cmTC_7cd2e.dir/build]
+  ignore line: [mingw32-make.exe[1]: Entering directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-e36ujc']
+  ignore line: [Building C object CMakeFiles/cmTC_7cd2e.dir/CMakeCCompilerABI.c.obj]
+  ignore line: [C:\dev\cti\avr\bin\avr-gcc.exe   -v -o CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj -c "C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCCompilerABI.c"]
+  ignore line: [Using built-in specs.]
+  ignore line: [Reading specs from c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/device-specs/specs-avr2]
+  ignore line: [COLLECT_GCC=C:\dev\cti\avr\bin\avr-gcc.exe]
+  ignore line: [Target: avr]
+  ignore line: [Configured with: /home/toolsbuild/workspace/avr8-gnu-toolchain/src/gcc/configure LDFLAGS=-L/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs/lib CPPFLAGS= --target=avr --host=x86_64-w64-mingw32 --build=x86_64-pc-linux-gnu --prefix=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64 --libdir=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64/lib --enable-languages=c c++ --with-dwarf2 --enable-doc --disable-shared --disable-libada --disable-libssp --disable-nls --with-avrlibc=yes --with-mpfr=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-gmp=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-mpc=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --enable-win32-registry=avrtoolchain --with-pkgversion=AVR_8_bit_GNU_Toolchain_3.7.0_1796 --with-bugurl=http://www.microchip.com]
+  ignore line: [Thread model: single]
+  ignore line: [gcc version 7.3.0 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj' '-c' '-specs=device-specs/specs-avr2']
+  ignore line: [ c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/cc1.exe -quiet -v -iprefix c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/ C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCCompilerABI.c -mn-flash=1 -mskip-bug -quiet -dumpbase CMakeCCompilerABI.c -auxbase-strip CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj -version -o C:\Users\derri\AppData\Local\Temp\ccFpGZtS.s]
+  ignore line: [GNU C11 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)]
+  ignore line: [	compiled by GNU C version 4.7.4  GMP version 5.0.2  MPFR version 3.0.0  MPC version 0.9  isl version none]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/sys-include"]
+  ignore line: [ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include"]
+  ignore line: [ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include-fixed"]
+  ignore line: [ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/sys-include"]
+  ignore line: [ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include]
+  ignore line: [ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include-fixed]
+  ignore line: [ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C11 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)]
+  ignore line: [	compiled by GNU C version 4.7.4  GMP version 5.0.2  MPFR version 3.0.0  MPC version 0.9  isl version none]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: e1a7222c35fe9d2fadcbe136f9368039]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj' '-c' '-specs=device-specs/specs-avr2']
+  ignore line: [ c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/as.exe -mmcu=avr2 -o CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj C:\Users\derri\AppData\Local\Temp\ccFpGZtS.s]
+  ignore line: [COMPILER_PATH=c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/]
+  ignore line: [c:/dev/cti/avr/bin/../libexec/gcc/]
+  ignore line: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/]
+  ignore line: [LIBRARY_PATH=c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/]
+  ignore line: [c:/dev/cti/avr/bin/../lib/gcc/]
+  ignore line: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_7cd2e.dir\CMakeCCompilerABI.c.obj' '-c' '-specs=device-specs/specs-avr2']
+  ignore line: [Linking C static library libcmTC_7cd2e.a]
+  ignore line: ["C:\Program Files\CMake\bin\cmake.exe" -P CMakeFiles\cmTC_7cd2e.dir\cmake_clean_target.cmake]
+  ignore line: ["C:\Program Files\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTC_7cd2e.dir\link.txt --verbose=1]
+  ignore line: [C:\dev\cti\avr\bin\avr-ar.exe qc libcmTC_7cd2e.a CMakeFiles/cmTC_7cd2e.dir/CMakeCCompilerABI.c.obj]
+  ignore line: [C:\dev\cti\avr\bin\avr-ranlib.exe libcmTC_7cd2e.a]
+  ignore line: [mingw32-make.exe[1]: Leaving directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-e36ujc']
+  ignore line: []
+  ignore line: []
+  implicit libs: []
+  implicit objs: []
+  implicit dirs: []
+  implicit fwks: []
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-abxyvf
+
+Run Build Command(s):C:/dev/mingw-w64/bin/mingw32-make.exe -f Makefile cmTC_0d6b4/fast && C:/dev/mingw-w64/bin/mingw32-make.exe  -f CMakeFiles\cmTC_0d6b4.dir\build.make CMakeFiles/cmTC_0d6b4.dir/build
+mingw32-make.exe[1]: Entering directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-abxyvf'
+Building CXX object CMakeFiles/cmTC_0d6b4.dir/CMakeCXXCompilerABI.cpp.obj
+C:\dev\cti\avr\bin\avr-g++.exe   -v -o CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj -c "C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCXXCompilerABI.cpp"
+Using built-in specs.
+Reading specs from c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/device-specs/specs-avr2
+COLLECT_GCC=C:\dev\cti\avr\bin\avr-g++.exe
+Target: avr
+Configured with: /home/toolsbuild/workspace/avr8-gnu-toolchain/src/gcc/configure LDFLAGS=-L/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs/lib CPPFLAGS= --target=avr --host=x86_64-w64-mingw32 --build=x86_64-pc-linux-gnu --prefix=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64 --libdir=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64/lib --enable-languages=c,c++ --with-dwarf2 --enable-doc --disable-shared --disable-libada --disable-libssp --disable-nls --with-avrlibc=yes --with-mpfr=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-gmp=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-mpc=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --enable-win32-registry=avrtoolchain --with-pkgversion=AVR_8_bit_GNU_Toolchain_3.7.0_1796 --with-bugurl=http://www.microchip.com
+Thread model: single
+gcc version 7.3.0 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) 
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-specs=device-specs/specs-avr2'
+ c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/cc1plus.exe -quiet -v -iprefix c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/ C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCXXCompilerABI.cpp -mn-flash=1 -mskip-bug -quiet -dumpbase CMakeCXXCompilerABI.cpp -auxbase-strip CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj -version -mn-flash=1 -mskip-bug -fno-rtti -fno-enforce-eh-specs -fno-exceptions -o C:\Users\derri\AppData\Local\Temp\ccO3aYiD.s
+GNU C++14 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)
+	compiled by GNU C version 4.7.4, GMP version 5.0.2, MPFR version 3.0.0, MPC version 0.9, isl version none
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0"
+ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/avr"
+ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/backward"
+ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/sys-include"
+ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0"
+ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/avr"
+ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/backward"
+ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include"
+ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include-fixed"
+ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/sys-include"
+ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include
+ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include-fixed
+ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include
+End of search list.
+GNU C++14 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)
+	compiled by GNU C version 4.7.4, GMP version 5.0.2, MPFR version 3.0.0, MPC version 0.9, isl version none
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 95b087446e73ed31edd93ef3ebb44dec
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-specs=device-specs/specs-avr2'
+ c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/as.exe -mmcu=avr2 -o CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj C:\Users\derri\AppData\Local\Temp\ccO3aYiD.s
+COMPILER_PATH=c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/;c:/dev/cti/avr/bin/../libexec/gcc/;c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/
+LIBRARY_PATH=c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/;c:/dev/cti/avr/bin/../lib/gcc/;c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-specs=device-specs/specs-avr2'
+Linking CXX static library libcmTC_0d6b4.a
+"C:\Program Files\CMake\bin\cmake.exe" -P CMakeFiles\cmTC_0d6b4.dir\cmake_clean_target.cmake
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTC_0d6b4.dir\link.txt --verbose=1
+C:\dev\cti\avr\bin\avr-ar.exe qc libcmTC_0d6b4.a CMakeFiles/cmTC_0d6b4.dir/CMakeCXXCompilerABI.cpp.obj
+C:\dev\cti\avr\bin\avr-ranlib.exe libcmTC_0d6b4.a
+mingw32-make.exe[1]: Leaving directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-abxyvf'
+
+
+
+Parsed CXX implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include]
+    add: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include-fixed]
+    add: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/include]
+  end of search list found
+  collapse include dir [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include] ==> [C:/dev/cti/avr/lib/gcc/avr/7.3.0/include]
+  collapse include dir [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/include-fixed] ==> [C:/dev/cti/avr/lib/gcc/avr/7.3.0/include-fixed]
+  collapse include dir [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/include] ==> [C:/dev/cti/avr/avr/include]
+  implicit include dirs: [C:/dev/cti/avr/lib/gcc/avr/7.3.0/include;C:/dev/cti/avr/lib/gcc/avr/7.3.0/include-fixed;C:/dev/cti/avr/avr/include]
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(avr-ld\.exe|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-abxyvf]
+  ignore line: []
+  ignore line: [Run Build Command(s):C:/dev/mingw-w64/bin/mingw32-make.exe -f Makefile cmTC_0d6b4/fast && C:/dev/mingw-w64/bin/mingw32-make.exe  -f CMakeFiles\cmTC_0d6b4.dir\build.make CMakeFiles/cmTC_0d6b4.dir/build]
+  ignore line: [mingw32-make.exe[1]: Entering directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-abxyvf']
+  ignore line: [Building CXX object CMakeFiles/cmTC_0d6b4.dir/CMakeCXXCompilerABI.cpp.obj]
+  ignore line: [C:\dev\cti\avr\bin\avr-g++.exe   -v -o CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj -c "C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCXXCompilerABI.cpp"]
+  ignore line: [Using built-in specs.]
+  ignore line: [Reading specs from c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/device-specs/specs-avr2]
+  ignore line: [COLLECT_GCC=C:\dev\cti\avr\bin\avr-g++.exe]
+  ignore line: [Target: avr]
+  ignore line: [Configured with: /home/toolsbuild/workspace/avr8-gnu-toolchain/src/gcc/configure LDFLAGS=-L/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs/lib CPPFLAGS= --target=avr --host=x86_64-w64-mingw32 --build=x86_64-pc-linux-gnu --prefix=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64 --libdir=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64/lib --enable-languages=c c++ --with-dwarf2 --enable-doc --disable-shared --disable-libada --disable-libssp --disable-nls --with-avrlibc=yes --with-mpfr=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-gmp=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --with-mpc=/home/toolsbuild/workspace/avr8-gnu-toolchain/avr8-gnu-toolchain-win32_x86_64-hostlibs --enable-win32-registry=avrtoolchain --with-pkgversion=AVR_8_bit_GNU_Toolchain_3.7.0_1796 --with-bugurl=http://www.microchip.com]
+  ignore line: [Thread model: single]
+  ignore line: [gcc version 7.3.0 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-specs=device-specs/specs-avr2']
+  ignore line: [ c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/cc1plus.exe -quiet -v -iprefix c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/ C:\Program Files\CMake\share\cmake-3.25\Modules\CMakeCXXCompilerABI.cpp -mn-flash=1 -mskip-bug -quiet -dumpbase CMakeCXXCompilerABI.cpp -auxbase-strip CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj -version -mn-flash=1 -mskip-bug -fno-rtti -fno-enforce-eh-specs -fno-exceptions -o C:\Users\derri\AppData\Local\Temp\ccO3aYiD.s]
+  ignore line: [GNU C++14 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)]
+  ignore line: [	compiled by GNU C version 4.7.4  GMP version 5.0.2  MPFR version 3.0.0  MPC version 0.9  isl version none]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0"]
+  ignore line: [ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/avr"]
+  ignore line: [ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/backward"]
+  ignore line: [ignoring nonexistent directory "c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/sys-include"]
+  ignore line: [ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0"]
+  ignore line: [ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/avr"]
+  ignore line: [ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include/c++/7.3.0/backward"]
+  ignore line: [ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include"]
+  ignore line: [ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/include-fixed"]
+  ignore line: [ignoring nonexistent directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/sys-include"]
+  ignore line: [ignoring duplicate directory "c:/dev/cti/avr/lib/gcc/../../lib/gcc/avr/7.3.0/../../../../avr/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include]
+  ignore line: [ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/include-fixed]
+  ignore line: [ c:\dev\cti\avr\bin\../lib/gcc/avr/7.3.0/../../../../avr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C++14 (AVR_8_bit_GNU_Toolchain_3.7.0_1796) version 7.3.0 (avr)]
+  ignore line: [	compiled by GNU C version 4.7.4  GMP version 5.0.2  MPFR version 3.0.0  MPC version 0.9  isl version none]
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: 95b087446e73ed31edd93ef3ebb44dec]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-specs=device-specs/specs-avr2']
+  ignore line: [ c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/as.exe -mmcu=avr2 -o CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj C:\Users\derri\AppData\Local\Temp\ccO3aYiD.s]
+  ignore line: [COMPILER_PATH=c:/dev/cti/avr/bin/../libexec/gcc/avr/7.3.0/]
+  ignore line: [c:/dev/cti/avr/bin/../libexec/gcc/]
+  ignore line: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/]
+  ignore line: [LIBRARY_PATH=c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/]
+  ignore line: [c:/dev/cti/avr/bin/../lib/gcc/]
+  ignore line: [c:/dev/cti/avr/bin/../lib/gcc/avr/7.3.0/../../../../avr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles\cmTC_0d6b4.dir\CMakeCXXCompilerABI.cpp.obj' '-c' '-specs=device-specs/specs-avr2']
+  ignore line: [Linking CXX static library libcmTC_0d6b4.a]
+  ignore line: ["C:\Program Files\CMake\bin\cmake.exe" -P CMakeFiles\cmTC_0d6b4.dir\cmake_clean_target.cmake]
+  ignore line: ["C:\Program Files\CMake\bin\cmake.exe" -E cmake_link_script CMakeFiles\cmTC_0d6b4.dir\link.txt --verbose=1]
+  ignore line: [C:\dev\cti\avr\bin\avr-ar.exe qc libcmTC_0d6b4.a CMakeFiles/cmTC_0d6b4.dir/CMakeCXXCompilerABI.cpp.obj]
+  ignore line: [C:\dev\cti\avr\bin\avr-ranlib.exe libcmTC_0d6b4.a]
+  ignore line: [mingw32-make.exe[1]: Leaving directory 'C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/CMakeScratch/TryCompile-abxyvf']
+  ignore line: []
+  ignore line: []
+  implicit libs: []
+  implicit objs: []
+  implicit dirs: []
+  implicit fwks: []
+
+

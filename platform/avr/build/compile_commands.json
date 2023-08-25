@@ -1,0 +1,102 @@
+[
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\source\\main.cpp.obj -c C:\\dev\\cti\\cti-firmware\\source\\main.cpp",
+  "file": "C:/dev/cti/cti-firmware/source/main.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\source\\platform\\core.cpp.obj -c C:\\dev\\cti\\cti-firmware\\source\\platform\\core.cpp",
+  "file": "C:/dev/cti/cti-firmware/source/platform/core.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\source\\platform\\info.cpp.obj -c C:\\dev\\cti\\cti-firmware\\source\\platform\\info.cpp",
+  "file": "C:/dev/cti/cti-firmware/source/platform/info.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\source\\platform\\io.cpp.obj -c C:\\dev\\cti\\cti-firmware\\source\\platform\\io.cpp",
+  "file": "C:/dev/cti/cti-firmware/source/platform/io.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\source\\visa\\core.cpp.obj -c C:\\dev\\cti\\cti-firmware\\source\\visa\\core.cpp",
+  "file": "C:/dev/cti/cti-firmware/source/visa/core.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\error.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\error.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/error.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\expression.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\expression.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/expression.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\fifo.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\fifo.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/fifo.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\ieee488.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\ieee488.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/ieee488.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\lexer.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\lexer.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/lexer.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\minimal.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\minimal.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/minimal.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\parser.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\parser.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/parser.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\units.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\units.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/units.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-gcc.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu11 -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\C_\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\utils.c.obj -c C:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\src\\utils.c",
+  "file": "C:/dev/cti/cti-firmware/lib/scpi-parser/libscpi/src/utils.c"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\platform\\avr_platform.cpp.obj -c C:\\dev\\cti\\cti-firmware\\platform\\avr\\platform\\avr_platform.cpp",
+  "file": "C:/dev/cti/cti-firmware/platform/avr/platform/avr_platform.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\platform\\avr_io.cpp.obj -c C:\\dev\\cti\\cti-firmware\\platform\\avr\\platform\\avr_io.cpp",
+  "file": "C:/dev/cti/cti-firmware/platform/avr/platform/avr_io.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\platform\\avr_timer.cpp.obj -c C:\\dev\\cti\\cti-firmware\\platform\\avr\\platform\\avr_timer.cpp",
+  "file": "C:/dev/cti/cti-firmware/platform/avr/platform/avr_timer.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\src\\avr_serial.cpp.obj -c C:\\dev\\cti\\cti-firmware\\platform\\avr\\src\\avr_serial.cpp",
+  "file": "C:/dev/cti/cti-firmware/platform/avr/src/avr_serial.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\src\\avr_timer.cpp.obj -c C:\\dev\\cti\\cti-firmware\\platform\\avr\\src\\avr_timer.cpp",
+  "file": "C:/dev/cti/cti-firmware/platform/avr/src/avr_timer.cpp"
+},
+{
+  "directory": "C:/dev/cti/cti-firmware/platform/avr/build",
+  "command": "C:\\dev\\cti\\avr\\bin\\avr-g++.exe -DCTI_VER_MAJOR=0 -DCTI_VER_MINOR=1 -DCTI_VER_PATCH=0 -DCTI_VISA=1 -DF_CPU=16000000ul -D_CTI_BOARD=arduino-uno -D_CTI_PLATFORM=avr -IC:\\dev\\cti\\cti-firmware\\include -IC:\\dev\\cti\\cti-firmware\\platform\\common\\include -IC:\\dev\\cti\\cti-firmware\\lib\\scpi-parser\\libscpi\\inc -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\get_filename_component -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\( -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\include -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\ABSOLUTE -IC:\\dev\\cti\\cti-firmware\\platform\\avr\\) -Os -DNDEBUG -std=gnu++1z -o CMakeFiles\\cti_visa_avr_arduino-uno.dir\\src\\circularbuffer.cpp.obj -c C:\\dev\\cti\\cti-firmware\\platform\\avr\\src\\circularbuffer.cpp",
+  "file": "C:/dev/cti/cti-firmware/platform/avr/src/circularbuffer.cpp"
+}
+]
