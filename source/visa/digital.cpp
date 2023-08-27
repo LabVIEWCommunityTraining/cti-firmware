@@ -145,11 +145,11 @@ namespace Visa {
     void initDigitalCommands(Visa* visa) {
         visa->addCommand({"DIGital:DIRection", digital_setDirection, 0});
         visa->addCommand({"DIGital:DIRection?", digital_getDirection, 0});
-        visa->addCommand({"DIGital:OUTput:VALue", digital_setValue, 0});
-        visa->addCommand({"DIGital:OUTput:VALue?", digital_getValue, 0});
-        visa->addCommand({"DIGital:INput:VALue?", digital_getValue, 0});
-        visa->addCommand({"DIGital:INput:PULL", digital_setPull, 0});
-        visa->addCommand({"DIGital:INput:PULL?", digital_getPull, 0});
+        visa->addCommand({"DIGital[:OUTput]:VALue", digital_setValue, 0});
+        visa->addCommand({"DIGital[:OUTput]:VALue?", digital_getValue, 0});
+        visa->addCommand({"DIGital[:INput]:VALue?", digital_getValue, 0});
+        visa->addCommand({"DIGital[:INput]:PULL", digital_setPull, 0});
+        visa->addCommand({"DIGital[:INput]:PULL?", digital_getPull, 0});
     }
 
 } //namespace Visa

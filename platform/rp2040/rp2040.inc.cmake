@@ -39,6 +39,7 @@ target_sources(${RP2040_TARGET} PRIVATE
 set(PICO_SDK_COMPONENTS
     pico_stdlib
     hardware_i2c
+    hardware_adc
 )
 
 target_link_libraries(${RP2040_TARGET}

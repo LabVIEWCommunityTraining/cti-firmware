@@ -50,6 +50,13 @@ public:
     void GetPull(int channel, PullDirection* dir);
 };
 
+class PlatformAnalog {
+public:
+
+    void EnableInput(int channel);
+    void GetInput(int channel, uint16_t* value);
+};
+
 class PlatformIO {
 public:
     PlatformIO();
@@ -67,6 +74,7 @@ public:
     void StatusLED(bool val);
 
     PlatformDigital Digital;
+    PlatformAnalog Analog;
 
 private:
     char _fgetc(FILE *file);

@@ -134,12 +134,12 @@ namespace Visa {
         while(true) {
             char c = gPlatform.IO.FGetC();
 
-            if (c == '\r')
+            /*if (c == '\r')
                 gPlatform.IO.FPutC('\n');
             else
                 gPlatform.IO.FPutC(c);
 
-            gPlatform.IO.Flush();
+            gPlatform.IO.Flush();*/
             SCPI_Input(&_context, &c, 1);
         }
     }

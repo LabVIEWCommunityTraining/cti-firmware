@@ -2,6 +2,6 @@
 #ifndef build_h_
 #define build_h_
 
-#define CTI_VER_TS 20230826T030141Z
+#define CTI_VER_TS 20230827T193959Z
 
 #endif //build_h_

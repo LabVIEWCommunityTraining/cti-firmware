@@ -2,6 +2,7 @@
 
 #include <pico/stdlib.h>
 #include <pico/unique_id.h>
+#include "hardware/adc.h"
 
 #include <cstring>
 
@@ -26,6 +27,7 @@ void Platform::Preinit() {
 }
 
 void Platform::Init() {
+        adc_init();
 }
 
 const char* PlatformInfo::Model() const { return "RP2040-Visa"; };
