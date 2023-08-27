@@ -1,7 +1,7 @@
 #include "cti/platform.h"
 
-#include <cstring>
-#include <cstdarg>
+#include <string.h>
+#include <stdarg.h>
 
 namespace CTI {
 

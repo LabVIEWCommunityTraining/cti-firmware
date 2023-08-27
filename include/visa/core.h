@@ -4,10 +4,11 @@
 #include "scpi/scpi.h"
 #include "cti/platform.h"
 
-#include <vector>
+//#include <vector>
 
 #define SCPI_INPUT_BUFFER_LENGTH 256
 #define SCPI_ERROR_QUEUE_SIZE 17
+#define SCPI_MAX_COMMANDS 1000
 
 namespace CTI {
 namespace Visa {
@@ -18,7 +19,8 @@ namespace Visa {
         DuplicateCommand,
         AmbiguousOptionalSegment,
         InvalidPattern,
-        AlreadyReady
+        AlreadyReady,
+        TooManyCommands
     } Status;
     
     class Visa : public PlatformEngine {
@@ -38,7 +40,8 @@ namespace Visa {
         const char* _model;
         const char* _serial;
         const char* _version;
-        std::vector<scpi_command_t> _commands;
+        scpi_command_t _commands[SCPI_MAX_COMMANDS + 1];
+        int _nextCmdI;
         char _input_buffer[SCPI_INPUT_BUFFER_LENGTH];
         scpi_error_t _error_queue[SCPI_ERROR_QUEUE_SIZE];
         scpi_interface_t _interface;

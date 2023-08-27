@@ -3,8 +3,8 @@
 
 #include "version.h"
 
-#include <cstdint>
-#include <cstdio>
+#include <stdint.h>
+#include <stdio.h>
 
 #define CTI_VENDOR "CTI"
 
@@ -37,6 +37,19 @@ private:
     size_t _totalAllocated = 0;
 };
 
+class PlatformDigital {
+public:
+    typedef enum { None, Up, Down, Both } PullDirection;
+
+    void SetOutput(int channel, bool value);
+    void SetDirection(int channel, bool output);
+    void SetPull(int channel, PullDirection dir);
+
+    void GetValue(int channel, bool* value);
+    void GetDirection(int channel, bool* output);
+    void GetPull(int channel, PullDirection* dir);
+};
+
 class PlatformIO {
 public:
     PlatformIO();
@@ -48,10 +61,12 @@ public:
 
     int FGetC() { return fgetc(stdin); };
     int FPutC(int c) { return fputc(c, stdout); };
-
     void ReadStdin(char** buffer, size_t maxLen);
+
     void InitStatusLED();
     void StatusLED(bool val);
+
+    PlatformDigital Digital;
 
 private:
     char _fgetc(FILE *file);

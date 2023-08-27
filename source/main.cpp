@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <stdio.h>
 
 #ifdef CTI_VISA
     #include "visa.h"

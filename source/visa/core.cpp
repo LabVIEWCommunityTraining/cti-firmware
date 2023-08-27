@@ -1,11 +1,13 @@
 #include "visa/core.h"
+#include "visa/digital.h"
+#include "visa/analog.h"
 
-#include "cti/platform.h"
-
-#include <cstring>
+#include <string.h>
 
 namespace CTI {
-namespace Visa{
+namespace Visa {
+
+    void initPlatformCommands(Visa* visa);
 
     size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
         gPlatform.IO.Print(len, data);
@@ -70,7 +72,7 @@ namespace Visa{
         //visa->addCommand({"*TST?", My_CoreTstQ, 0});
         visa->addCommand({"*WAI", SCPI_CoreWai, 0});
 
-        //custom commands
+        // SET:LED is a common command as gPlatform has a status LED abstraction
         visa->addCommand({"SET:LED", scpi_LED, 0});
     }
 
@@ -83,7 +85,10 @@ namespace Visa{
             SCPI_Reset
         };
 
+        _nextCmdI = 0;
+
         initCommonCommands(this);
+        initPlatformCommands(this);
     }
         
     Status Visa::addCommand(scpi_command_t command) {
@@ -91,7 +96,11 @@ namespace Visa{
             return AlreadyReady;
         }
 
-        _commands.push_back(command);
+        if (_nextCmdI == SCPI_MAX_COMMANDS) {
+            return TooManyCommands;
+        }
+
+        _commands[_nextCmdI++] = command;
 
         return Success;
     }
@@ -101,11 +110,10 @@ namespace Visa{
         _ready = true;
 
         //put the end of the command list special item at the end to use with the scpi-parser lib
-        _commands.push_back(SCPI_CMD_LIST_END);
-        _commands.shrink_to_fit();
+        _commands[_nextCmdI] = SCPI_CMD_LIST_END;
 
         SCPI_Init(&_context,
-            &_commands.front(),
+            _commands,
             &_interface,
             scpi_units_def,
             gPlatform.Info.Vendor(),
@@ -139,6 +147,12 @@ namespace Visa{
     const char* Visa::StatusText(int status) {
         return "";
     }
+
+    void initPlatformCommands(Visa* visa) {
+        initDigitalCommands(visa);
+        initAnalogCommands(visa);
+    }
+
 } //namespace Visa
 
     //The global Visa instance usable as CTI::gVisa

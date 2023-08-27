@@ -4,3 +4,9 @@
 [submodule "lib/scpi-parser"]
 	path = lib/scpi-parser
 	url = https://github.com/illuminated-g/scpi-parser.git
+[submodule "platform/rp2040/boards/wizfi360/WizFi360-EVB-Pico-C"]
+	path = platform/rp2040/boards/wizfi360/WizFi360-EVB-Pico-C
+	url = https://github.com/Wiznet/WizFi360-EVB-Pico-C.git
+[submodule "platform/rp2040/pico-examples"]
+	path = platform/rp2040/pico-examples
+	url = https://github.com/raspberrypi/pico-examples.git
