@@ -49,9 +49,9 @@ namespace Visa {
         gPlatform.IO.Digital.GetValue(channel, &val);
         
         if (val) {
-            gPlatform.IO.Print("ON\n");
+            gPlatform.IO.Print("ON");
         } else {
-            gPlatform.IO.Print("OFF\n");
+            gPlatform.IO.Print("OFF");
         }
 
         return SCPI_RES_OK;
@@ -85,9 +85,9 @@ namespace Visa {
         gPlatform.IO.Digital.GetDirection(channel, &out);
 
         if (out) {
-            gPlatform.IO.Print("OUT\n");
+            gPlatform.IO.Print("OUT");
         } else {
-            gPlatform.IO.Print("IN\n");
+            gPlatform.IO.Print("IN");
         }
 
         return SCPI_RES_OK;
@@ -123,19 +123,19 @@ namespace Visa {
 
         switch (pull) {
             case PlatformDigital::None:
-                gPlatform.IO.Print("NONE\n");
+                gPlatform.IO.Print("NONE");
                 break;
             
             case PlatformDigital::Up:
-                gPlatform.IO.Print("UP\n");
+                gPlatform.IO.Print("UP");
                 break;
             
             case PlatformDigital::Down:
-                gPlatform.IO.Print("DOWN\n");
+                gPlatform.IO.Print("DOWN");
                 break;
             
             case PlatformDigital::Both:
-                gPlatform.IO.Print("BOTH\n");
+                gPlatform.IO.Print("BOTH");
                 break;
         }
 

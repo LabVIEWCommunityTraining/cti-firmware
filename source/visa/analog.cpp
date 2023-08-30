@@ -22,7 +22,7 @@ namespace Visa {
 
         gPlatform.IO.Analog.GetInput(channel, &val);
 
-        gPlatform.IO.Printf("%d\n", val);
+        gPlatform.IO.Printf("%d", val);
 
         return SCPI_RES_OK;
     }
