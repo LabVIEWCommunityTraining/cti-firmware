@@ -38,10 +38,14 @@ void Platform::Setup() {
     gPlatform.IO.Print(" == Initializing Platform ==\n");
     gPlatform.IO.Flush();
     gPlatform.Init();
+
     gPlatform.IO.Print("OK\n");
     gPlatform.IO.Flush();
 
-    gPlatform.Timer.SleepMilliseconds(2000);
+    //Default status LED to active communications
+    gPlatform.IO.SetStatusSource(Comms);
+
+    //gPlatform.Timer.SleepMilliseconds(2000);
 
     // Set the engine pointer to the specific type
     gPlatform.pEngine = &CTI_ENGINE;

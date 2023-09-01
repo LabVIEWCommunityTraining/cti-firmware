@@ -36,4 +36,16 @@ namespace CTI {
 
     }
 
+    void PlatformIO::StatusLED(bool val, StatusSource source) {
+        if (source == User) {
+            //If the user explicitly set the LED, do what the user said
+            // and set the source to user to disable other auto sources
+            _statusSource = User;
+            _statusLED(val);
+        } else if (source == _statusSource) {
+            //otherwise, the source must match the configured status source
+            _statusLED(val);
+        }
+    }
+
 } //namespace CTI

@@ -7,6 +7,12 @@
 namespace CTI {
 namespace Visa {
 
+    scpi_choice_def_t statusSources[] = {
+        {"COMMS", 0},
+        {"USER", 1},
+        SCPI_CHOICE_LIST_END
+    };
+
     void initPlatformCommands(Visa* visa);
 
     size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
@@ -51,7 +57,33 @@ namespace Visa {
             return SCPI_RES_ERR;
         }
 
-        gPlatform.IO.StatusLED(val);
+        gPlatform.IO.StatusLED(val, User);
+
+        return SCPI_RES_OK;
+    }
+
+    scpi_result_t scpi_cmdStatusSource(scpi_t* context) {
+        int32_t choice;
+
+        if (!SCPI_ParamChoice(context, statusSources, &choice, true)) {
+            return SCPI_RES_ERR;
+        }
+
+        gPlatform.IO.SetStatusSource((StatusSource)choice);
+
+        return SCPI_RES_OK;
+    }
+
+    scpi_result_t scpi_queryStatusSource(scpi_t* context) {
+        switch(gPlatform.IO.GetStatusSource()) {
+        case Comms:
+            gPlatform.IO.Print("COMMS");
+            break;
+
+        case User:
+            gPlatform.IO.Print("USER");
+            break;
+        }
 
         return SCPI_RES_OK;
     }
@@ -73,7 +105,9 @@ namespace Visa {
         visa->addCommand({"*WAI", SCPI_CoreWai, 0});
 
         // SET:LED is a common command as gPlatform has a status LED abstraction
-        visa->addCommand({"SET:LED", scpi_LED, 0});
+        visa->addCommand({"STATus:USER", scpi_LED, 0});
+        visa->addCommand({"STATus:SOURce", scpi_cmdStatusSource, 0});
+        visa->addCommand({"STATus:SOURce?", scpi_queryStatusSource, 0});
     }
 
     Visa::Visa() {
@@ -131,16 +165,19 @@ namespace Visa {
         char inputBuffer[255];
         int inputPosition = 0;
 
+        int val; // timeout read value, will be -1 if timed out
+        char c;
+
         while(true) {
-            char c = gPlatform.IO.FGetC();
+            val = gPlatform.IO.FGetCtimeout(20000); //20 ms
 
-            /*if (c == '\r')
-                gPlatform.IO.FPutC('\n');
-            else
-                gPlatform.IO.FPutC(c);
-
-            gPlatform.IO.Flush();*/
-            SCPI_Input(&_context, &c, 1);
+            if (val == -1) {
+                gPlatform.IO.StatusLED(false, Comms);
+            } else {
+                c = val;
+                gPlatform.IO.StatusLED(true, Comms);
+                SCPI_Input(&_context, &c, 1);
+            }
         }
     }
 

@@ -19,7 +19,7 @@ void CTI::PlatformIO::InitStatusLED() {
     gpio_set_dir(led, true);
 }
 
-void CTI::PlatformIO::StatusLED(bool val) {
+void CTI::PlatformIO::_statusLED(bool val) {
     gpio_put(led, val);
 }
 

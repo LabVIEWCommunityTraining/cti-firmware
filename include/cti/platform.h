@@ -57,6 +57,11 @@ public:
     void GetInput(int channel, uint16_t* value);
 };
 
+typedef enum {
+    Comms,
+    User
+} StatusSource;
+
 class PlatformIO {
 public:
     PlatformIO();
@@ -66,12 +71,15 @@ public:
     void Printf(const char* format, ...) const;
     void Flush();
 
+    int FGetCtimeout(uint32_t timeout_us) { if (!timeout_us) { return FGetC(); } else { return _getchar_timeout_us(timeout_us);}}
     int FGetC() { return fgetc(stdin); };
     int FPutC(int c) { return fputc(c, stdout); };
     void ReadStdin(char** buffer, size_t maxLen);
 
     void InitStatusLED();
-    void StatusLED(bool val);
+    void StatusLED(bool val, StatusSource source = User);
+    void SetStatusSource(StatusSource source) { _statusSource = source; };
+    StatusSource GetStatusSource() { return _statusSource; };
 
     PlatformDigital Digital;
     PlatformAnalog Analog;
@@ -79,6 +87,9 @@ public:
 private:
     char _fgetc(FILE *file);
     int _getchar_timeout_us(uint32_t timeout_us);
+    void _statusLED(bool val);
+
+    StatusSource _statusSource;
 };
 
 class PlatformEngine {
