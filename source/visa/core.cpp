@@ -1,6 +1,7 @@
 #include "visa/core.h"
 #include "visa/digital.h"
 #include "visa/analog.h"
+#include "visa/pwm.h"
 
 #include <string.h>
 
@@ -123,6 +124,7 @@ namespace Visa {
 
         initCommonCommands(this);
         initPlatformCommands(this);
+        _init();
     }
         
     Status Visa::addCommand(scpi_command_t command) {
@@ -188,6 +190,7 @@ namespace Visa {
     void initPlatformCommands(Visa* visa) {
         initDigitalCommands(visa);
         initAnalogCommands(visa);
+        initPWMCommands(visa);
     }
 
 } //namespace Visa

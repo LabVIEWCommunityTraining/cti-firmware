@@ -27,7 +27,8 @@ void Platform::Preinit() {
 }
 
 void Platform::Init() {
-        adc_init();
+    adc_init();
+    adc_set_temp_sensor_enabled(true);
 }
 
 const char* PlatformInfo::Model() const { return "RP2040-Visa"; };

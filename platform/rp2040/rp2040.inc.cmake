@@ -32,6 +32,7 @@ target_sources(${RP2040_TARGET} PRIVATE
     platform/pi_pico_platform.cpp
     platform/pi_pico_io.cpp
     platform/pi_pico_timer.cpp
+    platform/pi_pico_pwm.cpp
 )
 
 # These are the components we're using from the pico-sdk
@@ -40,6 +41,8 @@ set(PICO_SDK_COMPONENTS
     pico_stdlib
     hardware_i2c
     hardware_adc
+    hardware_pwm
+    hardware_clocks
 )
 
 target_link_libraries(${RP2040_TARGET}

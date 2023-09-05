@@ -34,6 +34,8 @@ namespace Visa {
         virtual const char* StatusText(int status);
 
     private:
+        void _init();
+        
         bool _ready;
         scpi_t _context;
         const char* _vendor;

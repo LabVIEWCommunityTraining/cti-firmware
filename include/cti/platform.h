@@ -62,6 +62,20 @@ typedef enum {
     User
 } StatusSource;
 
+class PlatformPWM {
+public:
+    bool InitPWM(int gpio, bool phaseCorrect, bool enable);
+    bool SetDuty(int gpio, float dutyPercent);
+    bool SetFreq(int gpio, float freq);
+    void SetEnable(int gpio, bool enable);
+
+    bool SetTop(int gpio, uint16_t top);
+    bool SetDivider(int gpio, float divider);
+
+    float GetDuty(int gpio);
+    float GetFreq(int gpio);
+};
+
 class PlatformIO {
 public:
     PlatformIO();
@@ -83,6 +97,7 @@ public:
 
     PlatformDigital Digital;
     PlatformAnalog Analog;
+    PlatformPWM PWM;
 
 private:
     char _fgetc(FILE *file);
