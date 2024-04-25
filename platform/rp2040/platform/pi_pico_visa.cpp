@@ -1,5 +1,5 @@
 #include "cti/platform.h"
-#include "visa/core.h"
+#include "visa/visa_core.h"
 
 #include <hardware/adc.h>
 

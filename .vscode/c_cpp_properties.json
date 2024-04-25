@@ -5,15 +5,25 @@
             "includePath": [
                 "${workspaceFolder}/**"
             ],
-            "defines": [
-                "_DEBUG"
-            ],
-            "compilerPath": "C:\\Program Files (x86)\\Arm GNU Toolchain arm-none-eabi\\12.2 rel1\\bin\\arm-none-eabi-g++.exe",
+            "defines": [],
+            "compilerPath": "C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\gcc-arm-none-eabi\\bin\\arm-none-eabi-g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "gcc-arm",
             "compileCommands": "${workspaceFolder}/platform/rp2040/build/compile_commands.json"
-        }
+        },
+        {
+            "name": "ATmega328",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "C:\\Program Files\\Raspberry Pi\\Pico SDK v1.5.1\\gcc-arm-none-eabi\\bin\\arm-none-eabi-g++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm",
+            "compileCommands": "${workspaceFolder}/platform/avr/build/compile_commands.json"
+        },
     ],
     "version": 4
 }

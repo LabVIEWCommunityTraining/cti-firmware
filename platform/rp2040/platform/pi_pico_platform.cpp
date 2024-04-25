@@ -14,11 +14,13 @@ char unique_id[unique_id_len] = "0000000000000000";
 void Platform::Preinit() {
     pico_get_unique_board_id_string(unique_id, unique_id_len);
 
+    //TODO: Switch between UART or USB based on defines from build config
     stdio_usb_init();
 
+    // Flag for toggling LED while in startup delay
     bool status = false;
     
-    //need to give time for USB init and enumeration
+    //need to give time for USB init and enumeration on host side
     for (int i = 0; i < 12; ++i) {
         sleep_ms(400);
         status = !status;

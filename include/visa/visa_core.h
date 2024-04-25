@@ -1,7 +1,7 @@
 #ifndef visa_core_h_
 #define visa_core_h_
 
-#include "scpi/scpi.h"
+//#include "scpi/scpi.h"
 #include "cti/platform.h"
 
 //#include <vector>

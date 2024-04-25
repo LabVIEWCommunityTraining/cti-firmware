@@ -1,7 +1,9 @@
-#include "visa/core.h"
+#include "visa/visa_core.h"
 #include "visa/digital.h"
 #include "visa/analog.h"
 #include "visa/pwm.h"
+
+#include "scpi.h"
 
 #include <string.h>
 

@@ -83,8 +83,9 @@ function(create_cti_build prefix target output)
     target_sources(${CTI_TARGET} PUBLIC
         ${CTI_SOURCE_CORE}
         ${CTI_SOURCE_PLATFORM}
-        ${CTI_SOURCE_VISA}
-        ${SCPI_PARSER_SOURCE}
+        ${CTI_SOURCE_SCPI}
+        #${CTI_SOURCE_VISA}
+        #${SCPI_PARSER_SOURCE}
     )
 
     target_include_directories(${CTI_TARGET}
