@@ -1,6 +1,8 @@
 #ifndef scpi_core_h_
 #define scpi_core_h_
 
+#include "cti/platform.h"
+
 #include <cstdint>
 #include <vector>
 
@@ -259,10 +261,10 @@ namespace SCPI {
 
             switch (format) {
                 case NumberFormat::Binary:
-                    return parseBinary(val, maxDigits, sign);
+                    return parseBinary(val, maxDigits);
 
                 case NumberFormat::Dec:
-                    return parseDec(val, maxDigits);
+                    return parseDec(val, maxDigits, sign);
 
                 case NumberFormat::Hex:
                     return parseHex(val, maxDigits);

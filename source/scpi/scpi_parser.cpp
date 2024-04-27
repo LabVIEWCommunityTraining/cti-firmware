@@ -36,16 +36,26 @@ namespace SCPI {
 
     int ScpiParser::bufferInput(const char* data, int n) {
         for (int i = 0; i < n; ++i) {
-            uint8_t j = i + _bufSize;
-            if (j >= _bufCapacity) {
+            if (_bufSize >= _bufCapacity) {
                 return i; //buffer full, return the count of data actually buffered.
             }
 
-            _buf[j] = data[i];
+            _buf[_bufSize] = data[i];
+
+            _bufSize++;
 
             if (_state == ParserState::FindCommand ) {
-                if (data[n] == ' ' || '\n') {
+                if (data[i] == ' ' || data[i] == '\n') {
+                    gPlatform.IO.Printf("Node: (%d) ", _bufSize);
+                    gPlatform.IO.Print(_bufSize, _buf);
+                    gPlatform.IO.Print('\n');
+                    gPlatform.IO.Flush();
+
                     ParserStatus res = parseNode();
+
+                    _bufSize = 0;
+
+                    gPlatform.IO.Printf("Node Res: %d\n", res);
                 }
             } else if (_state == ParserState::FindEndOfLine) {
                 if (data[n] == '\n') {
@@ -53,6 +63,9 @@ namespace SCPI {
                 }
             }
         }
+
+        //made it to the end, able to buffer as much as provided
+        return n;
     }
 
     ParseResult ScpiParser::parseChoice(const ScpiChoice* choices, uint8_t& value) {
@@ -174,15 +187,26 @@ namespace SCPI {
         uint8_t start = 0;
         uint8_t depth = 0;
 
-        if (_buf[0] == ':') {
+        if (_buf[0] == ':') { //skip optional leading ':'
             cur = 1;
             start = 1;
         }
+
         for (; cur <= _bufSize; ++cur) {
+
+            gPlatform.IO.Printf("cur: %d, c: %c\n", cur, _buf[cur]);
+
             if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ') {
-                ScpiNode* child = node->lookupChild(_buf + cur, cur - start);
+
+                gPlatform.IO.Print("Segment: ");
+                gPlatform.IO.Print(cur - start, _buf + start);
+                gPlatform.IO.Print('\n');
+
+                ScpiNode* child = node->lookupChild(_buf + start, cur - start);
 
                 if (child == nullptr) {
+                    gPlatform.IO.Print("Command not found\n");
+
                     return ParserStatus::UnknownCommand;
                 }
 
@@ -304,6 +328,8 @@ namespace SCPI {
                 finalize();
             }
         }
+
+        return RegistrationResult::Success;
     }
 } // namespace SCPI
 } // namespace CTI

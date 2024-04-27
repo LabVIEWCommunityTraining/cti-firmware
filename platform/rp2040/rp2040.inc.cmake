@@ -33,6 +33,7 @@ target_sources(${RP2040_TARGET} PRIVATE
     platform/pi_pico_io.cpp
     platform/pi_pico_timer.cpp
     platform/pi_pico_pwm.cpp
+    platform/pi_pico_visa.cpp
 )
 
 # These are the components we're using from the pico-sdk

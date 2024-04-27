@@ -1,4 +1,6 @@
 #include "visa/visa_core.h"
+#include "visa/digital.h"
+
 #include "scpi.h"
 
 #include <cstring>
@@ -81,28 +83,6 @@ namespace Visa {
 
         return QueryResult::Success;
     }
-
-    /*void initCommonCommands(Visa* visa) {
-        //standard SCPI commands
-        visa->addCommand({"*CLS", SCPI_CoreCls, 0});
-        visa->addCommand({"*ESE", SCPI_CoreEse, 0});
-        visa->addCommand({"*ESE?", SCPI_CoreEseQ, 0});
-        visa->addCommand({"*ESR?", SCPI_CoreEsrQ, 0});
-        visa->addCommand({"*IDN?", SCPI_CoreIdnQ, 0});
-        visa->addCommand({"*OPC", SCPI_CoreOpc, 0});
-        visa->addCommand({"*OPC?", SCPI_CoreOpcQ, 0});
-        visa->addCommand({"*RST", SCPI_CoreRst, 0});
-        visa->addCommand({"*SRE", SCPI_CoreSre, 0});
-        visa->addCommand({"*SRE?", SCPI_CoreSreQ, 0});
-        visa->addCommand({"*STB?", SCPI_CoreStbQ, 0});
-        //visa->addCommand({"*TST?", My_CoreTstQ, 0});
-        visa->addCommand({"*WAI", SCPI_CoreWai, 0});
-
-        // SET:LED is a common command as gPlatform has a status LED abstraction
-        visa->addCommand({"STATus:USER", scpi_LED, 0});
-        visa->addCommand({"STATus:SOURce", scpi_cmdStatusSource, 0});
-        visa->addCommand({"STATus:SOURce?", scpi_queryStatusSource, 0});
-    }*/
 
     CommandResult SCPI_CoreCls(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
 
@@ -193,6 +173,8 @@ namespace Visa {
         //mark _ready as true which means the command list is finalized
         _ready = true;
         _parser.finalize();
+
+        return 0;
     }
 
     void Visa::MainLoop() {
@@ -223,8 +205,8 @@ namespace Visa {
 
     void initPlatformCommands(Visa* visa) {
         initDigitalCommands(visa);
-        initAnalogCommands(visa);
-        initPWMCommands(visa);
+        //initAnalogCommands(visa);
+        //initPWMCommands(visa);
     }
 
 } //namespace Visa

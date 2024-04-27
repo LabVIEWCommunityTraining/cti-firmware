@@ -45,7 +45,7 @@ void Platform::Setup() {
     //Default status LED to active communications
     gPlatform.IO.SetStatusSource(Comms);
 
-    //gPlatform.Timer.SleepMilliseconds(2000);
+    gPlatform.Timer.SleepMilliseconds(2000);
 
     // Set the engine pointer to the specific type
     gPlatform.pEngine = &CTI_ENGINE;
