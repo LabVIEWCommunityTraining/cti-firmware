@@ -1,6 +1,7 @@
 #include "scpi/scpi_core.h"
 
 #include <cstdlib>
+#include <cstring>
 
 namespace CTI {
 namespace SCPI {
@@ -87,41 +88,41 @@ namespace SCPI {
 
         return ParseResult::Success;
     }
-
-    ParseResult ScpiParser::parseU8(uint8_t& value) {
-        return parseInt(value, 3);
-    }
-    
-    ParseResult ScpiParser::parseI8(int8_t& value) {
-        return parseInt(value, 3, true);
-    }
-    
-    ParseResult ScpiParser::parseU16(uint16_t& value) {
-        return parseInt(value, 5);
-    }
-    
-    ParseResult ScpiParser::parseI16(int16_t& value) {
-        return parseInt(value, 5, true);
-    }
-    
-    ParseResult ScpiParser::parseU32(uint32_t& value) {
-        return parseInt(value, 10);
-    }
-    
-    ParseResult ScpiParser::parseI32(int32_t& value) {
-        return parseInt(value, 10, true);
-    }
-    
-    ParseResult ScpiParser::parseFloat(float& value) {
-
-    }
-    
-    ParseResult ScpiParser::parseDouble(double& value) {
-
-    }
     
     ParseResult ScpiParser::parseBlock(char* buf, int len) {
+        consumeWhiteSpace();
 
+        if (_buf[_paramPos] != '#') {
+            return ParseResult::Invalid;
+        }
+
+        _paramPos++; // consume #
+        uint8_t digitsLen = 0;
+        if (_buf[_paramPos] <= '9' && _buf[_paramPos] >= '0') {
+            digitsLen = _buf[_paramPos] - '0';
+            _paramPos++;
+        } else {
+            return ParseResult::Invalid;
+        }
+
+        int dataLen = 0;
+        for (int i = 0; i < digitsLen; ++i) {
+            dataLen *= 10;
+            dataLen += _buf[_paramPos] - '0';
+            _paramPos++;
+        }
+
+        if (dataLen > len) {
+            return ParseResult::InsufficientBuffer;
+        }
+
+        std::memcpy(buf, _buf, dataLen);
+
+        if (!isEndOfParam()) {
+            return ParseResult::Invalid;
+        }
+
+        return ParseResult::Success;
     }
     
 
@@ -259,5 +260,5 @@ namespace SCPI {
             }
         }
     }
-}
-}
+} // namespace SCPI
+} // namespace CTI

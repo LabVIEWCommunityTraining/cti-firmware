@@ -157,14 +157,6 @@ namespace SCPI {
         RegistrationResult registerNode(const char* str, ScpiCommand cmdHandler, ScpiQuery queryHandler);
 
         ParseResult parseBool(bool& value);
-        ParseResult parseU8(uint8_t& value);
-        ParseResult parseI8(int8_t& value);
-        ParseResult parseU16(uint16_t& value);
-        ParseResult parseI16(int16_t& value);
-        ParseResult parseU32(uint32_t& value);
-        ParseResult parseI32(int32_t& value);
-        ParseResult parseFloat(float& value);
-        ParseResult parseDouble(double& value);
         ParseResult parseBlock(char* buf, int len);
 
     private:
