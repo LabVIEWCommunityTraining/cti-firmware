@@ -1,24 +1,16 @@
 #include "visa/visa_core.h"
-#include "visa/digital.h"
-#include "visa/analog.h"
-#include "visa/pwm.h"
-
 #include "scpi.h"
 
-#include <string.h>
+#include <cstring>
 
 namespace CTI {
 namespace Visa {
 
-    scpi_choice_def_t statusSources[] = {
-        {"COMMS", 0},
-        {"USER", 1},
-        SCPI_CHOICE_LIST_END
-    };
+    using namespace SCPI;
 
     void initPlatformCommands(Visa* visa);
 
-    size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
+    /*size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
         gPlatform.IO.Print(len, data);
         return len;
     }
@@ -44,54 +36,53 @@ namespace Visa {
             gPlatform.IO.Printf("**CTRL: %X: 0x%X(%d)\n", ctrl, val, val);
         }
         return SCPI_RES_OK;
-    }
+    }*/
 
-    scpi_result_t SCPI_Reset(scpi_t * context) {
-        (void) context;
-
+    CommandResult SCPI_Reset(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
         gPlatform.IO.Print("**Reset\n");
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t scpi_LED(scpi_t * context) {
+    CommandResult scpi_LED(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
         bool val;
         
-        if (!SCPI_ParamBool(context, &val, true))  {
-            return SCPI_RES_ERR;
+        if (parser->parseBool(val) != ParseResult::Success)  {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.StatusLED(val, User);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t scpi_cmdStatusSource(scpi_t* context) {
-        int32_t choice;
+    ScpiChoice statusSource[] = {
+        { "COMMS", 0 },
+        { "USER",  1 },
 
-        if (!SCPI_ParamChoice(context, statusSources, &choice, true)) {
-            return SCPI_RES_ERR;
+        NullScpiChoice
+    };
+
+    CommandResult scpi_cmdStatusSource(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+        uint8_t choice;
+
+        if (parser->parseChoice(statusSource, choice) != ParseResult::Success) {
+            return CommandResult::UnexpectedParam;
         }
 
         gPlatform.IO.SetStatusSource((StatusSource)choice);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t scpi_queryStatusSource(scpi_t* context) {
-        switch(gPlatform.IO.GetStatusSource()) {
-        case Comms:
-            gPlatform.IO.Print("COMMS");
-            break;
+    QueryResult scpi_queryStatusSource(ScpiNode* node, const NumParamVector& nodeNumbers) {
 
-        case User:
-            gPlatform.IO.Print("USER");
-            break;
-        }
+        const char* str = statusSource[gPlatform.IO.GetStatusSource()].choiceString;
+        gPlatform.IO.Print(str);
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    void initCommonCommands(Visa* visa) {
+    /*void initCommonCommands(Visa* visa) {
         //standard SCPI commands
         visa->addCommand({"*CLS", SCPI_CoreCls, 0});
         visa->addCommand({"*ESE", SCPI_CoreEse, 0});
@@ -111,58 +102,97 @@ namespace Visa {
         visa->addCommand({"STATus:USER", scpi_LED, 0});
         visa->addCommand({"STATus:SOURce", scpi_cmdStatusSource, 0});
         visa->addCommand({"STATus:SOURce?", scpi_queryStatusSource, 0});
+    }*/
+
+    CommandResult SCPI_CoreCls(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+
+        return CommandResult::Success;
     }
 
-    Visa::Visa() {
-        _interface = {
-            SCPI_Error,
-            SCPI_Write,
-            SCPI_Control,
-            SCPI_Flush,
-            SCPI_Reset
-        };
+    CommandResult SCPI_CoreEse(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
 
-        _nextCmdI = 0;
+        return CommandResult::Success;
+    }
+
+    QueryResult SCPI_CoreEseQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+
+        return QueryResult::Success;
+    }
+
+    QueryResult SCPI_CoreEsrQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+
+        return QueryResult::Success;
+    }
+
+    QueryResult SCPI_CoreIdnQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+
+        return QueryResult::Success;
+    }
+
+    CommandResult SCPI_CoreOpc(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+
+        return CommandResult::Success;
+    }
+
+    QueryResult SCPI_CoreOpcQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+
+        return QueryResult::Success;
+    }
+
+    CommandResult SCPI_CoreRst(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+
+        return CommandResult::Success;
+    }
+
+    CommandResult SCPI_CoreSre(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+
+        return CommandResult::Success;
+    }
+
+    QueryResult SCPI_CoreSreQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+
+        return QueryResult::Success;
+    }
+
+    QueryResult SCPI_CoreStbQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+
+        return QueryResult::Success;
+    }
+
+    CommandResult SCPI_CoreWai(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+
+        return CommandResult::Success;
+    }
+
+    void initCommonCommands(Visa* visa) {
+        visa->addCommand("*CLS", SCPI_CoreCls, nullptr);
+        visa->addCommand("*ESE", SCPI_CoreEse, SCPI_CoreEseQ);
+        visa->addCommand("*ESR", nullptr, SCPI_CoreEsrQ);
+        visa->addCommand("*IDN", nullptr, SCPI_CoreIdnQ);
+        visa->addCommand("*OPC", SCPI_CoreOpc, SCPI_CoreOpcQ);
+        visa->addCommand("*RST", SCPI_CoreRst, nullptr);
+        visa->addCommand("*SRE", SCPI_CoreSre, SCPI_CoreSreQ);
+        visa->addCommand("*STB", nullptr, SCPI_CoreStbQ);
+        //visa->addCommand({"*TST?", My_CoreTstQ, nullptr);
+        visa->addCommand("*WAI", SCPI_CoreWai, nullptr);
+
+        // SET:LED is a common command as gPlatform has a status LED abstraction
+        visa->addCommand("STATus:USER", scpi_LED, nullptr);
+        visa->addCommand("STATus:SOURce", scpi_cmdStatusSource, scpi_queryStatusSource);
+    }
+
+    Visa::Visa():
+        _parser(SCPI_INPUT_BUFFER_LENGTH) {
 
         initCommonCommands(this);
         initPlatformCommands(this);
         _init();
     }
-        
-    Status Visa::addCommand(scpi_command_t command) {
-        if (_ready) {
-            return AlreadyReady;
-        }
-
-        if (_nextCmdI == SCPI_MAX_COMMANDS) {
-            return TooManyCommands;
-        }
-
-        _commands[_nextCmdI++] = command;
-
-        return Success;
-    }
 
     int Visa::Ready() {
         //mark _ready as true which means the command list is finalized
         _ready = true;
-
-        //put the end of the command list special item at the end to use with the scpi-parser lib
-        _commands[_nextCmdI] = SCPI_CMD_LIST_END;
-
-        SCPI_Init(&_context,
-            _commands,
-            &_interface,
-            scpi_units_def,
-            gPlatform.Info.Vendor(),
-            gPlatform.Info.Model(),
-            gPlatform.Info.SerialNum(),
-            gPlatform.Info.Version(),
-            _input_buffer, SCPI_INPUT_BUFFER_LENGTH,
-            _error_queue, SCPI_ERROR_QUEUE_SIZE);
-        
-
-        return (int)Success;
+        _parser.finalize();
     }
 
     void Visa::MainLoop() {
@@ -180,7 +210,9 @@ namespace Visa {
             } else {
                 c = val;
                 gPlatform.IO.StatusLED(true, Comms);
-                SCPI_Input(&_context, &c, 1);
+                if (!_parser.bufferInput(&c, 1)) {
+                    gPlatform.IO.Print("**ERR: Input Overflow");
+                }
             }
         }
     }

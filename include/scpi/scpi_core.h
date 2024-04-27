@@ -67,8 +67,15 @@ namespace SCPI {
 
     typedef std::vector<int8_t> NumParamVector;
 
-    typedef CommandResult (*ScpiCommand)(ScpiNode* node, ScpiParser* parser, NumParamVector nodeNumbers);
-    typedef QueryResult (*ScpiQuery)(ScpiNode* node, NumParamVector nodeNumbers);
+    typedef CommandResult (*ScpiCommand)(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers);
+    typedef QueryResult (*ScpiQuery)(ScpiNode* node, const NumParamVector& nodeNumbers);
+
+    typedef struct {
+        const char* choiceString;
+        uint8_t value;
+    } ScpiChoice;
+
+    extern ScpiChoice NullScpiChoice;
 
     class ScpiNode {
     public:
@@ -158,6 +165,10 @@ namespace SCPI {
 
         ParseResult parseBool(bool& value);
         ParseResult parseBlock(char* buf, int len);
+
+        ParseResult parseChoice(const ScpiChoice* choices, uint8_t& value);
+
+        void reset();
 
     private:
         ParserStatus parseNode();

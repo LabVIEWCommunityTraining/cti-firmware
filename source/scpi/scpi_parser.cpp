@@ -6,6 +6,8 @@
 namespace CTI {
 namespace SCPI {
 
+    ScpiChoice NullScpiChoice { nullptr, 0 };
+
     ScpiParser::ScpiParser(int bufCapacity) {
         _buf = (char*)malloc(bufCapacity);
         _bufCapacity = bufCapacity;
@@ -24,6 +26,12 @@ namespace SCPI {
         if (_buf) {
             free(_buf);
         }
+    }
+
+    void ScpiParser::reset() {
+        _bufSize = 0;
+        _state = ParserState::FindCommand;
+        _curNode = nullptr;
     }
 
     int ScpiParser::bufferInput(const char* data, int n) {
@@ -45,6 +53,38 @@ namespace SCPI {
                 }
             }
         }
+    }
+
+    ParseResult ScpiParser::parseChoice(const ScpiChoice* choices, uint8_t& value) {
+        consumeWhiteSpace();
+
+        uint8_t choice = 0;
+        uint8_t cur;
+        bool match = false;
+
+        while (choices[choice].choiceString != nullptr && !match) {
+            cur = 0;
+            const char* str = choices[choice].choiceString;
+
+            while (_paramPos + cur < _bufSize && str[cur] != 0) {
+                if (_buf[_paramPos + cur] != str[cur]) {
+                    choice++; //mismatch, try next choice
+                    break;
+                }
+            }
+
+            if (str[cur] == 0) {
+                //made it to the end without a mismatch, we've got a winner
+                match = true;
+            }
+        }
+
+        if (!match || !isEndOfParam()) {
+            return ParseResult::Invalid;
+        }
+
+        value = choices[choice].value;
+        return ParseResult::Success;
     }
 
     ParseResult ScpiParser::parseBool(bool& value) {
@@ -200,6 +240,11 @@ namespace SCPI {
                 return ParserStatus::Unknown;
             }
         }
+
+        _bufSize = 0;
+        _curNode = nullptr;
+        _isQuery = false;
+        _state = ParserState::FindCommand;
 
         return ParserStatus::Success;
     }

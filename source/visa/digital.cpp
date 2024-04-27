@@ -1,4 +1,4 @@
-#include "visa/core.h"
+#include "visa/visa_core.h"
 
 #include <string.h>
 

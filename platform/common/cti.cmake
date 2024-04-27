@@ -84,14 +84,12 @@ function(create_cti_build prefix target output)
         ${CTI_SOURCE_CORE}
         ${CTI_SOURCE_PLATFORM}
         ${CTI_SOURCE_SCPI}
-        #${CTI_SOURCE_VISA}
-        #${SCPI_PARSER_SOURCE}
+        ${CTI_SOURCE_VISA}
     )
 
     target_include_directories(${CTI_TARGET}
         PUBLIC ${CTI_INCLUDE}
         PUBLIC ${CTI_BUILD_INCLUDE}
-        PUBLIC ${SCPI_INCLUDE_DIR}
     )
 
     add_dependencies(${CTI_TARGET} cti_Version)
