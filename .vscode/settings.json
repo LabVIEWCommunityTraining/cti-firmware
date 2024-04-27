@@ -48,6 +48,12 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "cstdbool": "cpp",
-        "ctime": "cpp"
-    }
+        "ctime": "cpp",
+        "chrono": "cpp",
+        "netfwd": "cpp",
+        "optional": "cpp",
+        "ratio": "cpp",
+        "ranges": "cpp"
+    },
+    "cmake.configureOnOpen": false
 }
