@@ -109,14 +109,14 @@ namespace SCPI {
             numStart = i;
         }
 
-        int8_t num = 0; // 0 signifies node supports num param but one wasn't specified
+        int8_t num = -2; // -2 signifies node supports num param but one wasn't specified
         if (numStart < len) {
             for (uint8_t i = numStart; i < len; ++i) {
                 num *= 10;
                 num += (str[i] - '0');
 
                 if (num < 0) {
-                    return 0; //number was too big and rolled over
+                    return -3; //number was too big and rolled over
                 }
             }
         }

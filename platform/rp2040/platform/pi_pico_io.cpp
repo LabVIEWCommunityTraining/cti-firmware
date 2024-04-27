@@ -23,7 +23,7 @@ void CTI::PlatformIO::_statusLED(bool val) {
     gpio_put(led, val);
 }
 
-void CTI::PlatformDigital::SetOutput(int channel, bool value) {
+void CTI::PlatformDigital::SetOutput(uint16_t channel, bool value) {
     gpio_put(channel, value);
 }
 

@@ -5,82 +5,94 @@
 namespace CTI {
 namespace Visa {
 
-    scpi_choice_def_t digitalDirectionOptions[] = {
+    using namespace SCPI;
+
+    ScpiChoice digitalDirectionOptions[] = {
         {"IN", 0},
         {"OUT", 1},
-        SCPI_CHOICE_LIST_END
+        NullScpiChoice
     };
 
-    scpi_choice_def_t digitalPullOptions[] = {
-        {"NONE", (int32_t)PlatformDigital::None},
-        {"UP", (int32_t)PlatformDigital::Up},
-        {"DOWN", (int32_t)PlatformDigital::Down},
-        {"BOTH", (int32_t)PlatformDigital::Both},
-        SCPI_CHOICE_LIST_END
+    ScpiChoice digitalPullOptions[] = {
+        {"NONE", (uint8_t)PlatformDigital::None},
+        {"UP", (uint8_t)PlatformDigital::Up},
+        {"DOWN", (uint8_t)PlatformDigital::Down},
+        {"BOTH", (uint8_t)PlatformDigital::Both},
+        NullScpiChoice
     };
 
-    //scpi_result_t scpi_LED(scpi_t * context)
+    CommandResult digital_setValue(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+        //DIGital:PIN#:VALue
 
-    scpi_result_t digital_setValue(scpi_t * context) {
-        int32_t channel;
+        if (nodeNumbers[1] < 0) {
+            return CommandResult::MissingParam;
+        }
+
+        ChanIndex channel = nodeNumbers[1];
         bool val;
         
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
-        }
-        
-        if (!SCPI_ParamBool(context, &val, true))  {
-            return SCPI_RES_ERR;
+        if (parser->parseBool(val) != ParseResult::Success)  {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.Digital.SetOutput(channel, val);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t digital_getValue(scpi_t * context) {
-        int32_t channel;
+    QueryResult digital_getValue(ScpiNode* node, const NumParamVector& nodeNumbers) {
+        // DIGital:PIN#:VALue?
+
+        if (nodeNumbers[1] < 0) {
+            return QueryResult::Error;
+        }
+
+        ChanIndex channel;
         bool val;
         
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
-        }
+        channel = nodeNumbers[1]; //Pull number from PIN part of tree
 
         gPlatform.IO.Digital.GetValue(channel, &val);
         
         if (val) {
-            gPlatform.IO.Print("ON");
+            gPlatform.IO.Print("1");
         } else {
-            gPlatform.IO.Print("OFF");
+            gPlatform.IO.Print("0");
         }
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t digital_setDirection(scpi_t * context) {
-        int32_t channel;
-        int32_t choice;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    CommandResult digital_setDirection(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+        //DIGital:PIN#:DIRection
+
+        if (nodeNumbers[1] < 0) {
+            return CommandResult::MissingParam;
         }
 
-        if (!SCPI_ParamChoice(context, digitalDirectionOptions, &choice, true)) {
-            return SCPI_RES_ERR;
+        ChanIndex channel;
+        uint8_t choice;
+        
+        channel = nodeNumbers[1]; // pull # from PIN portion of tree
+
+        if (parser->parseChoice(digitalDirectionOptions, choice) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.Digital.SetDirection(channel, choice == 1);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t digital_getDirection(scpi_t * context) {
-        int32_t channel;
-        bool out;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    QueryResult digital_getDirection(ScpiNode* node, const NumParamVector& nodeNumbers) {
+        //DIGital:PIN#:DIRection?
+
+        if (nodeNumbers[1] < 0) {
+            return QueryResult::Error;
         }
+
+        ChanIndex channel = nodeNumbers[1]; //extract # from PIN portion
+        bool out;
 
         gPlatform.IO.Digital.GetDirection(channel, &out);
 
@@ -90,32 +102,36 @@ namespace Visa {
             gPlatform.IO.Print("IN");
         }
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t digital_setPull(scpi_t * context) {
-        int32_t channel;
-        int32_t choice;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    CommandResult digital_setPull(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+        //DIGital:PIN#:PULL
+
+        if (nodeNumbers[1] < 0) {
+            return CommandResult::MissingParam;
         }
 
-        if (!SCPI_ParamChoice(context, digitalPullOptions, &choice, true)) {
-            return SCPI_RES_ERR;
+        ChanIndex channel = nodeNumbers[1];
+        uint8_t choice;
+
+        if (parser->parseChoice(digitalPullOptions, choice) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.Digital.SetPull(channel, (PlatformDigital::PullDirection)choice);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t digital_getPull(scpi_t * context) {
-        int32_t channel;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    QueryResult digital_getPull(ScpiNode* node, const NumParamVector& nodeNumbers) {
+        //DIGital:PIN#:PULL?
+
+        if (nodeNumbers[1] < 0) {
+            return QueryResult::Error;
         }
+
+        ChanIndex channel = nodeNumbers[1];
 
         PlatformDigital::PullDirection pull;
 
@@ -139,17 +155,13 @@ namespace Visa {
                 break;
         }
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
     void initDigitalCommands(Visa* visa) {
-        visa->addCommand({"DIGital:DIRection", digital_setDirection, 0});
-        visa->addCommand({"DIGital:DIRection?", digital_getDirection, 0});
-        visa->addCommand({"DIGital[:OUTput]:VALue", digital_setValue, 0});
-        visa->addCommand({"DIGital[:OUTput]:VALue?", digital_getValue, 0});
-        visa->addCommand({"DIGital[:INput]:VALue?", digital_getValue, 0});
-        visa->addCommand({"DIGital[:INput]:PULL", digital_setPull, 0});
-        visa->addCommand({"DIGital[:INput]:PULL?", digital_getPull, 0});
+        visa->addCommand("DIGital:PIN#:DIRection", digital_setDirection, digital_getDirection);
+        visa->addCommand("DIGital:PIN#:VALue",     digital_setValue,     digital_getValue);
+        visa->addCommand("DIGital:PIN#:PULL",      digital_setPull,      digital_getPull);
     }
 
 } //namespace Visa

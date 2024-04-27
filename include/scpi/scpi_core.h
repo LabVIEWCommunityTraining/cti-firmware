@@ -165,8 +165,31 @@ namespace SCPI {
 
         ParseResult parseBool(bool& value);
         ParseResult parseBlock(char* buf, int len);
-
         ParseResult parseChoice(const ScpiChoice* choices, uint8_t& value);
+
+        ParseResult parseInt(uint8_t& value) {
+            return parseIntFormat(value, 3);
+        }
+
+        ParseResult parseInt(int8_t& value) {
+            return parseIntFormat(value, 3, true);
+        }
+
+        ParseResult parseInt(uint16_t& value) {
+            return parseIntFormat(value, 5);
+        }
+
+        ParseResult parseInt(int16_t& value) {
+            return parseIntFormat(value, 5, true);
+        }
+
+        ParseResult parseInt(uint32_t& value) {
+            return parseIntFormat(value, 10);
+        }
+
+        ParseResult parseInt(int32_t& value) {
+            return parseIntFormat(value, 10, true);
+        }
 
         void reset();
 
@@ -229,7 +252,7 @@ namespace SCPI {
         }
 
         template <class T>
-        ParseResult parseInt(T& val, uint8_t maxDigits, bool sign = false) {
+        ParseResult parseIntFormat(T& val, uint8_t maxDigits, bool sign = false) {
             consumeWhiteSpace();
 
             NumberFormat format = numberFormat();

@@ -16,6 +16,8 @@ namespace CTI {
     typedef PlatformTickType platform_tick_t;
 #endif
 
+#define ChanIndex uint8_t
+
 class PlatformInfo {    
 public:
     PlatformInfo();
@@ -41,20 +43,20 @@ class PlatformDigital {
 public:
     typedef enum { None, Up, Down, Both } PullDirection;
 
-    void SetOutput(int channel, bool value);
-    void SetDirection(int channel, bool output);
-    void SetPull(int channel, PullDirection dir);
+    void SetOutput(ChanIndex channel, bool value);
+    void SetDirection(ChanIndex channel, bool output);
+    void SetPull(ChanIndex channel, PullDirection dir);
 
-    void GetValue(int channel, bool* value);
-    void GetDirection(int channel, bool* output);
-    void GetPull(int channel, PullDirection* dir);
+    void GetValue(ChanIndex channel, bool* value);
+    void GetDirection(ChanIndex channel, bool* output);
+    void GetPull(ChanIndex channel, PullDirection* dir);
 };
 
 class PlatformAnalog {
 public:
 
-    void EnableInput(int channel);
-    void GetInput(int channel, uint16_t* value);
+    void EnableInput(ChanIndex channel);
+    void GetInput(ChanIndex channel, uint16_t* value);
 };
 
 typedef enum {
@@ -64,16 +66,16 @@ typedef enum {
 
 class PlatformPWM {
 public:
-    bool InitPWM(int gpio, bool phaseCorrect, bool enable);
-    bool SetDuty(int gpio, float dutyPercent);
-    bool SetFreq(int gpio, float freq);
-    void SetEnable(int gpio, bool enable);
+    bool InitPWM(ChanIndex gpio, bool phaseCorrect, bool enable);
+    bool SetDuty(ChanIndex gpio, float dutyPercent);
+    bool SetFreq(ChanIndex gpio, float freq);
+    void SetEnable(ChanIndex gpio, bool enable);
 
-    bool SetTop(int gpio, uint16_t top);
-    bool SetDivider(int gpio, float divider);
+    bool SetTop(ChanIndex gpio, uint16_t top);
+    bool SetDivider(ChanIndex gpio, float divider);
 
-    float GetDuty(int gpio);
-    float GetFreq(int gpio);
+    float GetDuty(ChanIndex gpio);
+    float GetFreq(ChanIndex gpio);
 };
 
 class PlatformIO {
