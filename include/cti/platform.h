@@ -16,7 +16,7 @@ namespace CTI {
     typedef PlatformTickType platform_tick_t;
 #endif
 
-#define ChanIndex uint8_t
+#define ChanIndex int8_t
 
 class PlatformInfo {    
 public:

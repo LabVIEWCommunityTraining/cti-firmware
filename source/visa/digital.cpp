@@ -24,16 +24,20 @@ namespace Visa {
     CommandResult digital_setValue(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
         //DIGital:PIN#:VALue
 
-        if (nodeNumbers[1] < 0) {
+        ChanIndex channel = nodeNumbers.get(1);
+
+        gPlatform.IO.Printf("channel: %d\n", channel);
+
+        if (channel < 0) {
             return CommandResult::MissingParam;
         }
 
-        ChanIndex channel = nodeNumbers[1];
         bool val;
-        
         if (parser->parseBool(val) != ParseResult::Success)  {
             return CommandResult::MissingParam;
         }
+
+        gPlatform.IO.Printf("val: %d\n\n", val ? 1 : 0);
 
         gPlatform.IO.Digital.SetOutput(channel, val);
 
@@ -42,15 +46,13 @@ namespace Visa {
 
     QueryResult digital_getValue(ScpiNode* node, const NumParamVector& nodeNumbers) {
         // DIGital:PIN#:VALue?
+        ChanIndex channel = nodeNumbers.get(1);
 
-        if (nodeNumbers[1] < 0) {
+        if (channel < 0) {
             return QueryResult::Error;
         }
 
-        ChanIndex channel;
         bool val;
-        
-        channel = nodeNumbers[1]; //Pull number from PIN part of tree
 
         gPlatform.IO.Digital.GetValue(channel, &val);
         
@@ -65,15 +67,13 @@ namespace Visa {
 
     CommandResult digital_setDirection(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
         //DIGital:PIN#:DIRection
+        ChanIndex channel = nodeNumbers.get(1);
 
-        if (nodeNumbers[1] < 0) {
+        if (channel < 0) {
             return CommandResult::MissingParam;
         }
 
-        ChanIndex channel;
         uint8_t choice;
-        
-        channel = nodeNumbers[1]; // pull # from PIN portion of tree
 
         if (parser->parseChoice(digitalDirectionOptions, choice) != ParseResult::Success) {
             return CommandResult::MissingParam;
@@ -86,12 +86,12 @@ namespace Visa {
 
     QueryResult digital_getDirection(ScpiNode* node, const NumParamVector& nodeNumbers) {
         //DIGital:PIN#:DIRection?
+        ChanIndex channel = nodeNumbers.get(1);
 
-        if (nodeNumbers[1] < 0) {
+        if (channel < 0) {
             return QueryResult::Error;
         }
 
-        ChanIndex channel = nodeNumbers[1]; //extract # from PIN portion
         bool out;
 
         gPlatform.IO.Digital.GetDirection(channel, &out);
@@ -107,12 +107,12 @@ namespace Visa {
 
     CommandResult digital_setPull(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
         //DIGital:PIN#:PULL
+        ChanIndex channel = nodeNumbers.get(1);
 
-        if (nodeNumbers[1] < 0) {
+        if (channel < 0) {
             return CommandResult::MissingParam;
         }
 
-        ChanIndex channel = nodeNumbers[1];
         uint8_t choice;
 
         if (parser->parseChoice(digitalPullOptions, choice) != ParseResult::Success) {
@@ -126,12 +126,11 @@ namespace Visa {
 
     QueryResult digital_getPull(ScpiNode* node, const NumParamVector& nodeNumbers) {
         //DIGital:PIN#:PULL?
+        ChanIndex channel = nodeNumbers.get(1);
 
-        if (nodeNumbers[1] < 0) {
+        if (channel < 0) {
             return QueryResult::Error;
         }
-
-        ChanIndex channel = nodeNumbers[1];
 
         PlatformDigital::PullDirection pull;
 

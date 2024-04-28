@@ -12,6 +12,7 @@ namespace SCPI {
         _optional = false;
         _hasNum = false;
         _depth = 0;
+        _parent = nullptr;
     }
 
     ScpiNode::ScpiNode(const char* nodeStr, uint8_t strLen, uint8_t depth,
@@ -21,6 +22,7 @@ namespace SCPI {
         _depth = depth;
         _cmdHandler = cmdHandler;
         _queryHandler = queryHandler;
+        _parent = nullptr;
 
         _hasNum = false;
         _optional = false;
@@ -46,10 +48,17 @@ namespace SCPI {
     bool ScpiNode::matches(const char* candidate, uint8_t len) {
         uint8_t startNum = len; //default to end of string for terminal loop conditions later
 
+        gPlatform.IO.Print("  checking ");
+        gPlatform.IO.Print(len, candidate);
+        gPlatform.IO.Print(" against ");
+        gPlatform.IO.Print(_strLen, _nodeStr);
+        gPlatform.IO.Print('\n');
+
         if (_hasNum) {
             //check for numeric at end of candidate string
+            //also checks for '#' so can match against specifier syntax
             for (uint8_t i = len - 1; i >= 0; --i) {
-                if (candidate[i] > '9' || candidate[i] < '0') {
+                if ((candidate[i] > '9' || candidate[i] < '0') && candidate[i] != '#') {
                     break;
                 }
 
@@ -57,15 +66,19 @@ namespace SCPI {
             }
         }
 
-        if (startNum != _strLen) {
+        //string needs to either be same length as required portion or full string
+        if (startNum != _reqLen && startNum != _strLen) {
             return false;
         }
 
         //iterate over required portion to check match, case-insensitively
         for (uint8_t i = 0; i < _reqLen; ++i) {
             //Test if lower-case (required nodeStr should be upper-case)
-            if (candidate[i] >= 'a' && candidate[i] <= 'z' && candidate[i] - 32 != _nodeStr[i]) {
-                return false;
+
+            if (candidate[i] >= 'a' && candidate[i] <= 'z') {
+                if (candidate[i] - 32 != _nodeStr[i]) {
+                    return false;
+                }
             } else if (candidate[i] != _nodeStr[i]) {
                 return false;
             }
@@ -73,8 +86,11 @@ namespace SCPI {
 
         if (len > _reqLen) {
             for (uint8_t i = _reqLen; i < startNum; ++i) {
-                if (candidate[i] <= 'Z' && candidate[i] >= 'A' && candidate[i] + 32 != _nodeStr[i]) {
-                    return false;
+
+                if (candidate[i] <= 'Z' && candidate[i] >= 'A') {
+                    if (candidate[i] + 32 != _nodeStr[i]) {
+                        return false;
+                    }
                 } else if (candidate[i] != _nodeStr[i]) {
                     return false;
                 }
@@ -84,8 +100,31 @@ namespace SCPI {
         //at this point we're the same non-number portion length and don't have a mismatch
         return true;
     }
+
+    void ScpiNode::printNode(bool recurse) {
+        if (recurse) {
+            if (_parent != nullptr) {
+                //print parent segments before current segment
+                _parent->printNode(recurse);
+            } else {
+                //root node base case, nothing to print
+                return;
+            }
+
+            gPlatform.IO.Print(':');
+        }
+ 
+        if (_optional) gPlatform.IO.Print('[');
+
+        gPlatform.IO.Print(_strLen, _nodeStr);
+
+        if (_hasNum)   gPlatform.IO.Print('#');
+        if (_optional) gPlatform.IO.Print(']');
+    }
+
     ScpiNode* ScpiNode::lookupChild(const char* str, uint8_t len) {
         for (ScpiNode* node : _children) {
+
             if (node->matches(str, len)) {
                 return node;
             }
@@ -109,19 +148,22 @@ namespace SCPI {
             numStart = i;
         }
 
-        int8_t num = -2; // -2 signifies node supports num param but one wasn't specified
         if (numStart < len) {
+            int8_t num = 0;
             for (uint8_t i = numStart; i < len; ++i) {
+                int8_t digit = str[i] - '0';
                 num *= 10;
-                num += (str[i] - '0');
+                num += (digit);
 
                 if (num < 0) {
                     return -3; //number was too big and rolled over
                 }
             }
+
+            return num;
         }
 
-        return num;
+        return -2; //Num supported but not found
     }
 
     RegistrationResult ScpiNode::addChild(ScpiNode* child) {
@@ -130,6 +172,11 @@ namespace SCPI {
         // first as it has a higher chance of having a name collision that
         // can be checked for.
         if (_optional) {
+            if (_parent == nullptr) {
+                //first level node can't be optional
+                return RegistrationResult::SyntaxError;
+            }
+
             RegistrationResult res = _parent->addChild(child);
 
             if (res != RegistrationResult::Success) {
@@ -149,6 +196,7 @@ namespace SCPI {
         }
 
         _children.push_back(child);
+        child->_parent = this;
 
         // There are other result types but for now I'm assuming the node string
         // parsing code will handle those and only call addChild with a valid

@@ -1,4 +1,4 @@
 #edit the firmware version here
 set(CTI_VER_MAJOR "0")
 set(CTI_VER_MINOR "4")
-set(CTI_VER_PATCH "0")
+set(CTI_VER_PATCH "1")

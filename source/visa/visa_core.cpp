@@ -105,7 +105,15 @@ namespace Visa {
     }
 
     QueryResult SCPI_CoreIdnQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
-
+        gPlatform.IO.Print(gPlatform.Info.Vendor());
+        gPlatform.IO.Print(',');
+        gPlatform.IO.Print(gPlatform.Info.Model());
+        gPlatform.IO.Print(',');
+        gPlatform.IO.Print(gPlatform.Info.SerialNum());
+        gPlatform.IO.Print(',');
+        gPlatform.IO.Print(gPlatform.Info.Version());
+        gPlatform.IO.Print('\n');
+        
         return QueryResult::Success;
     }
 
@@ -163,13 +171,13 @@ namespace Visa {
 
     Visa::Visa():
         _parser(SCPI_INPUT_BUFFER_LENGTH) {
-
-        initCommonCommands(this);
-        initPlatformCommands(this);
-        _init();
     }
 
     int Visa::Ready() {
+        initCommonCommands(this);
+        initPlatformCommands(this);
+        _init();
+
         //mark _ready as true which means the command list is finalized
         _ready = true;
         _parser.finalize();
@@ -194,6 +202,15 @@ namespace Visa {
                 gPlatform.IO.StatusLED(true, Comms);
                 if (!_parser.bufferInput(&c, 1)) {
                     gPlatform.IO.Print("**ERR: Input Overflow");
+
+                    //consume rest of input and reset parser
+                    while (true) {
+                        val = gPlatform.IO.FGetCtimeout(20000);
+                        if (val == -1 || val == '\n') {
+                            _parser.reset();
+                            break;
+                        }
+                    }
                 }
             }
         }

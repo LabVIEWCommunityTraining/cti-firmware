@@ -4,6 +4,7 @@
 #include "cti/platform.h"
 
 #include <cstdint>
+#include <cstdlib>
 #include <vector>
 
 namespace CTI {
@@ -37,7 +38,8 @@ namespace SCPI {
         Success,
         SyntaxError,
         Ambiguous,
-        InvalidHandler
+        InvalidHandler,
+        AlreadyFinalized,
     } ;
 
     enum class ParserState {
@@ -64,10 +66,55 @@ namespace SCPI {
         Hex
     };
 
+    enum class BufferResult {
+        Success,
+        UnmatchedCommand,
+        BufferOverflow,
+        Unknown,
+    };
+
     class ScpiNode;
     class ScpiParser;
 
-    typedef std::vector<int8_t> NumParamVector;
+    //typedef std::vector<int8_t> NumParamVector;
+
+    class NumParamVector {
+    public:
+        NumParamVector() {
+            _nums = nullptr;
+            _count = 0;
+        }
+
+        int8_t get(uint8_t index) const {
+            if (index < _count) {
+                return _nums[index];
+            }
+
+            return -1;
+        }
+
+        bool set(uint8_t index, int8_t value) {
+            if (index < _count) {
+                _nums[index] = value;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool reserve(uint8_t size) {
+            if (!_nums) {
+                _nums = (int8_t*)malloc(size);
+                _count = size;
+                return true;
+            }
+
+            return false;
+        }
+    private:
+        int8_t* _nums;
+        uint8_t _count;
+    };
 
     typedef CommandResult (*ScpiCommand)(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers);
     typedef QueryResult (*ScpiQuery)(ScpiNode* node, const NumParamVector& nodeNumbers);
@@ -116,7 +163,10 @@ namespace SCPI {
             return QueryResult::NoHandler;
         };
 
+        void printNode(bool recurse);
+
     private:
+
         /// @brief The original segment of the node string at this level as passed into the registration.
         const char* _nodeStr;
         uint8_t _strLen;
@@ -208,12 +258,20 @@ namespace SCPI {
         }
 
         bool isEndOfParam() {
-            return (_paramPos == _bufSize || 
-                _buf[_paramPos] == ' ' ||
-                _buf[_paramPos] == '\n' ||
-                _buf[_paramPos] == '\t' ||
-                _buf[_paramPos] == '\r'
+            char c = _buf[_paramPos];
+            bool isEnd = (_paramPos == _bufSize || 
+                c == ' ' ||
+                c == '\n' ||
+                c == '\t' ||
+                c == '\r' ||
+                c == ','
             );
+
+            if (c == ',') {
+                _paramPos++; //consume separator comma
+            }
+
+            return isEnd;
         }
 
         NumberFormat numberFormat() {

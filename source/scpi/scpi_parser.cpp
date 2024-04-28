@@ -46,20 +46,27 @@ namespace SCPI {
 
             if (_state == ParserState::FindCommand ) {
                 if (data[i] == ' ' || data[i] == '\n') {
-                    gPlatform.IO.Printf("Node: (%d) ", _bufSize);
-                    gPlatform.IO.Print(_bufSize, _buf);
-                    gPlatform.IO.Print('\n');
-                    gPlatform.IO.Flush();
-
                     ParserStatus res = parseNode();
 
+                    if (res != ParserStatus::Success) {
+                        gPlatform.IO.Printf("NO MATCH! (%d)\n\n", res);
+                        _state = ParserState::InvalidNode;
+                    } else {
+                        gPlatform.IO.Print("matched: ");
+                        _curNode->printNode(true);
+                        gPlatform.IO.Print('\n');
+                    }
                     _bufSize = 0;
-
-                    gPlatform.IO.Printf("Node Res: %d\n", res);
                 }
             } else if (_state == ParserState::FindEndOfLine) {
-                if (data[n] == '\n') {
+                if (data[i] == '\n') {
                     ParserStatus res = invokeNode();
+                    reset();
+                }
+            } else if (_state == ParserState::InvalidNode) {
+                if (data[i] == '\n') {
+                    _state = ParserState::FindCommand;
+                    reset();
                 }
             }
         }
@@ -84,11 +91,14 @@ namespace SCPI {
                     choice++; //mismatch, try next choice
                     break;
                 }
+
+                cur++;
             }
 
             if (str[cur] == 0) {
                 //made it to the end without a mismatch, we've got a winner
                 match = true;
+                _paramPos += cur;
             }
         }
 
@@ -97,16 +107,26 @@ namespace SCPI {
         }
 
         value = choices[choice].value;
+
         return ParseResult::Success;
     }
 
     ParseResult ScpiParser::parseBool(bool& value) {
         consumeWhiteSpace();
 
+        gPlatform.IO.Print("buf\n");
+        gPlatform.IO.Print(_bufSize, _buf);
+        gPlatform.IO.Print('\n');
+
+        gPlatform.IO.Printf("\nparseBool() pos=%d\n");
+
+        gPlatform.IO.Printf("  %c\n", _buf[_paramPos]);
+
         if (_buf[_paramPos] == '0') {
             value = false;
             _paramPos++;
         } else if (_buf[_paramPos] == '1') {
+            
             value = true;
             _paramPos++;
         } else if (_buf[_paramPos] == 'O' || _buf[_paramPos] == 'o') {
@@ -115,6 +135,8 @@ namespace SCPI {
             if (_paramPos == _bufSize) {
                 return ParseResult::EndOfData;
             }
+
+            gPlatform.IO.Printf("  %c\n", _buf[_paramPos]);
 
             if (_buf[_paramPos] == 'N' || _buf[_paramPos] == 'n') {
                 value = true;
@@ -125,6 +147,8 @@ namespace SCPI {
                     if (_paramPos == _bufSize) {
                         return ParseResult::EndOfData;
                     }
+                    
+                    gPlatform.IO.Printf("  %c\n", _buf[_paramPos]);
 
                     if (_buf[_paramPos] == 'F' || _buf[_paramPos] == 'f') {
                         value = true;
@@ -136,6 +160,7 @@ namespace SCPI {
 
         // Ensure param is separated from next param, not mispelled, or at end of string
         if (!isEndOfParam()) {
+            gPlatform.IO.Print("Invalid");
             return ParseResult::Invalid;
         }
 
@@ -194,28 +219,34 @@ namespace SCPI {
 
         for (; cur <= _bufSize; ++cur) {
 
-            gPlatform.IO.Printf("cur: %d, c: %c\n", cur, _buf[cur]);
+            //gPlatform.IO.Printf("cur: %d, c: %c\n", cur, _buf[cur]);
 
-            if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ') {
+            if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ' || _buf[cur] == '\n') {
+                //reached end of tree portion, perform lookup
 
-                gPlatform.IO.Print("Segment: ");
+                gPlatform.IO.Print("segment: ");
                 gPlatform.IO.Print(cur - start, _buf + start);
                 gPlatform.IO.Print('\n');
 
                 ScpiNode* child = node->lookupChild(_buf + start, cur - start);
 
                 if (child == nullptr) {
-                    gPlatform.IO.Print("Command not found\n");
-
                     return ParserStatus::UnknownCommand;
                 }
 
-                _nodeNums[depth] = child->nodeNum(_buf + cur, cur - start);
+                gPlatform.IO.Print("  found ");
+                child->printNode(true);
+                gPlatform.IO.Print('\n');
+
+                int8_t num = child->nodeNum(_buf + start, cur - start);
+                _nodeNums.set(depth, num);
                 depth++;
 
-                start = cur;
+                if (_buf[cur] == ':') {
+                    cur++;
+                }
 
-                if (cur == _bufSize) {
+                if (cur == _bufSize || _buf[cur] == ' ' || _buf[cur] == '\n') {
                     _bufSize = 0;
                     _curNode = child;
                     _state = ParserState::FindEndOfLine;
@@ -231,6 +262,9 @@ namespace SCPI {
 
                     return ParserStatus::Success;
                 }
+                
+                start = cur;
+                node = child;
             }
         }
 
@@ -240,8 +274,11 @@ namespace SCPI {
 
     ParserStatus ScpiParser::invokeNode() {
         if (_curNode == nullptr) {
+            gPlatform.IO.Print("\ncurNode not set, aborting!\n\n");
             return ParserStatus::Unknown;
         }
+
+        _paramPos = 0;
 
         if (_isQuery) {
             QueryResult res = _curNode->invokeQuery(this, _nodeNums);
@@ -278,15 +315,21 @@ namespace SCPI {
         _nodeNums.reserve(_maxDepth);
 
         for (uint8_t i = 0; i < _maxDepth; ++i) {
-            _nodeNums[i] = 0;
+            _nodeNums.set(i, 0);
         }
     }
     
     RegistrationResult ScpiParser::registerNode(const char* str, ScpiCommand cmdHandler, ScpiQuery queryHandler) {
+        if (_finalized) {
+            return RegistrationResult::AlreadyFinalized;
+        }
+
         int len = 0;
         while (len < _bufCapacity && str[len] != 0) {
             len++;
         }
+
+        len++; // account for null terminator
 
         uint8_t cur = 0;
         uint8_t start = 0;
@@ -302,15 +345,29 @@ namespace SCPI {
         for (;cur < len; ++cur) {
             //Split up string by ':' or null-terminator
             if (str[cur] == ':' || str[cur] == 0) {
-                ScpiNode* node = new ScpiNode(str + cur, cur - start, depth,
-                    cmdHandler, queryHandler);
-                
-                RegistrationResult res = curNode->addChild(node);
 
-                if (res != RegistrationResult::Success) {
-                    return res;
+                //First check to see if node already has that child
+
+                ScpiNode* node = curNode->lookupChild(str + start, cur - start);
+                if (node == nullptr) {
+                    gPlatform.IO.Print("creating ");
+                    gPlatform.IO.Print(cur - start, str + start);
+                    gPlatform.IO.Print('\n');
+
+                    node = new ScpiNode(str + start, cur - start, depth,
+                        cmdHandler, queryHandler);
+                    
+                    RegistrationResult res = curNode->addChild(node);
+
+                    if (res != RegistrationResult::Success) {
+                        return res;
+                    }
+                } else {
+                    gPlatform.IO.Print("existing ");
+                    node->printNode(false);
+                    gPlatform.IO.Print('\n');
                 }
-
+                
                 curNode = node;
                 
                 start = cur + 1;
@@ -324,9 +381,6 @@ namespace SCPI {
 
         if (depth > _maxDepth) {
             _maxDepth = depth;
-            if (_finalized) {
-                finalize();
-            }
         }
 
         return RegistrationResult::Success;
