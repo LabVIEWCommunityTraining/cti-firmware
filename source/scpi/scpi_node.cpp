@@ -48,12 +48,6 @@ namespace SCPI {
     bool ScpiNode::matches(const char* candidate, uint8_t len) {
         uint8_t startNum = len; //default to end of string for terminal loop conditions later
 
-        // gPlatform.IO.Print("  checking ");
-        // gPlatform.IO.Print(len, candidate);
-        // gPlatform.IO.Print(" against ");
-        // gPlatform.IO.Print(_strLen, _nodeStr);
-        // gPlatform.IO.Print('\n');
-
         if (_hasNum) {
             //check for numeric at end of candidate string
             //also checks for '#' so can match against specifier syntax
@@ -74,7 +68,6 @@ namespace SCPI {
         //iterate over required portion to check match, case-insensitively
         for (uint8_t i = 0; i < _reqLen; ++i) {
             //Test if lower-case (required nodeStr should be upper-case)
-
             if (candidate[i] >= 'a' && candidate[i] <= 'z') {
                 if (candidate[i] - 32 != _nodeStr[i]) {
                     return false;

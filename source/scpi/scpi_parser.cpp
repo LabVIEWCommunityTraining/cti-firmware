@@ -50,12 +50,7 @@ namespace SCPI {
                     ParserStatus res = parseNode();
 
                     if (res != ParserStatus::Success) {
-                        // gPlatform.IO.Printf("NO MATCH! (%d)\n\n", res);
                         _state = ParserState::InvalidNode;
-                    } else {
-                        // gPlatform.IO.Print("matched: ");
-                        // _curNode->printNode(true);
-                        // gPlatform.IO.Print('\n');
                     }
                     _bufSize = 0;
                 }
@@ -87,11 +82,7 @@ namespace SCPI {
             cur = 0;
             const char* str = choices[choice].choiceString;
 
-            // gPlatform.IO.Printf("  checking choice: %s\n", str);
-
             while (_paramPos + cur < _bufSize && str[cur] != 0) {
-                // gPlatform.IO.Print(_buf[_paramPos + cur]);
-
                 if (_buf[_paramPos + cur] != str[cur]) {
                     choice++; //mismatch, try next choice
                     break;
@@ -99,8 +90,6 @@ namespace SCPI {
 
                 cur++;
             }
-
-            // gPlatform.IO.Print('\n');
 
             if (str[cur] == 0) {
                 //made it to the end without a mismatch, we've got a winner
@@ -115,21 +104,11 @@ namespace SCPI {
 
         value = choices[choice].value;
 
-        // gPlatform.IO.Printf(" value = %d\n", value);
-
         return ParseResult::Success;
     }
 
     ParseResult ScpiParser::parseBool(bool& value) {
         consumeWhiteSpace();
-
-        // gPlatform.IO.Print("buf\n");
-        // gPlatform.IO.Print(_bufSize, _buf);
-        // gPlatform.IO.Print('\n');
-
-        // gPlatform.IO.Printf("\nparseBool() pos=%d\n", _paramPos);
-
-        // gPlatform.IO.Printf("  %c\n", _buf[_paramPos]);
 
         if (_buf[_paramPos] == '0') {
             value = false;
@@ -145,8 +124,6 @@ namespace SCPI {
                 return ParseResult::EndOfData;
             }
 
-            // gPlatform.IO.Printf("  %c\n", _buf[_paramPos]);
-
             if (_buf[_paramPos] == 'N' || _buf[_paramPos] == 'n') {
                 value = true;
                 _paramPos++;
@@ -156,8 +133,6 @@ namespace SCPI {
                     if (_paramPos == _bufSize) {
                         return ParseResult::EndOfData;
                     }
-                    
-                    // gPlatform.IO.Printf("  %c\n", _buf[_paramPos]);
 
                     if (_buf[_paramPos] == 'F' || _buf[_paramPos] == 'f') {
                         value = true;
@@ -169,7 +144,6 @@ namespace SCPI {
 
         // Ensure param is separated from next param, not mispelled, or at end of string
         if (!isEndOfParam()) {
-            // gPlatform.IO.Print("Invalid");
             return ParseResult::Invalid;
         }
 
@@ -227,25 +201,13 @@ namespace SCPI {
         }
 
         for (; cur <= _bufSize; ++cur) {
-
-            //gPlatform.IO.Printf("cur: %d, c: %c\n", cur, _buf[cur]);
-
             if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ' || _buf[cur] == '\n') {
                 //reached end of tree portion, perform lookup
-
-                // gPlatform.IO.Print("segment: ");
-                // gPlatform.IO.Print(cur - start, _buf + start);
-                // gPlatform.IO.Print('\n');
-
                 ScpiNode* child = node->lookupChild(_buf + start, cur - start);
 
                 if (child == nullptr) {
                     return ParserStatus::UnknownCommand;
                 }
-
-                // gPlatform.IO.Print("  found ");
-                // child->printNode(true);
-                // gPlatform.IO.Print('\n');
 
                 int8_t num = child->nodeNum(_buf + start, cur - start);
                 _nodeNums.set(depth, num);
@@ -356,12 +318,8 @@ namespace SCPI {
             if (str[cur] == ':' || str[cur] == 0) {
 
                 //First check to see if node already has that child
-
                 ScpiNode* node = curNode->lookupChild(str + start, cur - start);
                 if (node == nullptr) {
-                    // gPlatform.IO.Print("creating ");
-                    // gPlatform.IO.Print(cur - start, str + start);
-                    // gPlatform.IO.Print('\n');
 
                     node = new ScpiNode(str + start, cur - start, depth,
                         cmdHandler, queryHandler);
@@ -371,10 +329,6 @@ namespace SCPI {
                     if (res != RegistrationResult::Success) {
                         return res;
                     }
-                } else {
-                    // gPlatform.IO.Print("existing ");
-                    // node->printNode(false);
-                    // gPlatform.IO.Print('\n');
                 }
                 
                 curNode = node;

@@ -76,8 +76,6 @@ namespace SCPI {
     class ScpiNode;
     class ScpiParser;
 
-    //typedef std::vector<int8_t> NumParamVector;
-
     class NumParamVector {
     public:
         NumParamVector() {
@@ -166,28 +164,18 @@ namespace SCPI {
         void printNode(bool recurse);
 
     private:
-
-        /// @brief The original segment of the node string at this level as passed into the registration.
         const char* _nodeStr;
         uint8_t _strLen;
         
-        /// @brief The number of characters that are the required portion of the string. Once beyond that, the entire
-        /// remaining string must be matched. The node string match check always ignores the case of the character.
         uint8_t _reqLen;
 
-        /// @brief Signifies whether the node segment ended with '#' and should track a number param
         bool _hasNum;
-
-        /// @brief Whether the node at this level is option (was surrounded in '[]' during registration).
         bool _optional;
 
         uint8_t _depth;
 
-        /// @brief Pointer to the parent level of the tree this node is nested under.
-        /// Will be nullptr for the root node.
         ScpiNode* _parent;
 
-        /// @brief  List of pointers to children nodes. Will be empty for leaf nodes.
         std::vector<ScpiNode*> _children;
 
         ScpiCommand _cmdHandler;
@@ -202,17 +190,8 @@ namespace SCPI {
 
         void finalize();
 
-        /// @brief Buffers new input characters. As soon as a query/command terminator is seen (space) a handler will be invoked if a match is found.
-        /// @param data Buffer of characters to add to the parser.
-        /// @param n The count of characters contained in data to buffer.
-        /// @return The count of characters actually added, anything less than n means the buffer is out of room.
         int bufferInput(const char* data, int n);
 
-        /// @brief Registers a new pair of command/query handler(s) to a SCPI tree string.
-        /// @param str The null-terminated string to match against following the SCPI specifier syntax.
-        /// @param cmdHandler The handler to invoke when the command is matched, specify nullptr to disable.
-        /// @param queryHandler The handler to invoke when the query is matched, specify nullptr to disable.
-        /// @return 
         RegistrationResult registerNode(const char* str, ScpiCommand cmdHandler, ScpiQuery queryHandler);
 
         ParseResult parseBool(bool& value);
@@ -499,7 +478,6 @@ namespace SCPI {
         int _bufSize;
         int _bufCapacity;
 
-        /// @brief Tracks the current position in the buffer as params are extracted
         uint8_t _paramPos;
 
         bool _finalized;
