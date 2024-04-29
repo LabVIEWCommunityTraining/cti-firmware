@@ -48,11 +48,11 @@ namespace SCPI {
     bool ScpiNode::matches(const char* candidate, uint8_t len) {
         uint8_t startNum = len; //default to end of string for terminal loop conditions later
 
-        gPlatform.IO.Print("  checking ");
-        gPlatform.IO.Print(len, candidate);
-        gPlatform.IO.Print(" against ");
-        gPlatform.IO.Print(_strLen, _nodeStr);
-        gPlatform.IO.Print('\n');
+        // gPlatform.IO.Print("  checking ");
+        // gPlatform.IO.Print(len, candidate);
+        // gPlatform.IO.Print(" against ");
+        // gPlatform.IO.Print(_strLen, _nodeStr);
+        // gPlatform.IO.Print('\n');
 
         if (_hasNum) {
             //check for numeric at end of candidate string

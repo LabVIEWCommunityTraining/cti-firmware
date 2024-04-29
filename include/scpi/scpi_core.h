@@ -124,7 +124,7 @@ namespace SCPI {
         uint8_t value;
     } ScpiChoice;
 
-    extern ScpiChoice NullScpiChoice;
+    extern ScpiChoice EndScpiChoice;
 
     class ScpiNode {
     public:

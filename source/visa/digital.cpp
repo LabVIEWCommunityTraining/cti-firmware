@@ -8,17 +8,17 @@ namespace Visa {
     using namespace SCPI;
 
     ScpiChoice digitalDirectionOptions[] = {
-        {"IN", 0},
+        {"IN",  0},
         {"OUT", 1},
-        NullScpiChoice
+        EndScpiChoice
     };
 
     ScpiChoice digitalPullOptions[] = {
         {"NONE", (uint8_t)PlatformDigital::None},
-        {"UP", (uint8_t)PlatformDigital::Up},
+        {"UP",   (uint8_t)PlatformDigital::Up},
         {"DOWN", (uint8_t)PlatformDigital::Down},
         {"BOTH", (uint8_t)PlatformDigital::Both},
-        NullScpiChoice
+        EndScpiChoice
     };
 
     CommandResult digital_setValue(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
@@ -26,7 +26,7 @@ namespace Visa {
 
         ChanIndex channel = nodeNumbers.get(1);
 
-        gPlatform.IO.Printf("channel: %d\n", channel);
+        // gPlatform.IO.Printf("channel: %d\n", channel);
 
         if (channel < 0) {
             return CommandResult::MissingParam;
@@ -37,7 +37,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
-        gPlatform.IO.Printf("val: %d\n\n", val ? 1 : 0);
+        // gPlatform.IO.Printf("val: %d\n\n", val ? 1 : 0);
 
         gPlatform.IO.Digital.SetOutput(channel, val);
 
@@ -57,9 +57,9 @@ namespace Visa {
         gPlatform.IO.Digital.GetValue(channel, &val);
         
         if (val) {
-            gPlatform.IO.Print("1");
+            gPlatform.IO.Print("1\n");
         } else {
-            gPlatform.IO.Print("0");
+            gPlatform.IO.Print("0\n");
         }
 
         return QueryResult::Success;
@@ -97,9 +97,9 @@ namespace Visa {
         gPlatform.IO.Digital.GetDirection(channel, &out);
 
         if (out) {
-            gPlatform.IO.Print("OUT");
+            gPlatform.IO.Print("OUT\n");
         } else {
-            gPlatform.IO.Print("IN");
+            gPlatform.IO.Print("IN\n");
         }
 
         return QueryResult::Success;
@@ -138,19 +138,19 @@ namespace Visa {
 
         switch (pull) {
             case PlatformDigital::None:
-                gPlatform.IO.Print("NONE");
+                gPlatform.IO.Print("NONE\n");
                 break;
             
             case PlatformDigital::Up:
-                gPlatform.IO.Print("UP");
+                gPlatform.IO.Print("UP\n");
                 break;
             
             case PlatformDigital::Down:
-                gPlatform.IO.Print("DOWN");
+                gPlatform.IO.Print("DOWN\n");
                 break;
             
             case PlatformDigital::Both:
-                gPlatform.IO.Print("BOTH");
+                gPlatform.IO.Print("BOTH\n");
                 break;
         }
 

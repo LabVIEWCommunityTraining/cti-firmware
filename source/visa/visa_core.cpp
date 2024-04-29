@@ -61,11 +61,13 @@ namespace Visa {
         { "COMMS", 0 },
         { "USER",  1 },
 
-        NullScpiChoice
+        EndScpiChoice
     };
 
     CommandResult scpi_cmdStatusSource(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
         uint8_t choice;
+
+        // gPlatform.IO.Print("cmdStatusSource()\n");
 
         if (parser->parseChoice(statusSource, choice) != ParseResult::Success) {
             return CommandResult::UnexpectedParam;
@@ -186,9 +188,6 @@ namespace Visa {
     }
 
     void Visa::MainLoop() {
-        char inputBuffer[255];
-        int inputPosition = 0;
-
         int val; // timeout read value, will be -1 if timed out
         char c;
 
@@ -201,7 +200,7 @@ namespace Visa {
                 c = val;
                 gPlatform.IO.StatusLED(true, Comms);
                 if (!_parser.bufferInput(&c, 1)) {
-                    gPlatform.IO.Print("**ERR: Input Overflow");
+                    gPlatform.IO.Print("**ERROR: Input Overflow");
 
                     //consume rest of input and reset parser
                     while (true) {
