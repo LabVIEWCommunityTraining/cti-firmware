@@ -15,7 +15,11 @@ namespace Visa {
         bool phaseCorrect = false;
         bool enable = false;
 
-        scpi->parseBool(phaseCorrect); //optional, don't care if not present
+        ParseResult res = scpi->parseBool(phaseCorrect); //optional, don't care if not present
+
+        if (res == ParseResult::Success) {
+            scpi->parseBool(enable);
+        }
 
         if (!gPlatform.IO.PWM.InitPWM(gpio, phaseCorrect, enable)) {
             return CommandResult::Error;

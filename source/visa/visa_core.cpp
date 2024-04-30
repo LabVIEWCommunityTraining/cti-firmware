@@ -1,5 +1,6 @@
 #include "visa/visa_core.h"
 #include "visa/digital.h"
+#include "visa/pwm.h"
 
 #include "scpi.h"
 
@@ -222,7 +223,7 @@ namespace Visa {
     void initPlatformCommands(Visa* visa) {
         initDigitalCommands(visa);
         //initAnalogCommands(visa);
-        //initPWMCommands(visa);
+        initPWMCommands(visa);
     }
 
 } //namespace Visa
