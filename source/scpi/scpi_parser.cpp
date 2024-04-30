@@ -46,12 +46,13 @@ namespace SCPI {
             _bufSize++;
 
             if (_state == ParserState::FindCommand ) {
-                if (data[i] == ' ' || data[i] == '\n') {
+                if (data[i] == ' ' || data[i] == '?' || data[i] == '\n') {
                     ParserStatus res = parseNode();
 
                     if (res != ParserStatus::Success) {
                         _state = ParserState::InvalidNode;
                     }
+
                     _bufSize = 0;
                 }
             } else if (_state == ParserState::FindEndOfLine) {
@@ -83,7 +84,7 @@ namespace SCPI {
             const char* str = choices[choice].choiceString;
 
             while (_paramPos + cur < _bufSize && str[cur] != 0) {
-                if (_buf[_paramPos + cur] != str[cur]) {
+                if (!cmpIChar(_buf[_paramPos + cur], str[cur])) {
                     choice++; //mismatch, try next choice
                     break;
                 }

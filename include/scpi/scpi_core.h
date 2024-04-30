@@ -283,6 +283,25 @@ namespace SCPI {
         ParserStatus parseNode();
         ParserStatus invokeNode();
 
+        bool cmpIChar(char a, char b) {
+            //make sure a is smaller value (upper case if different)
+            if (a > b) {
+                char t = a;
+                a = b;
+                b = t;
+            }
+
+            bool aUCase = (a <= 'Z' && a >= 'A');
+            bool bUCase = (b <= 'Z' && b >= 'B');
+
+            if (aUCase != bUCase) {
+                //not the same case, a must be upper case and b must be lower case
+                b -= 32;
+            }
+
+            return a == b;
+        }
+
         void consumeWhiteSpace() {
             while (_paramPos < _bufSize &&
                 (_buf[_paramPos] == ' ' || _buf[_paramPos] == '\t' || _buf[_paramPos] == '\r')) {

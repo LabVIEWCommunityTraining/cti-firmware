@@ -79,7 +79,6 @@ namespace SCPI {
 
         if (len > _reqLen) {
             for (uint8_t i = _reqLen; i < startNum; ++i) {
-
                 if (candidate[i] <= 'Z' && candidate[i] >= 'A') {
                     if (candidate[i] + 32 != _nodeStr[i]) {
                         return false;
@@ -119,6 +118,7 @@ namespace SCPI {
         for (ScpiNode* node : _children) {
 
             if (node->matches(str, len)) {
+
                 return node;
             }
         }

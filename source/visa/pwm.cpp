@@ -92,11 +92,9 @@ namespace Visa {
             return QueryResult::Error;
         }
 
-        float duty;
+        float duty = gPlatform.IO.PWM.GetDuty(gpio);
 
-        duty = gPlatform.IO.PWM.GetDuty(gpio);
-
-        gPlatform.IO.Printf("%f", duty);
+        gPlatform.IO.Printf("%f\n", duty);
 
         return QueryResult::Success;
     }
@@ -107,11 +105,9 @@ namespace Visa {
             return QueryResult::Error;
         }
 
-        float freq;
+        float freq = gPlatform.IO.PWM.GetFreq(gpio);
 
-        freq = gPlatform.IO.PWM.GetFreq(gpio);
-
-        gPlatform.IO.Printf("%f", freq);
+        gPlatform.IO.Printf("%f\n", freq);
 
         return QueryResult::Success;
     }
