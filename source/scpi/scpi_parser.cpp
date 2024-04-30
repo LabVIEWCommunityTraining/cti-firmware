@@ -252,7 +252,7 @@ namespace SCPI {
         _paramPos = 0;
 
         if (_isQuery) {
-            QueryResult res = _curNode->invokeQuery(this, _nodeNums);
+            QueryResult res = _curNode->invokeQuery(this);
 
             if (res != QueryResult::Success) {
                 if (res == QueryResult::NoHandler) {
@@ -262,7 +262,7 @@ namespace SCPI {
                 return ParserStatus::Unknown;
             }
         } else {
-            CommandResult res = _curNode->invokeCommand(this, _nodeNums);
+            CommandResult res = _curNode->invokeCommand(this);
 
             if (res != CommandResult::Success) {
                 if (res == CommandResult::NoHandler) {
@@ -279,6 +279,10 @@ namespace SCPI {
         _state = ParserState::FindCommand;
 
         return ParserStatus::Success;
+    }
+
+    bool ScpiParser::enqueueError(int16_t code, const char* str) {
+        return false;
     }
 
     void ScpiParser::finalize() {

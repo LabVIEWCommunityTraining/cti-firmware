@@ -40,15 +40,15 @@ namespace Visa {
         return SCPI_RES_OK;
     }*/
 
-    CommandResult SCPI_Reset(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_Reset(ScpiParser* scpi) {
         gPlatform.IO.Print("**Reset\n");
         return CommandResult::Success;
     }
 
-    CommandResult scpi_LED(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult scpi_LED(ScpiParser* scpi) {
         bool val;
         
-        if (parser->parseBool(val) != ParseResult::Success)  {
+        if (scpi->parseBool(val) != ParseResult::Success)  {
             return CommandResult::MissingParam;
         }
 
@@ -64,12 +64,12 @@ namespace Visa {
         EndScpiChoice
     };
 
-    CommandResult scpi_cmdStatusSource(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult scpi_cmdStatusSource(ScpiParser* scpi) {
         uint8_t choice;
 
         // gPlatform.IO.Print("cmdStatusSource()\n");
 
-        if (parser->parseChoice(statusSource, choice) != ParseResult::Success) {
+        if (scpi->parseChoice(statusSource, choice) != ParseResult::Success) {
             return CommandResult::UnexpectedParam;
         }
 
@@ -78,7 +78,7 @@ namespace Visa {
         return CommandResult::Success;
     }
 
-    QueryResult scpi_queryStatusSource(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult scpi_queryStatusSource(ScpiParser* scpi) {
 
         const char* str = statusSource[gPlatform.IO.GetStatusSource()].choiceString;
         gPlatform.IO.Print(str);
@@ -86,27 +86,27 @@ namespace Visa {
         return QueryResult::Success;
     }
 
-    CommandResult SCPI_CoreCls(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_CoreCls(ScpiParser* scpi) {
 
         return CommandResult::Success;
     }
 
-    CommandResult SCPI_CoreEse(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_CoreEse(ScpiParser* scpi) {
 
         return CommandResult::Success;
     }
 
-    QueryResult SCPI_CoreEseQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult SCPI_CoreEseQ(ScpiParser* scpi) {
 
         return QueryResult::Success;
     }
 
-    QueryResult SCPI_CoreEsrQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult SCPI_CoreEsrQ(ScpiParser* scpi) {
 
         return QueryResult::Success;
     }
 
-    QueryResult SCPI_CoreIdnQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult SCPI_CoreIdnQ(ScpiParser* scpi) {
         gPlatform.IO.Print(gPlatform.Info.Vendor());
         gPlatform.IO.Print(',');
         gPlatform.IO.Print(gPlatform.Info.Model());
@@ -119,37 +119,37 @@ namespace Visa {
         return QueryResult::Success;
     }
 
-    CommandResult SCPI_CoreOpc(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_CoreOpc(ScpiParser* scpi) {
 
         return CommandResult::Success;
     }
 
-    QueryResult SCPI_CoreOpcQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult SCPI_CoreOpcQ(ScpiParser* scpi) {
 
         return QueryResult::Success;
     }
 
-    CommandResult SCPI_CoreRst(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_CoreRst(ScpiParser* scpi) {
 
         return CommandResult::Success;
     }
 
-    CommandResult SCPI_CoreSre(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_CoreSre(ScpiParser* scpi) {
 
         return CommandResult::Success;
     }
 
-    QueryResult SCPI_CoreSreQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult SCPI_CoreSreQ(ScpiParser* scpi) {
 
         return QueryResult::Success;
     }
 
-    QueryResult SCPI_CoreStbQ(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult SCPI_CoreStbQ(ScpiParser* scpi) {
 
         return QueryResult::Success;
     }
 
-    CommandResult SCPI_CoreWai(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult SCPI_CoreWai(ScpiParser* scpi) {
 
         return CommandResult::Success;
     }

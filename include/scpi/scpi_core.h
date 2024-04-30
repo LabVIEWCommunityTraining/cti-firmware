@@ -7,6 +7,10 @@
 #include <cstdlib>
 #include <vector>
 
+#ifndef SCPI_ERROR_QUEUE_SIZE
+#define SCPI_ERROR_QUEUE_SIZE 10
+#endif
+
 namespace CTI {
 namespace SCPI {
 
@@ -114,8 +118,41 @@ namespace SCPI {
         uint8_t _count;
     };
 
-    typedef CommandResult (*ScpiCommand)(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers);
-    typedef QueryResult (*ScpiQuery)(ScpiNode* node, const NumParamVector& nodeNumbers);
+    typedef struct {
+        int16_t code;
+        const char* str;
+    } ScpiError;
+
+    class ScpiErrorQueue {
+    public:
+        ScpiErrorQueue();
+        
+        bool enqueue(int16_t code, const char* str);
+        bool dequeue(int16_t* code, const char ** str);
+
+        void clear();
+        
+        bool full() {
+            return _full;
+        }
+
+        bool overflow() {
+            return _overflow;
+        }
+    
+    private:
+        ScpiError _err[SCPI_ERROR_QUEUE_SIZE];
+        uint8_t _capacity;
+        uint8_t _head;
+        uint8_t _tail;
+
+        bool _empty;
+        bool _full;
+        bool _overflow;
+    };
+
+    typedef CommandResult (*ScpiCommand)(ScpiParser* scpi);
+    typedef QueryResult (*ScpiQuery)(ScpiParser* scpi);
 
     typedef struct {
         const char* choiceString;
@@ -145,17 +182,17 @@ namespace SCPI {
 
         ScpiNode* lookupChild(const char* str, uint8_t len);
 
-        CommandResult invokeCommand(ScpiParser* parser, const NumParamVector& nodeNumbers) {
+        CommandResult invokeCommand(ScpiParser* parser) {
             if (_cmdHandler != nullptr) {
-                return _cmdHandler(this, parser, nodeNumbers);
+                return _cmdHandler(parser);
             }
 
             return CommandResult::NoHandler;
         };
 
-        QueryResult invokeQuery(ScpiParser* parser, const NumParamVector& nodeNumbers) {
+        QueryResult invokeQuery(ScpiParser* parser) {
             if (_queryHandler != nullptr) {
-                return _queryHandler(this, nodeNumbers);
+                return _queryHandler(parser);
             }
 
             return QueryResult::NoHandler;
@@ -222,7 +259,25 @@ namespace SCPI {
             return parseIntFormat(value, 10, true);
         }
 
+        ParseResult parseReal(float& value) {
+            return parseRealFormat(value);
+        }
+
+        ParseResult parseReal(double& value) {
+            return parseRealFormat(value);
+        }
+
+        bool enqueueError(int16_t code, const char* str);
+
         void reset();
+
+        ScpiNode* curNode() {
+            return _curNode;
+        }
+
+        ChanIndex nodeNum(uint8_t level) {
+            return _nodeNums.get(level);
+        }
 
     private:
         ParserStatus parseNode();
@@ -426,7 +481,9 @@ namespace SCPI {
         }
         
         template <class T>
-        ParseResult parseReal(T& val) {
+        ParseResult parseRealFormat(T& val) {
+            consumeWhiteSpace();
+
             val = 0;
             bool neg = false;
 
@@ -467,6 +524,10 @@ namespace SCPI {
                 val += (T)frac / div;
             }
 
+            if (neg) {
+                val *= -1;
+            }
+
             if (!isEndOfParam()) {
                 return ParseResult::Invalid;
             }
@@ -493,6 +554,8 @@ namespace SCPI {
         ParserState _state;
 
         ScpiNode* _curNode;
+
+        ScpiErrorQueue _err;
     };
 
 } // SCPI

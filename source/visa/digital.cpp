@@ -21,10 +21,10 @@ namespace Visa {
         EndScpiChoice
     };
 
-    CommandResult digital_setValue(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult digital_setValue(ScpiParser* scpi) {
         //DIGital:PIN#:VALue
 
-        ChanIndex channel = nodeNumbers.get(1);
+        ChanIndex channel = scpi->nodeNum(1);
 
         // gPlatform.IO.Printf("channel: %d\n", channel);
 
@@ -33,7 +33,7 @@ namespace Visa {
         }
 
         bool val;
-        if (parser->parseBool(val) != ParseResult::Success)  {
+        if (scpi->parseBool(val) != ParseResult::Success)  {
             return CommandResult::MissingParam;
         }
 
@@ -44,9 +44,9 @@ namespace Visa {
         return CommandResult::Success;
     }
 
-    QueryResult digital_getValue(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult digital_getValue(ScpiParser* scpi) {
         // DIGital:PIN#:VALue?
-        ChanIndex channel = nodeNumbers.get(1);
+        ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
             return QueryResult::Error;
@@ -65,9 +65,9 @@ namespace Visa {
         return QueryResult::Success;
     }
 
-    CommandResult digital_setDirection(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult digital_setDirection(ScpiParser* scpi) {
         //DIGital:PIN#:DIRection
-        ChanIndex channel = nodeNumbers.get(1);
+        ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
             return CommandResult::MissingParam;
@@ -75,7 +75,7 @@ namespace Visa {
 
         uint8_t choice;
 
-        if (parser->parseChoice(digitalDirectionOptions, choice) != ParseResult::Success) {
+        if (scpi->parseChoice(digitalDirectionOptions, choice) != ParseResult::Success) {
             return CommandResult::MissingParam;
         }
 
@@ -84,9 +84,9 @@ namespace Visa {
         return CommandResult::Success;
     }
 
-    QueryResult digital_getDirection(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult digital_getDirection(ScpiParser* scpi) {
         //DIGital:PIN#:DIRection?
-        ChanIndex channel = nodeNumbers.get(1);
+        ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
             return QueryResult::Error;
@@ -105,9 +105,9 @@ namespace Visa {
         return QueryResult::Success;
     }
 
-    CommandResult digital_setPull(ScpiNode* node, ScpiParser* parser, const NumParamVector& nodeNumbers) {
+    CommandResult digital_setPull(ScpiParser* scpi) {
         //DIGital:PIN#:PULL
-        ChanIndex channel = nodeNumbers.get(1);
+        ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
             return CommandResult::MissingParam;
@@ -115,7 +115,7 @@ namespace Visa {
 
         uint8_t choice;
 
-        if (parser->parseChoice(digitalPullOptions, choice) != ParseResult::Success) {
+        if (scpi->parseChoice(digitalPullOptions, choice) != ParseResult::Success) {
             return CommandResult::MissingParam;
         }
 
@@ -124,9 +124,9 @@ namespace Visa {
         return CommandResult::Success;
     }
 
-    QueryResult digital_getPull(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult digital_getPull(ScpiParser* scpi) {
         //DIGital:PIN#:PULL?
-        ChanIndex channel = nodeNumbers.get(1);
+        ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
             return QueryResult::Error;

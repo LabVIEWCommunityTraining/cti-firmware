@@ -8,7 +8,7 @@ namespace Visa {
 
     using namespace SCPI;
 
-    QueryResult scpi_pico_temp(ScpiNode* node, const NumParamVector& nodeNumbers) {
+    QueryResult scpi_pico_temp(ScpiParser* scpi) {
         adc_select_input(4);
         uint16_t raw = adc_read();
 
