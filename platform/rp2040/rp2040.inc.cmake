@@ -34,12 +34,14 @@ target_sources(${RP2040_TARGET} PRIVATE
     platform/pi_pico_timer.cpp
     platform/pi_pico_pwm.cpp
     platform/pi_pico_visa.cpp
+    platform/pi_pico_comms.cpp
 )
 
 # These are the components we're using from the pico-sdk
 # building a list variable to use with target_link_library command below.
 set(PICO_SDK_COMPONENTS
     pico_stdlib
+    hardware_uart
     hardware_i2c
     hardware_adc
     hardware_pwm

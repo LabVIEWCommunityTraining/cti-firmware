@@ -68,22 +68,14 @@ namespace SCPI {
         //iterate over required portion to check match, case-insensitively
         for (uint8_t i = 0; i < _reqLen; ++i) {
             //Test if lower-case (required nodeStr should be upper-case)
-            if (candidate[i] >= 'a' && candidate[i] <= 'z') {
-                if (candidate[i] - 32 != _nodeStr[i]) {
-                    return false;
-                }
-            } else if (candidate[i] != _nodeStr[i]) {
+            if (!cmpIChar(candidate[i], _nodeStr[i])) {
                 return false;
             }
         }
 
         if (len > _reqLen) {
             for (uint8_t i = _reqLen; i < startNum; ++i) {
-                if (candidate[i] <= 'Z' && candidate[i] >= 'A') {
-                    if (candidate[i] + 32 != _nodeStr[i]) {
-                        return false;
-                    }
-                } else if (candidate[i] != _nodeStr[i]) {
+                if (!cmpIChar(candidate[i], _nodeStr[i])) {
                     return false;
                 }
             }

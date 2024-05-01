@@ -1,6 +1,8 @@
 #include "visa/visa_core.h"
 #include "visa/digital.h"
+#include "visa/analog.h"
 #include "visa/pwm.h"
+#include "visa/uart.h"
 
 #include "scpi.h"
 
@@ -12,34 +14,6 @@ namespace Visa {
     using namespace SCPI;
 
     void initPlatformCommands(Visa* visa);
-
-    /*size_t SCPI_Write(scpi_t * context, const char * data, size_t len) {
-        gPlatform.IO.Print(len, data);
-        return len;
-    }
-
-    scpi_result_t SCPI_Flush(scpi_t * context) {
-        (void) context;
-        gPlatform.IO.Flush();
-        return SCPI_RES_OK;
-    }
-
-    int SCPI_Error(scpi_t * context, int_fast16_t err) {
-        (void) context;
-        gPlatform.IO.Printf("**ERROR: %d, \"%s\"\n", err, SCPI_ErrorTranslate(err));
-        return 0;
-    }
-
-    scpi_result_t SCPI_Control(scpi_t * context, scpi_ctrl_name_t ctrl, scpi_reg_val_t val) {
-        (void) context;
-
-        if (SCPI_CTRL_SRQ == ctrl) {
-            gPlatform.IO.Printf("**SRQ: 0x%X(%d)\n", val, val);
-        } else {
-            gPlatform.IO.Printf("**CTRL: %X: 0x%X(%d)\n", ctrl, val, val);
-        }
-        return SCPI_RES_OK;
-    }*/
 
     CommandResult SCPI_Reset(ScpiParser* scpi) {
         gPlatform.IO.Print("**Reset\n");
@@ -83,6 +57,7 @@ namespace Visa {
 
         const char* str = statusSource[gPlatform.IO.GetStatusSource()].choiceString;
         gPlatform.IO.Print(str);
+        gPlatform.IO.Print('\n');
 
         return QueryResult::Success;
     }
@@ -222,8 +197,9 @@ namespace Visa {
 
     void initPlatformCommands(Visa* visa) {
         initDigitalCommands(visa);
-        //initAnalogCommands(visa);
+        initAnalogCommands(visa);
         initPWMCommands(visa);
+        initUartCommands(visa);
     }
 
 } //namespace Visa

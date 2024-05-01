@@ -24,7 +24,7 @@ void Platform::Preinit() {
         while (1) {
             status = !status;
             gPlatform.IO.StatusLED(status);
-            sleep_ms(200);
+            sleep_ms(100);
         }
     }
     
@@ -34,6 +34,8 @@ void Platform::Preinit() {
         status = !status;
         gPlatform.IO.StatusLED(status);
     }
+
+    setbuf(stdout, NULL);
 }
 
 void Platform::Init() {

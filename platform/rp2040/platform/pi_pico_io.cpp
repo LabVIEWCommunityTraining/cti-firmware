@@ -1,8 +1,9 @@
 #include "cti/platform.h"
+
 #include <pico/stdlib.h>
 #include <hardware/adc.h>
 
-const ChanIndex led = 22;
+const CTI::ChanIndex led = 22;
 
 int CTI::PlatformIO::_getchar_timeout_us(uint32_t timeout_us) {
     int c;

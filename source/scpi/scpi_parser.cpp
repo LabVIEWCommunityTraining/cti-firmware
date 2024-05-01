@@ -54,6 +54,11 @@ namespace SCPI {
                     }
 
                     _bufSize = 0;
+
+                    if (data[i] == '\n') {
+                        res = invokeNode();
+                        reset();
+                    }
                 }
             } else if (_state == ParserState::FindEndOfLine) {
                 if (data[i] == '\n') {
@@ -151,14 +156,15 @@ namespace SCPI {
         return ParseResult::Success;
     }
     
-    ParseResult ScpiParser::parseBlock(char* buf, int len) {
+    ParseResult ScpiParser::parseBlock(char** buf, int* len) {
         consumeWhiteSpace();
 
         if (_buf[_paramPos] != '#') {
             return ParseResult::Invalid;
         }
-
+        
         _paramPos++; // consume #
+
         uint8_t digitsLen = 0;
         if (_buf[_paramPos] <= '9' && _buf[_paramPos] >= '0') {
             digitsLen = _buf[_paramPos] - '0';
@@ -174,11 +180,14 @@ namespace SCPI {
             _paramPos++;
         }
 
-        if (dataLen > len) {
-            return ParseResult::InsufficientBuffer;
-        }
+        //point buffer at visa read buffer, data will remain valid while
+        //command/query is invoked. Caller just needs to behave themselves
+        //but this means no extra copies or memory space needed for buffer.
+        *buf = _buf + _paramPos;
+        *len = dataLen;
 
-        std::memcpy(buf, _buf, dataLen);
+        //move parse location past end of block
+        _paramPos += dataLen;
 
         if (!isEndOfParam()) {
             return ParseResult::Invalid;
@@ -353,5 +362,25 @@ namespace SCPI {
 
         return RegistrationResult::Success;
     }
+
+    bool cmpIChar(char a, char b) {
+        //make sure a is smaller value (upper case if different)
+        if (a > b) {
+            char t = a;
+            a = b;
+            b = t;
+        }
+
+        bool aUCase = (a <= 'Z' && a >= 'A');
+        bool bUCase = (b <= 'Z' && b >= 'A');
+
+        if (aUCase != bUCase) {
+            //not the same case, a must be upper case and b must be lower case
+            b -= 32;
+        }
+
+        return a == b;
+    }
+
 } // namespace SCPI
 } // namespace CTI
