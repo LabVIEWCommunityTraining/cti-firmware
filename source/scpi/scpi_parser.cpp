@@ -1,8 +1,5 @@
 #include "scpi/scpi_core.h"
 
-#include <cstdlib>
-#include <cstring>
-
 namespace CTI {
 namespace SCPI {
 

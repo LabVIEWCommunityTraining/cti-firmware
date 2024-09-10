@@ -3,9 +3,8 @@
 
 #include "cti/platform.h"
 
-#include <cstdint>
-#include <cstdlib>
-#include <vector>
+#include <stdint.h>
+#include <stdlib.h>
 
 #ifndef SCPI_ERROR_QUEUE_SIZE
 #define SCPI_ERROR_QUEUE_SIZE 10
@@ -79,6 +78,12 @@ namespace SCPI {
 
     class ScpiNode;
     class ScpiParser;
+
+    typedef struct {
+        ScpiNode** nodes;
+        int size;
+        int capacity;
+    } NodeList;
 
     class NumParamVector {
     public:
@@ -165,6 +170,7 @@ namespace SCPI {
     public:
         ScpiNode();
         ScpiNode(const char* nodeString, uint8_t strLen, uint8_t depth, ScpiCommand cmdHandler, ScpiQuery queryHandler);
+        ~ScpiNode();
         
         RegistrationResult addChild(ScpiNode* node);
 
@@ -213,7 +219,7 @@ namespace SCPI {
 
         ScpiNode* _parent;
 
-        std::vector<ScpiNode*> _children;
+        NodeList* _children;
 
         ScpiCommand _cmdHandler;
 

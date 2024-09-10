@@ -77,7 +77,7 @@ void printDec(const float &val) {
     if (isnan(val)) {
         printf("NaN");
     } else {
-        printf("%c%d.%03d", (val < 0 ? '-' : ' '), abs((int)val), abs((int)(val * 1000) % 1000));
+        printf("%c%d.%03d", (val < 0.0f ? '-' : ' '), abs((int)val), abs((int)(val * 1000) % 1000));
     }
 }
 
@@ -85,7 +85,7 @@ void printDec(const float *val) {
     if (isnan(*val)) {
         printf("NaN");
     } else {
-        printf("%c%d.%03d", (val < 0 ? '-' : ' '), abs((int)*val), abs((int)(*val * 1000) % 1000));
+        printf("%c%d.%03d", (*val < 0.0f ? '-' : ' '), abs((int)*val), abs((int)(*val * 1000) % 1000));
     }
 }
 
@@ -93,6 +93,6 @@ void printDec(volatile float *val) {
     if (isnan(*val)) {
         printf("NaN");
     } else {
-        printf("%c%d.%03d", (val < 0 ? '-' : ' '), abs((int)*val), abs((int)(*val * 1000) % 1000));
+        printf("%c%d.%03d", (*val < 0.0f ? '-' : ' '), abs((int)*val), abs((int)(*val * 1000) % 1000));
     }
 }

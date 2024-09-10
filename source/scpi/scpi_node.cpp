@@ -1,9 +1,59 @@
 #include "scpi/scpi_core.h"
 
-#include <cstring>
+#include <string.h>
 
 namespace CTI {
 namespace SCPI {
+
+    using namespace std;
+
+    NodeList* createNodeList(int capacity = 4) {
+        NodeList* nl = (NodeList*)malloc(sizeof(NodeList));
+
+        if (!nl) return 0;
+
+        nl->nodes = (ScpiNode**)malloc(capacity * sizeof(ScpiNode**));
+
+        nl->capacity = capacity;
+        nl->size = 0;
+
+        return nl;
+    }
+
+    bool growNodeList(NodeList* nl) {
+        int newSize = nl->capacity * 2;
+        ScpiNode** newList = (ScpiNode**)malloc(newSize * sizeof(ScpiNode**));
+        
+        if (!newList) {
+            return false;
+        }
+
+        memcpy(newList, nl->nodes, nl->size * sizeof(ScpiNode**));
+        
+        free(nl->nodes);
+        nl->nodes = newList;
+        nl->capacity = newSize;
+
+        return true;
+    }
+
+    bool addScpiNode(NodeList* nl, ScpiNode* node) {
+        if (nl->size == nl->capacity) {
+            if (!growNodeList(nl)) {
+                return false;
+            }
+        }
+
+        nl->nodes[nl->size] = node;
+        nl->size += 1;
+
+        return true;
+    }
+
+    void freeNodeList(NodeList* nl) {
+        free(nl->nodes);
+        free(nl);
+    }
 
     ScpiNode::ScpiNode() {
         _nodeStr = nullptr;
@@ -13,6 +63,7 @@ namespace SCPI {
         _hasNum = false;
         _depth = 0;
         _parent = nullptr;
+        _children = createNodeList();
     }
 
     ScpiNode::ScpiNode(const char* nodeStr, uint8_t strLen, uint8_t depth,
@@ -23,6 +74,7 @@ namespace SCPI {
         _cmdHandler = cmdHandler;
         _queryHandler = queryHandler;
         _parent = nullptr;
+        _children = createNodeList();
 
         _hasNum = false;
         _optional = false;
@@ -43,6 +95,10 @@ namespace SCPI {
         while (_reqLen < _strLen && _nodeStr[_reqLen] < 'a') {
             ++_reqLen;
         }
+    }
+
+    ScpiNode::~ScpiNode() {
+        freeNodeList(_children);
     }
 
     bool ScpiNode::matches(const char* candidate, uint8_t len) {
@@ -107,11 +163,11 @@ namespace SCPI {
     }
 
     ScpiNode* ScpiNode::lookupChild(const char* str, uint8_t len) {
-        for (ScpiNode* node : _children) {
+        for (int i = 0; i < _children->size; ++i) {
 
-            if (node->matches(str, len)) {
+            if (_children->nodes[i]->matches(str, len)) {
 
-                return node;
+                return _children->nodes[i];
             }
         }
 
@@ -172,15 +228,17 @@ namespace SCPI {
         //Check to see if there's a name collision at this level.
         // this would be more likely when there's an optional level and the 
         // child node is being passed up to an ancestor for registration.
-        for(ScpiNode* c : _children) {
+        for(int i = 0; i < _children->size; ++i) {
+            ScpiNode* c = _children->nodes[i];
+
             if (c->_strLen == _strLen) {
-                if (std::strncmp(c->_nodeStr, _nodeStr, _strLen) == 0) {
+                if (strncmp(c->_nodeStr, _nodeStr, _strLen) == 0) {
                     return RegistrationResult::Ambiguous;
                 }
             }
         }
 
-        _children.push_back(child);
+        addScpiNode(_children, child);
         child->_parent = this;
 
         // There are other result types but for now I'm assuming the node string
