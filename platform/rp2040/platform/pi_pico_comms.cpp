@@ -2,6 +2,7 @@
 
 #include <hardware/uart.h>
 #include <hardware/gpio.h>
+#include <hardware/i2c.h>
 
 namespace CTI {
 
@@ -15,6 +16,13 @@ uart_inst_t* uarts[uartCount] = {
 uint8_t uart_term[uartCount] = {
     0,
     0
+};
+
+const uint8_t i2cCount = 2;
+
+i2c_inst_t* i2cs[i2cCount] = {
+    i2c0,
+    i2c1
 };
 
 PlatformUART::PlatformUART() {
@@ -63,6 +71,37 @@ size_t PlatformUART::read(uint8_t uart, size_t len, uint8_t* buf) {
 
         return len;
     }
+}
+
+PlatformI2C::PlatformI2C() {
+}
+
+uint32_t PlatformI2C::init(uint8_t bus, uint32_t baud, int8_t txPin, int8_t rxPin) {
+    i2c_inst_t* i2c = i2cs[bus];
+
+    uint32_t act_baud = i2c_init(i2c, baud);
+
+    if (txPin >= 0) {
+        gpio_set_function(txPin, gpio_function::GPIO_FUNC_I2C);
+    }
+
+    if (rxPin >= 0) {
+        gpio_set_function(rxPin, gpio_function::GPIO_FUNC_I2C);
+    }
+
+    return baud;
+}
+
+size_t PlatformI2C::write(uint8_t bus, uint8_t addr, size_t len, const uint8_t* data, bool nostop) {
+    i2c_write_blocking(i2cs[bus], addr, data, len, nostop);
+
+    return len;
+}
+
+size_t PlatformI2C::read(uint8_t bus, uint8_t addr, size_t len, uint8_t* buf, bool nostop) {
+    i2c_read_blocking(i2cs[bus], addr, buf, len, nostop);
+
+    return len;
 }
 
 } // namespace CTI

@@ -71,6 +71,7 @@ public:
     PlatformIO IO;
     PlatformTimer Timer;
     PlatformUART UART;
+    PlatformI2C I2C;
     PlatformEngine* pEngine;
 
 private:

@@ -35,6 +35,8 @@ namespace Visa {
         const char* _version;
     };
 
+    SCPI::QueryResult PrintBlock(size_t len, const uint8_t *data);
+
 } //namespace Visa
 
     //make gVisa accessible as CTI::gVisa and not nested within Visa namespace.

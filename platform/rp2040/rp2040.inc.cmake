@@ -1,6 +1,5 @@
 function (configure_rp2040 RP2040_TARGET)
 
-
 #Sets the driver to use for stdio
 if (RP2040_STDIO STREQUAL "usb")
     pico_enable_stdio_usb(${RP2040_TARGET} 1)
@@ -41,6 +40,7 @@ target_sources(${RP2040_TARGET} PRIVATE
 # building a list variable to use with target_link_library command below.
 set(PICO_SDK_COMPONENTS
     pico_stdlib
+    pico_unique_id
     hardware_uart
     hardware_i2c
     hardware_adc

@@ -76,6 +76,7 @@ QueryResult uart_read(ScpiParser* scpi) {
         while (len > 0) {
             gPlatform.UART.read(uart, 1, &byte);
             gPlatform.IO.Print((char)byte);
+            len--;
         }
     } else {
         while (byte != term) {
