@@ -18,11 +18,16 @@ public:
 };
 
 class PlatformI2C {
+public:
+    PlatformI2C();
 
+    uint32_t init(uint8_t bus, uint32_t baud, int8_t txPin, int8_t rxPin);
+    size_t write(uint8_t bus, uint8_t addr, size_t len, const uint8_t* data, bool nostop = false);
+    size_t read(uint8_t bus, uint8_t addr, size_t len, uint8_t* buf, bool nostop = false);
 };
 
 class PlatformSPI {
-
+    
 };
 
 } // namespace CTI
