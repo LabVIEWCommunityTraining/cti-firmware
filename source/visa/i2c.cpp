@@ -59,8 +59,8 @@ CommandResult i2c_write(ScpiParser* scpi) {
 
     if (len > 0) {
         gPlatform.I2C.write(bus, addr, len, (uint8_t*) buf, nostop);
-        gPlatform.IO.Print(len, buf);
-        gPlatform.IO.Print('\n');
+        //gPlatform.IO.Print(len, buf);
+        //gPlatform.IO.Print('\n');
 
         return CommandResult::Success;
     }
@@ -75,7 +75,6 @@ QueryResult i2c_read(ScpiParser* scpi) {
     }
 
     uint8_t len = 0;
-    uint8_t byte = 0;
     uint8_t addr;
     bool nostop = false;
 

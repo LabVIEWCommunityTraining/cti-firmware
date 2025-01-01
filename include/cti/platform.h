@@ -72,6 +72,7 @@ public:
     PlatformTimer Timer;
     PlatformUART UART;
     PlatformI2C I2C;
+    PlatformSPI SPI;
     PlatformEngine* pEngine;
 
 private:

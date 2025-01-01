@@ -46,6 +46,7 @@ set(PICO_SDK_COMPONENTS
     hardware_adc
     hardware_pwm
     hardware_clocks
+    hardware_spi
 )
 
 target_link_libraries(${RP2040_TARGET}
