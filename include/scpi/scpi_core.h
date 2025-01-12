@@ -233,7 +233,7 @@ namespace SCPI {
 
         ParseResult parseBool(bool& value);
         ParseResult parseBlock(char** buf, int* len);
-        ParseResult parseChoice(const ScpiChoice* choices, uint8_t& value);
+        ParseResult parseChoice(const ScpiChoice* choices, int32_t& value);
 
         ParseResult parseInt(uint8_t& value) {
             return parseIntFormat(value, 3);

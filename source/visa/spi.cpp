@@ -97,9 +97,7 @@ QueryResult spi_read(ScpiParser* scpi) {
 
     len = gPlatform.SPI.read(bus, len, spi_buf, (uint8_t*)data);
 
-    for (uint8_t i = 0; i < len; ++i) {
-        gPlatform.IO.Print(spi_buf[i]);
-    }
+    PrintBlock(len, spi_buf);
     gPlatform.IO.Print('\n');
 
     return QueryResult::Success;

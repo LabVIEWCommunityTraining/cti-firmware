@@ -77,10 +77,10 @@ namespace SCPI {
         return n;
     }
 
-    ParseResult ScpiParser::parseChoice(const ScpiChoice* choices, uint8_t& value) {
+    ParseResult ScpiParser::parseChoice(const ScpiChoice* choices, int32_t& value) {
         consumeWhiteSpace();
 
-        uint8_t choice = 0;
+        int32_t choice = 0;
         uint8_t cur;
         bool match = false;
 

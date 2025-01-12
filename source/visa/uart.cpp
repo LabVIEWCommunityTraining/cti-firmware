@@ -6,6 +6,9 @@ namespace Visa {
 
 using namespace SCPI;
 
+const uint8_t uart_buf_len = 100;
+uint8_t uart_buf[uart_buf_len]; // extra byte to accomodate null termination
+
 CommandResult uart_init(ScpiParser* scpi) {
     uint8_t uart = scpi->nodeNum(1);
     if (uart < 0) {
@@ -70,15 +73,28 @@ QueryResult uart_read(ScpiParser* scpi) {
     uint8_t byte = 0;
 
     if (term == 0) {
+        //send back false for line mode response
+        gPlatform.IO.Print('0');
+        gPlatform.IO.Print(',');
+
+        //binary mode, read into buffer and print binary block
         if (scpi->parseInt(len) != ParseResult::Success) {
             return QueryResult::Error;
         }
-        while (len > 0) {
-            gPlatform.UART.read(uart, 1, &byte);
-            gPlatform.IO.Print((char)byte);
-            len--;
+        
+        if (len > uart_buf_len) {
+            return QueryResult::Error;
         }
+
+        len = gPlatform.UART.read(uart, len, uart_buf);
+        PrintBlock(len, uart_buf);
+        gPlatform.IO.Print('\n');
     } else {
+        //ascii line mode, echo bytes until term char is seen
+        //send back true for line mode response
+        gPlatform.IO.Print('1');
+        gPlatform.IO.Print(',');
+
         while (byte != term) {
             gPlatform.UART.read(uart, 1, &byte);
             gPlatform.IO.Print((char)byte);
