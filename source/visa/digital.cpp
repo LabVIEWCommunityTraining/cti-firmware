@@ -73,7 +73,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
-        uint8_t choice;
+        int32_t choice;
 
         if (scpi->parseChoice(digitalDirectionOptions, choice) != ParseResult::Success) {
             return CommandResult::MissingParam;
@@ -113,7 +113,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
-        uint8_t choice;
+        int32_t choice;
 
         if (scpi->parseChoice(digitalPullOptions, choice) != ParseResult::Success) {
             return CommandResult::MissingParam;

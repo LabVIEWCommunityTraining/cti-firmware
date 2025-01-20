@@ -13,7 +13,7 @@ namespace Visa {
         uint16_t raw = adc_read();
 
         float temp = 27 - ((raw / 4096.0) * 3.3 - 0.706) / 0.001721;
-        gPlatform.IO.Printf("%f", temp);
+        gPlatform.IO.Printf("%f\n", temp);
 
         return QueryResult::Success;
     }

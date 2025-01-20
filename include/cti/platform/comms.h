@@ -27,7 +27,12 @@ public:
 };
 
 class PlatformSPI {
-    
+public:
+    PlatformSPI();
+
+    uint32_t init(uint8_t bus, uint32_t baud, uint8_t spiMode, uint8_t bits, int8_t mosiPin, int8_t misoPin, int8_t sckPin);
+    size_t write(uint8_t bus, size_t len, const uint8_t* data);
+    size_t read(uint8_t bus, size_t len, uint8_t* buf, const uint8_t* data = 0);
 };
 
 } // namespace CTI

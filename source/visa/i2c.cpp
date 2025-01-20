@@ -59,8 +59,8 @@ CommandResult i2c_write(ScpiParser* scpi) {
 
     if (len > 0) {
         gPlatform.I2C.write(bus, addr, len, (uint8_t*) buf, nostop);
-        gPlatform.IO.Print(len, buf);
-        gPlatform.IO.Print('\n');
+        //gPlatform.IO.Print(len, buf);
+        //gPlatform.IO.Print('\n');
 
         return CommandResult::Success;
     }
@@ -69,13 +69,12 @@ CommandResult i2c_write(ScpiParser* scpi) {
 }
 
 QueryResult i2c_read(ScpiParser* scpi) {
-    uint8_t uart = scpi->nodeNum(1);
-    if (uart < 0) {
+    uint8_t bus = scpi->nodeNum(1);
+    if (bus < 0) {
         return QueryResult::Error;
     }
 
     uint8_t len = 0;
-    uint8_t byte = 0;
     uint8_t addr;
     bool nostop = false;
 
@@ -89,11 +88,9 @@ QueryResult i2c_read(ScpiParser* scpi) {
 
     scpi->parseBool(nostop); // optional flag to not release bus after transaction
 
-    len = gPlatform.I2C.read(uart, addr, len, i2c_buf, nostop);
+    len = gPlatform.I2C.read(bus, addr, len, i2c_buf, nostop);
 
-    for (uint8_t i = 0; i < len; ++i) {
-        gPlatform.IO.Print(i2c_buf[i]);
-    }
+    PrintBlock(len, i2c_buf);
     gPlatform.IO.Print('\n');
 
     return QueryResult::Success;

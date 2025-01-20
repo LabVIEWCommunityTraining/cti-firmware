@@ -4,6 +4,7 @@
 #include "visa/pwm.h"
 #include "visa/uart.h"
 #include "visa/i2c.h"
+#include "visa/spi.h"
 
 #include "scpi.h"
 
@@ -41,7 +42,7 @@ namespace Visa {
     };
 
     CommandResult scpi_cmdStatusSource(ScpiParser* scpi) {
-        uint8_t choice;
+        int32_t choice;
 
         // gPlatform.IO.Print("cmdStatusSource()\n");
 
@@ -202,6 +203,25 @@ namespace Visa {
         initPWMCommands(visa);
         initUartCommands(visa);
         initI2CCommands(visa);
+        initSPICommands(visa);
+    }
+
+    SCPI::QueryResult PrintBlock(size_t len, const uint8_t *data) {
+        size_t len2 = len;
+        size_t digits = 1;
+
+        while (len2 > 10) {
+            digits++;
+            len2 /= 10;
+        }
+
+        gPlatform.IO.Printf("#%d%d", digits, len);
+
+        for (size_t i = 0; i < len; ++i) {
+            gPlatform.IO.Print(data[i]);
+        }
+
+        return QueryResult::Success;
     }
 
 } //namespace Visa

@@ -1,8 +1,11 @@
 #include "cti/platform/comms.h"
 
+#include "cti/platform.h"
+
 #include <hardware/uart.h>
 #include <hardware/gpio.h>
 #include <hardware/i2c.h>
+#include <hardware/spi.h>
 
 namespace CTI {
 
@@ -23,6 +26,13 @@ const uint8_t i2cCount = 2;
 i2c_inst_t* i2cs[i2cCount] = {
     i2c0,
     i2c1
+};
+
+const uint8_t spiCount = 2;
+
+spi_inst_t* spis[spiCount] = {
+    spi0,
+    spi1
 };
 
 PlatformUART::PlatformUART() {
@@ -89,7 +99,7 @@ uint32_t PlatformI2C::init(uint8_t bus, uint32_t baud, int8_t sclPin, int8_t sda
         gpio_set_function(sdaPin, gpio_function::GPIO_FUNC_I2C);
     }
 
-    return baud;
+    return act_baud;
 }
 
 size_t PlatformI2C::write(uint8_t bus, uint8_t addr, size_t len, const uint8_t* data, bool nostop) {
@@ -100,6 +110,51 @@ size_t PlatformI2C::write(uint8_t bus, uint8_t addr, size_t len, const uint8_t* 
 
 size_t PlatformI2C::read(uint8_t bus, uint8_t addr, size_t len, uint8_t* buf, bool nostop) {
     i2c_read_blocking(i2cs[bus], addr, buf, len, nostop);
+
+    return len;
+}
+
+PlatformSPI::PlatformSPI() {
+
+}
+
+uint32_t PlatformSPI::init(uint8_t bus, uint32_t baud, uint8_t spiMode, uint8_t bits, int8_t mosiPin, int8_t misoPin, int8_t sckPin) {
+    spi_inst_t* spi = spis[bus];
+    uint32_t act_baud = spi_init(spi, baud);
+    //gPlatform.IO.Printf("B: %d (%d) ", baud, act_baud);
+
+    spi_cpol_t cpol = (spi_cpol_t)((spiMode & 0x2) >> 1);
+    spi_cpha_t cpha = (spi_cpha_t)(spiMode & 0x1);
+
+    spi_set_format(spi, bits, cpol, cpha, SPI_MSB_FIRST);
+
+    if (mosiPin >= 0) {
+        gpio_set_function(mosiPin, gpio_function::GPIO_FUNC_SPI);
+    }
+
+    if (misoPin >= 0) {
+        gpio_set_function(misoPin, gpio_function::GPIO_FUNC_SPI);
+    }
+
+    if (sckPin >= 0) {
+        gpio_set_function(sckPin, gpio_function::GPIO_FUNC_SPI);
+    }
+
+    return act_baud;
+}
+
+size_t PlatformSPI::write(uint8_t bus, size_t len, const uint8_t* data) {
+    spi_write_blocking(spis[bus], data, len);
+
+    return len;
+}
+
+size_t PlatformSPI::read(uint8_t bus, size_t len, uint8_t* buf, const uint8_t* data) {
+    if (data != 0) {
+        spi_write_read_blocking(spis[bus], data, buf, len);
+    } else {
+        spi_read_blocking(spis[bus], 0, buf, len);
+    }
 
     return len;
 }
