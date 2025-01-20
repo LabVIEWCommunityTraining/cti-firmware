@@ -3,6 +3,7 @@
 #include "visa/analog.h"
 #include "visa/pwm.h"
 #include "visa/uart.h"
+#include "visa/i2c.h"
 
 #include "scpi.h"
 
@@ -200,6 +201,7 @@ namespace Visa {
         initAnalogCommands(visa);
         initPWMCommands(visa);
         initUartCommands(visa);
+        initI2CCommands(visa);
     }
 
 } //namespace Visa

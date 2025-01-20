@@ -16,22 +16,22 @@ CommandResult i2c_init(ScpiParser* scpi) {
     }
 
     uint32_t baud;
-    uint8_t txPin;
-    uint8_t rxPin;
+    uint8_t sclPin;
+    uint8_t sdaPin;
 
     if (scpi->parseInt(baud) != ParseResult::Success) {
         return CommandResult::MissingParam;
     }
 
-    if (scpi->parseInt(txPin) != ParseResult::Success) {
+    if (scpi->parseInt(sclPin) != ParseResult::Success) {
         return CommandResult::MissingParam;
     }
 
-    if (scpi->parseInt(rxPin) != ParseResult::Success) {
+    if (scpi->parseInt(sdaPin) != ParseResult::Success) {
         return CommandResult::MissingParam;
     }
 
-    baud = gPlatform.I2C.init(bus, baud, txPin, rxPin);
+    baud = gPlatform.I2C.init(bus, baud, sclPin, sdaPin);
 
     return CommandResult::Success;
 }

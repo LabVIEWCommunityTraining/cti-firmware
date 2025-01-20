@@ -76,17 +76,17 @@ size_t PlatformUART::read(uint8_t uart, size_t len, uint8_t* buf) {
 PlatformI2C::PlatformI2C() {
 }
 
-uint32_t PlatformI2C::init(uint8_t bus, uint32_t baud, int8_t txPin, int8_t rxPin) {
+uint32_t PlatformI2C::init(uint8_t bus, uint32_t baud, int8_t sclPin, int8_t sdaPin) {
     i2c_inst_t* i2c = i2cs[bus];
 
     uint32_t act_baud = i2c_init(i2c, baud);
 
-    if (txPin >= 0) {
-        gpio_set_function(txPin, gpio_function::GPIO_FUNC_I2C);
+    if (sclPin >= 0) {
+        gpio_set_function(sclPin, gpio_function::GPIO_FUNC_I2C);
     }
 
-    if (rxPin >= 0) {
-        gpio_set_function(rxPin, gpio_function::GPIO_FUNC_I2C);
+    if (sdaPin >= 0) {
+        gpio_set_function(sdaPin, gpio_function::GPIO_FUNC_I2C);
     }
 
     return baud;
