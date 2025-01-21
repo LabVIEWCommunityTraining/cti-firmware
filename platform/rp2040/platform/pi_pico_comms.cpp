@@ -59,11 +59,11 @@ uint32_t PlatformUART::init(uint8_t uart, uint32_t baud, int8_t txPin, int8_t rx
     uart_term[uart] = lineTerm;
 
     if (txPin >= 0) {
-        gpio_set_function(txPin, gpio_function::GPIO_FUNC_UART);
+        gpio_set_function(txPin, GPIO_FUNC_UART);
     }
 
     if (rxPin >= 0) {
-        gpio_set_function(rxPin, gpio_function::GPIO_FUNC_UART);
+        gpio_set_function(rxPin, GPIO_FUNC_UART);
     }
 
     return baud;
@@ -112,11 +112,11 @@ uint32_t PlatformI2C::init(uint8_t bus, uint32_t baud, int8_t sclPin, int8_t sda
     uint32_t act_baud = i2c_init(i2c, baud);
 
     if (sclPin >= 0) {
-        gpio_set_function(sclPin, gpio_function::GPIO_FUNC_I2C);
+        gpio_set_function(sclPin, GPIO_FUNC_I2C);
     }
 
     if (sdaPin >= 0) {
-        gpio_set_function(sdaPin, gpio_function::GPIO_FUNC_I2C);
+        gpio_set_function(sdaPin, GPIO_FUNC_I2C);
     }
 
     return act_baud;
@@ -158,15 +158,15 @@ uint32_t PlatformSPI::init(uint8_t bus, uint32_t baud, uint8_t spiMode, uint8_t 
     spi_set_format(spi, bits, cpol, cpha, SPI_MSB_FIRST);
 
     if (mosiPin >= 0) {
-        gpio_set_function(mosiPin, gpio_function::GPIO_FUNC_SPI);
+        gpio_set_function(mosiPin, GPIO_FUNC_SPI);
     }
 
     if (misoPin >= 0) {
-        gpio_set_function(misoPin, gpio_function::GPIO_FUNC_SPI);
+        gpio_set_function(misoPin, GPIO_FUNC_SPI);
     }
 
     if (sckPin >= 0) {
-        gpio_set_function(sckPin, gpio_function::GPIO_FUNC_SPI);
+        gpio_set_function(sckPin, GPIO_FUNC_SPI);
     }
 
     return act_baud;

@@ -25,12 +25,12 @@ void CTI::PlatformIO::_statusLED(bool val) {
 }
 
 // Generated with CTI-Tools.lvlib
-LVBlock availableGPIOs = { 30,
+CTI::LVBlock availableGPIOs = { 30,
     { 0x00, 0x00, 0x00, 0x1A, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x1A, 0x1B, 0x1C }
 };
 
 CTI::LVBlock* CTI::PlatformDigital::Available() {
-    return &availableGPIO;
+    return &availableGPIOs;
 }
 
 void CTI::PlatformDigital::SetOutput(ChanIndex channel, bool value) {
@@ -65,7 +65,7 @@ void CTI::PlatformDigital::GetPull(ChanIndex channel, CTI::PlatformDigital::Pull
 }
 
 // Generated with CTI-Tools.lvlib
-LVBlock availableAIs = { 10,
+CTI::LVBlock availableAIs = { 10,
     { 0x00, 0x00, 0x00, 0x03, 0x00, 0x1A, 0x01, 0x1B, 0x02, 0x1C }
 };
 

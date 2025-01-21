@@ -1,3 +1,5 @@
+set (RP2040_PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
+
 function (configure_rp2040 RP2040_TARGET)
 
 #Sets the driver to use for stdio
@@ -28,12 +30,12 @@ endif ()
 
 #Add the source files specific to rp2040 to the build
 target_sources(${RP2040_TARGET} PRIVATE
-    platform/pi_pico_platform.cpp
-    platform/pi_pico_io.cpp
-    platform/pi_pico_timer.cpp
-    platform/pi_pico_pwm.cpp
-    platform/pi_pico_visa.cpp
-    platform/pi_pico_comms.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_platform.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_io.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_timer.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_pwm.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_visa.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_comms.cpp
 )
 
 # These are the components we're using from the pico-sdk
