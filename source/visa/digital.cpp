@@ -124,6 +124,14 @@ namespace Visa {
         return CommandResult::Success;
     }
 
+    QueryResult digital_available(ScpiParser* scpi) {
+        LVBlock* gpios = gPlatform.IO.Digital.Available();
+
+        PrintBlock(gpios->len, gpios->buffer);
+        
+        return QueryResult::Success;
+    }
+
     QueryResult digital_getPull(ScpiParser* scpi) {
         //DIGital:PIN#:PULL?
         ChanIndex channel = scpi->nodeNum(1);
@@ -158,6 +166,7 @@ namespace Visa {
     }
 
     void initDigitalCommands(Visa* visa) {
+        visa->addCommand("DIGital:AVAILable",      nullptr,              digital_available);
         visa->addCommand("DIGital:PIN#:DIRection", digital_setDirection, digital_getDirection);
         visa->addCommand("DIGital:PIN#:VALue",     digital_setValue,     digital_getValue);
         visa->addCommand("DIGital:PIN#:PULL",      digital_setPull,      digital_getPull);

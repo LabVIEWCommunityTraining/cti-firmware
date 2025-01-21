@@ -75,6 +75,14 @@ CommandResult spi_write(ScpiParser* scpi) {
     return CommandResult::SyntaxError;
 }
 
+QueryResult spi_available(ScpiParser* scpi) {
+    LVBlock* spis = gPlatform.SPI.Available();
+
+    PrintBlock(spis->len, spis->buffer);
+
+    return QueryResult::Success;
+}
+
 QueryResult spi_read(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
@@ -104,6 +112,9 @@ QueryResult spi_read(ScpiParser* scpi) {
 }
 
 void initSPICommands(Visa* visa) {
+
+    visa->addCommand("COMM:SPI:AVAILable", nullptr, spi_available);
+
     /**
      * COMM:SPI#:INIT <BAUD>,<MODE>,<BITS>,<MOSI>,<MISO>,<SCK>,<CS>
      */

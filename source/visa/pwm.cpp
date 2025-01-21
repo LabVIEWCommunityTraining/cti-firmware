@@ -99,6 +99,14 @@ namespace Visa {
         return QueryResult::Success;
     }
 
+    QueryResult pwm_available(ScpiParser* scpi) {
+        LVBlock* pwms = gPlatform.IO.PWM.Available();
+
+        PrintBlock(pwms->len, pwms->buffer);
+        
+        return QueryResult::Success;
+    }
+
     QueryResult pwm_get_freq(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
@@ -149,6 +157,7 @@ namespace Visa {
     }
 
     void initPWMCommands(Visa* visa) {
+        visa->addCommand("PWM:AVAILable", nullptr, pwm_available);
         visa->addCommand("PWM#:INIT", pwm_init, nullptr);
         visa->addCommand("PWM#:DUTY", pwm_set_duty, pwm_get_duty);
         visa->addCommand("PWM#:FREQ", pwm_set_freq, pwm_get_freq);

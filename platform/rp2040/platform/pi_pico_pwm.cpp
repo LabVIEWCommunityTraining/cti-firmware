@@ -12,6 +12,15 @@ namespace CTI {
     //store requested duty % to prevent value walks due to numeric precision, per slice
     float _duty[NUM_PWM_SLICES];
 
+    // Generated with CTI-Tools.lvlib
+    LVBlock availablePWMs = { 18,
+        { 0x00, 0x00, 0x00, 0x0E, 0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x1A, 0x1C }
+    };
+
+    LBVlock* PlatformPWM::Available() {
+        return &availablePWMs;
+    }
+
     bool PlatformPWM::InitPWM(ChanIndex gpio, bool phaseCorrect, bool enable) {
         //For simplicity, only support even numbered GPIO to only have 1 gpio per PWM config
         if (gpio & 1u == 1) {

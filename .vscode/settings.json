@@ -53,7 +53,19 @@
         "netfwd": "cpp",
         "optional": "cpp",
         "ratio": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "csignal": "cpp",
+        "cuchar": "cpp",
+        "forward_list": "cpp",
+        "set": "cpp",
+        "regex": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "sstream": "cpp",
+        "valarray": "cpp"
     },
     "cmake.configureOnOpen": false
 }

@@ -9,6 +9,14 @@ using namespace SCPI;
 const uint8_t uart_buf_len = 100;
 uint8_t uart_buf[uart_buf_len]; // extra byte to accomodate null termination
 
+QueryResult uart_avail(ScpiParser* scpi) {
+    LVBlock* uarts = gPlatform.UART.Available();
+
+    PrintBlock(uarts->len, uarts->buffer);
+
+    return QueryResult::Success;
+}
+
 CommandResult uart_init(ScpiParser* scpi) {
     uint8_t uart = scpi->nodeNum(1);
     if (uart < 0) {
@@ -105,6 +113,7 @@ QueryResult uart_read(ScpiParser* scpi) {
 }
 
 void initUartCommands(Visa* visa) {
+    visa->addCommand("COMM:UART:AVAILable",  nullptr, uart_avail);
     visa->addCommand("COMM:UART#:INIT", uart_init, nullptr);
     visa->addCommand("COMM:UART#:DATA", uart_write, uart_read);
 }

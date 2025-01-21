@@ -2,7 +2,8 @@
 #define platform_io_h_
 
 #include <stdio.h>
-#include <stdint.h>
+
+#include "types.h"
 
 namespace CTI {
 
@@ -19,6 +20,8 @@ public:
     void GetValue(ChanIndex channel, bool* value);
     void GetDirection(ChanIndex channel, bool* output);
     void GetPull(ChanIndex channel, PullDirection* dir);
+
+    LVBlock* Available();
 };
 
 class PlatformAnalog {
@@ -26,12 +29,9 @@ public:
 
     void EnableInput(ChanIndex channel);
     void GetInput(ChanIndex channel, uint16_t* value);
-};
 
-typedef enum {
-    Comms,
-    User
-} StatusSource;
+    LVBlock* Available();
+};
 
 class PlatformPWM {
 public:
@@ -45,7 +45,14 @@ public:
 
     float GetDuty(ChanIndex gpio);
     float GetFreq(ChanIndex gpio);
+
+    LVBlock* Available();
 };
+
+typedef enum {
+    Comms,
+    User
+} StatusSource;
 
 class PlatformIO {
 public:

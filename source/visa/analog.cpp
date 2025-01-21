@@ -14,6 +14,14 @@ namespace Visa {
         return CommandResult::Error;
     }
 
+    QueryResult analog_available(ScpiParser* scpi) {
+        LVBlock* adcs = gPlatform.IO.Analog.Available();
+
+        PrintBlock(adcs->len, adcs->buffer);
+
+        return QueryResult::Success;
+    }
+
     QueryResult analog_in_getValue(ScpiParser* scpi) {
         ChanIndex channel = scpi->nodeNum(1);
         if (channel < 0) {
@@ -40,9 +48,10 @@ namespace Visa {
     }
 
     void initAnalogCommands(Visa* visa) {
+        visa->addCommand("ANAlog:AVAILable",     nullptr,             analog_available);
         visa->addCommand("ANAlog:OUTput#:VALue", analog_out_setValue, nullptr);
-        visa->addCommand("ANAlog:INput#:VALue", nullptr, analog_in_getValue);
-        visa->addCommand("ANAlog:INput#:ENable", analog_in_enable, nullptr);
+        visa->addCommand("ANAlog:INput#:VALue",  nullptr,             analog_in_getValue);
+        visa->addCommand("ANAlog:INput#:ENable", analog_in_enable,    nullptr);
     }
 
 } //namespace Visa

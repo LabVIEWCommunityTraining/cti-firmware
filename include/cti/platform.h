@@ -3,6 +3,7 @@
 
 #include "version.h"
 
+#include "platform/types.h"
 #include "platform/io.h"
 #include "platform/comms.h"
 

@@ -68,6 +68,14 @@ CommandResult i2c_write(ScpiParser* scpi) {
     return CommandResult::SyntaxError;
 }
 
+QueryResult i2c_available(ScpiParser* scpi) {
+    LVBlock* i2cs = gPlatform.I2C.Available();
+
+    PrintBlock(i2cs->len, i2cs->buffer);
+    
+    return QueryResult::Success;
+}
+
 QueryResult i2c_read(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
@@ -97,6 +105,7 @@ QueryResult i2c_read(ScpiParser* scpi) {
 }
 
 void initI2CCommands(Visa* visa) {
+    visa->addCommand("COMM:I2C:AVAILable", nullptr, i2c_available);
     visa->addCommand("COMM:I2C#:INIT", i2c_init, nullptr);
     visa->addCommand("COMM:I2C#:DATA", i2c_write, i2c_read);
 }
