@@ -65,6 +65,7 @@ namespace Visa {
     }
 
     CommandResult SCPI_CoreCls(ScpiParser* scpi) {
+        scpi->clearErrors();
 
         return CommandResult::Success;
     }
@@ -132,6 +133,17 @@ namespace Visa {
         return CommandResult::Success;
     }
 
+    QueryResult SCPI_SystErr(ScpiParser* scpi) {
+        int16_t code;
+        char* str;
+
+        scpi->dequeueError(&code, &str);
+
+        gPlatform.IO.Printf("%d, %s\n", code, str);
+
+        return QueryResult::Success;
+    }
+
     void initCommonCommands(Visa* visa) {
         visa->addCommand("*CLS", SCPI_CoreCls, nullptr);
         visa->addCommand("*ESE", SCPI_CoreEse, SCPI_CoreEseQ);
@@ -143,6 +155,8 @@ namespace Visa {
         visa->addCommand("*STB", nullptr, SCPI_CoreStbQ);
         //visa->addCommand({"*TST?", My_CoreTstQ, nullptr);
         visa->addCommand("*WAI", SCPI_CoreWai, nullptr);
+
+        visa->addCommand("SYSTem:ERRor", nullptr, SCPI_SystErr);
 
         // SET:LED is a common command as gPlatform has a status LED abstraction
         visa->addCommand("STATus:USER", scpi_LED, nullptr);

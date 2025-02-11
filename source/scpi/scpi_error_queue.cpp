@@ -49,7 +49,7 @@ bool ScpiErrorQueue::enqueue(int16_t code, const char* str) {
     return true;
 }
 
-bool ScpiErrorQueue::dequeue(int16_t* code, const char ** str) {
+bool ScpiErrorQueue::dequeue(int16_t* code, char ** str) {
     if (_empty) {
         if (_overflow) {
             _overflow = false;

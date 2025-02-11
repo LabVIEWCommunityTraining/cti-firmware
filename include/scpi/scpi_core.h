@@ -134,7 +134,7 @@ namespace SCPI {
         ScpiErrorQueue();
         
         bool enqueue(int16_t code, const char* str);
-        bool dequeue(int16_t* code, const char ** str);
+        bool dequeue(int16_t* code, char ** str);
 
         void clear();
         
@@ -274,6 +274,14 @@ namespace SCPI {
         }
 
         bool enqueueError(int16_t code, const char* str);
+
+        bool dequeueError(int16_t* code, char** str) {
+            return _err.dequeue(code, str);
+        }
+
+        void clearErrors() {
+            _err.clear();
+        }
 
         void reset();
 
