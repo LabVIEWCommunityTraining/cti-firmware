@@ -11,6 +11,7 @@ namespace Visa {
     //scpi_result_t scpi_LED(scpi_t * context)
 
     CommandResult analog_out_setValue(ScpiParser* scpi) {
+        errNoCommand(scpi);
         return CommandResult::Error;
     }
 
@@ -25,6 +26,7 @@ namespace Visa {
     QueryResult analog_in_getValue(ScpiParser* scpi) {
         ChanIndex channel = scpi->nodeNum(1);
         if (channel < 0) {
+            errSuffixOutOfRange(scpi);
             return QueryResult::Error;
         }
 
@@ -39,7 +41,8 @@ namespace Visa {
     CommandResult analog_in_enable(ScpiParser* scpi) {
         ChanIndex channel = scpi->nodeNum(1);
         if (channel < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         gPlatform.IO.Analog.EnableInput(channel);

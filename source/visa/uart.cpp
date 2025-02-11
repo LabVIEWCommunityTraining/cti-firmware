@@ -6,7 +6,7 @@ namespace Visa {
 
 using namespace SCPI;
 
-const uint8_t uart_buf_len = 100;
+const uint8_t uart_buf_len = 255;
 uint8_t uart_buf[uart_buf_len]; // extra byte to accomodate null termination
 
 QueryResult uart_avail(ScpiParser* scpi) {
@@ -20,7 +20,8 @@ QueryResult uart_avail(ScpiParser* scpi) {
 CommandResult uart_init(ScpiParser* scpi) {
     uint8_t uart = scpi->nodeNum(1);
     if (uart < 0) {
-        return CommandResult::MissingParam;
+        errSuffixOutOfRange(scpi);
+        return CommandResult::Error;
     }
 
     uint32_t baud;
@@ -50,7 +51,8 @@ CommandResult uart_init(ScpiParser* scpi) {
 CommandResult uart_write(ScpiParser* scpi) {
     uint8_t uart = scpi->nodeNum(1);
     if (uart < 0) {
-        return CommandResult::MissingParam;
+        errSuffixOutOfRange(scpi);
+        return CommandResult::Error;
     }
 
     int len = 0;
@@ -73,6 +75,7 @@ CommandResult uart_write(ScpiParser* scpi) {
 QueryResult uart_read(ScpiParser* scpi) {
     uint8_t uart = scpi->nodeNum(1);
     if (uart < 0) {
+        errSuffixOutOfRange(scpi);
         return QueryResult::Error;
     }
 
@@ -87,10 +90,11 @@ QueryResult uart_read(ScpiParser* scpi) {
 
         //binary mode, read into buffer and print binary block
         if (scpi->parseInt(len) != ParseResult::Success) {
-            return QueryResult::Error;
+            return QueryResult::MissingParam;
         }
         
         if (len > uart_buf_len) {
+            errParamOutOfRange(scpi);
             return QueryResult::Error;
         }
 

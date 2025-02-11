@@ -29,7 +29,8 @@ namespace Visa {
         // gPlatform.IO.Printf("channel: %d\n", channel);
 
         if (channel < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         bool val;
@@ -49,6 +50,7 @@ namespace Visa {
         ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
+            errSuffixOutOfRange(scpi);
             return QueryResult::Error;
         }
 
@@ -70,7 +72,8 @@ namespace Visa {
         ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         int32_t choice;
@@ -89,6 +92,7 @@ namespace Visa {
         ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
+            errSuffixOutOfRange(scpi);
             return QueryResult::Error;
         }
 
@@ -110,7 +114,8 @@ namespace Visa {
         ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         int32_t choice;
@@ -137,6 +142,7 @@ namespace Visa {
         ChanIndex channel = scpi->nodeNum(1);
 
         if (channel < 0) {
+            errSuffixOutOfRange(scpi);
             return QueryResult::Error;
         }
 

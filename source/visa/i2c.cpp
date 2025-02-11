@@ -6,13 +6,14 @@ namespace Visa {
 
 using namespace SCPI;
 
-const uint8_t i2c_buf_len = 100;
+const uint8_t i2c_buf_len = 255;
 uint8_t i2c_buf[i2c_buf_len + 1]; // extra byte to accomodate null termination
 
 CommandResult i2c_init(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
-        return CommandResult::MissingParam;
+        errSuffixOutOfRange(scpi);
+        return CommandResult::Error;
     }
 
     uint32_t baud;
@@ -39,7 +40,8 @@ CommandResult i2c_init(ScpiParser* scpi) {
 CommandResult i2c_write(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
-        return CommandResult::MissingParam;
+        errSuffixOutOfRange(scpi);
+        return CommandResult::Error;
     }
 
     int len = 0;
@@ -79,6 +81,7 @@ QueryResult i2c_available(ScpiParser* scpi) {
 QueryResult i2c_read(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
+        errSuffixOutOfRange(scpi);
         return QueryResult::Error;
     }
 
@@ -87,10 +90,15 @@ QueryResult i2c_read(ScpiParser* scpi) {
     bool nostop = false;
 
     if (scpi->parseInt(addr) != ParseResult::Success) {
-        return QueryResult::Error;
+        return QueryResult::MissingParam;
     }
 
-    if (scpi->parseInt(len) != ParseResult::Success || len > i2c_buf_len) {
+    if (scpi->parseInt(len) != ParseResult::Success) {
+        return QueryResult::MissingParam;
+    }
+
+    if (len > i2c_buf_len) {
+        errParamOutOfRange(scpi);
         return QueryResult::Error;
     }
 

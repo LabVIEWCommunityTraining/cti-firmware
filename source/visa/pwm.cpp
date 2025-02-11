@@ -9,7 +9,8 @@ namespace Visa {
         ChanIndex gpio = scpi->nodeNum(0);
 
         if (gpio < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         bool phaseCorrect = false;
@@ -22,6 +23,7 @@ namespace Visa {
         }
 
         if (!gPlatform.IO.PWM.InitPWM(gpio, phaseCorrect, enable)) {
+            errCommand(scpi);
             return CommandResult::Error;
         }
 
@@ -32,7 +34,8 @@ namespace Visa {
         ChanIndex gpio = scpi->nodeNum(0);
 
         if (gpio < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         float duty;
@@ -42,6 +45,7 @@ namespace Visa {
         }
 
         if (!gPlatform.IO.PWM.SetDuty(gpio, duty)) {
+            errCommand(scpi);
             return CommandResult::Error;
         }
 
@@ -51,7 +55,8 @@ namespace Visa {
     CommandResult pwm_set_freq(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         float freq;
@@ -61,6 +66,7 @@ namespace Visa {
         }
 
         if (!gPlatform.IO.PWM.SetFreq(gpio, freq)) {
+            errCommand(scpi);
             return CommandResult::Error;
         }
 
@@ -70,7 +76,8 @@ namespace Visa {
     CommandResult pwm_set_top(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         uint32_t top;
@@ -80,6 +87,7 @@ namespace Visa {
         }
 
         if (!gPlatform.IO.PWM.SetTop(gpio, top)) {
+            errCommand(scpi);
             return CommandResult::Error;
         }
 
@@ -89,6 +97,7 @@ namespace Visa {
     QueryResult pwm_get_duty(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
             return QueryResult::Error;
         }
 
@@ -110,6 +119,7 @@ namespace Visa {
     QueryResult pwm_get_freq(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
             return QueryResult::Error;
         }
 
@@ -123,7 +133,8 @@ namespace Visa {
     CommandResult pwm_set_enable(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         bool enable;
@@ -140,7 +151,8 @@ namespace Visa {
     CommandResult pwm_set_divider(ScpiParser* scpi) {
         ChanIndex gpio = scpi->nodeNum(0);
         if (gpio < 0) {
-            return CommandResult::MissingParam;
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         float divider;
@@ -150,6 +162,7 @@ namespace Visa {
         }
 
         if (!gPlatform.IO.PWM.SetDivider(gpio, divider)) {
+            errCommand(scpi);
             return CommandResult::Error;
         }
 

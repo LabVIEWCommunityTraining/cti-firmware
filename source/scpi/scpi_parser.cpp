@@ -1,4 +1,5 @@
 #include "scpi/scpi_core.h"
+#include "scpi/scpi_errors.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -255,7 +256,7 @@ namespace SCPI {
 
     ParserStatus ScpiParser::invokeNode() {
         if (_curNode == nullptr) {
-            gPlatform.IO.Print("\ncurNode not set, aborting!\n\n");
+            errUndefinedHeader(this);
             return ParserStatus::Unknown;
         }
 
@@ -266,7 +267,7 @@ namespace SCPI {
 
             if (res != QueryResult::Success) {
                 if (res == QueryResult::NoHandler) {
-                    return ParserStatus::UnknownCommand;
+                    errNoQuery(this);
                 }
 
                 return ParserStatus::Unknown;
@@ -277,6 +278,14 @@ namespace SCPI {
             if (res != CommandResult::Success) {
                 if (res == CommandResult::NoHandler) {
                     return ParserStatus::UnknownCommand;
+                } else if (res == CommandResult::MissingParam) {
+                    errMissingParam(this);
+                } else if (res == CommandResult::UnexpectedParam) {
+                    errTooManyParams(this);
+                } else if (res == CommandResult::SyntaxError) {
+                    errSyntax(this);
+                } else if (res == CommandResult::NoHandler) {
+                    errNoCommand(this);
                 }
 
                 return ParserStatus::Unknown;

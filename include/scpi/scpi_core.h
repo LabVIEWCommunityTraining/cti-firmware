@@ -11,6 +11,10 @@
 #define SCPI_ERROR_QUEUE_SIZE 10
 #endif
 
+#ifndef SCPI_ERROR_STR_SIZE
+#define SCPI_ERROR_STR_SIZE 256
+#endif
+
 namespace CTI {
 namespace SCPI {
 
@@ -27,14 +31,16 @@ namespace SCPI {
         Success,
         MissingParam,
         UnexpectedParam,
-        SyntaxError,
+        SyntaxError,        // Try and avoid in favor of more specificity
         NoHandler,
-        Error
+        Error               // Used when a more specific error has been enqueued
     };
 
     enum class QueryResult {
         Success,
         NoHandler,
+        MissingParam,
+        UnexpectedParam,
         Error
     };
 
@@ -120,7 +126,7 @@ namespace SCPI {
 
     typedef struct {
         int16_t code;
-        const char* str;
+        char str[SCPI_ERROR_STR_SIZE];
     } ScpiError;
 
     class ScpiErrorQueue {
@@ -270,6 +276,14 @@ namespace SCPI {
         bool enqueueError(int16_t code, const char* str);
 
         void reset();
+
+        int16_t position() {
+            return _paramPos;
+        }
+
+        char curChar() {
+            return _buf[_paramPos];
+        }
 
         ScpiNode* curNode() {
             return _curNode;

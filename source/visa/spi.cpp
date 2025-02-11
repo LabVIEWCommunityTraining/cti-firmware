@@ -6,13 +6,14 @@ namespace Visa {
 
 using namespace SCPI;
 
-const uint8_t spi_buf_len = 100;
+const uint8_t spi_buf_len = 255;
 uint8_t spi_buf[spi_buf_len + 1]; // extra byte to accomodate null termination
 
 CommandResult spi_init(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
-        return CommandResult::MissingParam;
+        errSuffixOutOfRange(scpi);
+        return CommandResult::Error;
     }
 
     uint32_t baud;
@@ -54,7 +55,8 @@ CommandResult spi_init(ScpiParser* scpi) {
 CommandResult spi_write(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
-        return CommandResult::MissingParam;
+        errSuffixOutOfRange(scpi);
+        return CommandResult::Error;
     }
 
     int len = 0;
@@ -72,7 +74,8 @@ CommandResult spi_write(ScpiParser* scpi) {
         return CommandResult::Success;
     }
 
-    return CommandResult::SyntaxError;
+    errParamOutOfRange(scpi);
+    return CommandResult::Error;
 }
 
 QueryResult spi_available(ScpiParser* scpi) {
@@ -86,6 +89,7 @@ QueryResult spi_available(ScpiParser* scpi) {
 QueryResult spi_read(ScpiParser* scpi) {
     uint8_t bus = scpi->nodeNum(1);
     if (bus < 0) {
+        errSuffixOutOfRange(scpi);
         return QueryResult::Error;
     }
 
@@ -94,12 +98,13 @@ QueryResult spi_read(ScpiParser* scpi) {
     int dataLen = 0;
 
     if (scpi->parseInt(len) != ParseResult::Success) {
-        return QueryResult::Error;
+        return QueryResult::MissingParam;
     }  
 
     scpi->parseBlock(&data, &dataLen);
 
     if (dataLen > 0 && dataLen != len) {
+        errParamOutOfRange(scpi);
         return QueryResult::Error;
     }
 
