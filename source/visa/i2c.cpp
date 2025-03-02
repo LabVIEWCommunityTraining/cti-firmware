@@ -74,6 +74,7 @@ QueryResult i2c_available(ScpiParser* scpi) {
     LVBlock* i2cs = gPlatform.I2C.Available();
 
     PrintBlock(i2cs->len, i2cs->buffer);
+    gPlatform.IO.Print('\n');
     
     return QueryResult::Success;
 }

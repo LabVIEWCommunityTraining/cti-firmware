@@ -133,6 +133,7 @@ namespace Visa {
         LVBlock* gpios = gPlatform.IO.Digital.Available();
 
         PrintBlock(gpios->len, gpios->buffer);
+        gPlatform.IO.Print('\n');
         
         return QueryResult::Success;
     }

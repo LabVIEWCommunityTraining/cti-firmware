@@ -224,7 +224,7 @@ namespace Visa {
         size_t len2 = len;
         size_t digits = 1;
 
-        while (len2 > 10) {
+        while (len2 >= 10) {
             digits++;
             len2 /= 10;
         }

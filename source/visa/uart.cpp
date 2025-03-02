@@ -13,6 +13,7 @@ QueryResult uart_avail(ScpiParser* scpi) {
     LVBlock* uarts = gPlatform.UART.Available();
 
     PrintBlock(uarts->len, uarts->buffer);
+    gPlatform.IO.Print('\n');
 
     return QueryResult::Success;
 }

@@ -112,6 +112,7 @@ namespace Visa {
         LVBlock* pwms = gPlatform.IO.PWM.Available();
 
         PrintBlock(pwms->len, pwms->buffer);
+        gPlatform.IO.Print('\n');
         
         return QueryResult::Success;
     }

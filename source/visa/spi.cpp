@@ -82,6 +82,7 @@ QueryResult spi_available(ScpiParser* scpi) {
     LVBlock* spis = gPlatform.SPI.Available();
 
     PrintBlock(spis->len, spis->buffer);
+    gPlatform.IO.Print('\n');
 
     return QueryResult::Success;
 }

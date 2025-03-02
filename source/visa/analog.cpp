@@ -19,6 +19,7 @@ namespace Visa {
         LVBlock* adcs = gPlatform.IO.Analog.Available();
 
         PrintBlock(adcs->len, adcs->buffer);
+        gPlatform.IO.Print('\n');
 
         return QueryResult::Success;
     }
