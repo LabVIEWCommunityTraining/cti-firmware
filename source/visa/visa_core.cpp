@@ -222,15 +222,18 @@ namespace Visa {
 
     SCPI::QueryResult PrintBlock(size_t len, const uint8_t *data) {
         size_t len2 = len;
-        size_t digits = 1;
+        size_t digits = 1; // all lens are at least length 1 in digits
 
+        //Determine the additional # of digits in the len
         while (len2 >= 10) {
             digits++;
             len2 /= 10;
         }
 
+        //Arbitrary block header #<LenDigitCount><Len>
         gPlatform.IO.Printf("#%d%d", digits, len);
 
+        //iterate over data portion of block and send as-is
         for (size_t i = 0; i < len; ++i) {
             gPlatform.IO.Print(data[i]);
         }

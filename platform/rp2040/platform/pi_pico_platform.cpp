@@ -20,6 +20,9 @@ void Platform::Preinit() {
     //TODO: Switch between UART or USB based on defines from build config
     bool usb_init = stdio_usb_init();
 
+    //disable automatically adding CR before LF
+    stdio_set_translate_crlf(&stdio_usb, false);
+
     if (!usb_init) {
         while (1) {
             status = !status;
