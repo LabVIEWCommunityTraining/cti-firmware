@@ -64,8 +64,8 @@ CommandResult uart_write(ScpiParser* scpi) {
 
     if (len > 0) {
         gPlatform.UART.write(uart, len, (uint8_t*) buf);
-        gPlatform.IO.Print(len, buf);
-        gPlatform.IO.Print('\n');
+        //gPlatform.IO.Print(len, buf);
+        //gPlatform.IO.Print('\n');
 
         return CommandResult::Success;
     }
@@ -84,15 +84,14 @@ QueryResult uart_read(ScpiParser* scpi) {
     uint8_t term = gPlatform.UART.termChar(uart);
     uint8_t byte = 0;
 
-    if (term == 0) {
-        //send back false for line mode response
+    if (scpi->parseInt(len) != ParseResult::Success) {
+        return QueryResult::MissingParam;
+    }
+
+    if (len > 0) {
+        //send back false for line mode response, will send block of binary data
         gPlatform.IO.Print('0');
         gPlatform.IO.Print(',');
-
-        //binary mode, read into buffer and print binary block
-        if (scpi->parseInt(len) != ParseResult::Success) {
-            return QueryResult::MissingParam;
-        }
         
         if (len > uart_buf_len) {
             errParamOutOfRange(scpi);
@@ -102,7 +101,7 @@ QueryResult uart_read(ScpiParser* scpi) {
         len = gPlatform.UART.read(uart, len, uart_buf);
         PrintBlock(len, uart_buf);
         gPlatform.IO.Print('\n');
-    } else {
+    } else if (term != 0) {
         //ascii line mode, echo bytes until term char is seen
         //send back true for line mode response
         gPlatform.IO.Print('1');
@@ -112,6 +111,8 @@ QueryResult uart_read(ScpiParser* scpi) {
             gPlatform.UART.read(uart, 1, &byte);
             gPlatform.IO.Print((char)byte);
         }
+    } else {
+        return QueryResult::UnexpectedParam;
     }
 
     return QueryResult::Success;
