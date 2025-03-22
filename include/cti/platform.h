@@ -3,6 +3,10 @@
 
 #include "version.h"
 
+#include "platform/types.h"
+#include "platform/io.h"
+#include "platform/comms.h"
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -37,75 +41,7 @@ private:
     size_t _totalAllocated = 0;
 };
 
-class PlatformDigital {
-public:
-    typedef enum { None, Up, Down, Both } PullDirection;
 
-    void SetOutput(int channel, bool value);
-    void SetDirection(int channel, bool output);
-    void SetPull(int channel, PullDirection dir);
-
-    void GetValue(int channel, bool* value);
-    void GetDirection(int channel, bool* output);
-    void GetPull(int channel, PullDirection* dir);
-};
-
-class PlatformAnalog {
-public:
-
-    void EnableInput(int channel);
-    void GetInput(int channel, uint16_t* value);
-};
-
-typedef enum {
-    Comms,
-    User
-} StatusSource;
-
-class PlatformPWM {
-public:
-    bool InitPWM(int gpio, bool phaseCorrect, bool enable);
-    bool SetDuty(int gpio, float dutyPercent);
-    bool SetFreq(int gpio, float freq);
-    void SetEnable(int gpio, bool enable);
-
-    bool SetTop(int gpio, uint16_t top);
-    bool SetDivider(int gpio, float divider);
-
-    float GetDuty(int gpio);
-    float GetFreq(int gpio);
-};
-
-class PlatformIO {
-public:
-    PlatformIO();
-    void Print(int32_t len, const char* str);
-    void Print(const char* str);
-    void Print(char c);
-    void Printf(const char* format, ...) const;
-    void Flush();
-
-    int FGetCtimeout(uint32_t timeout_us) { if (!timeout_us) { return FGetC(); } else { return _getchar_timeout_us(timeout_us);}}
-    int FGetC() { return fgetc(stdin); };
-    int FPutC(int c) { return fputc(c, stdout); };
-    void ReadStdin(char** buffer, size_t maxLen);
-
-    void InitStatusLED();
-    void StatusLED(bool val, StatusSource source = User);
-    void SetStatusSource(StatusSource source) { _statusSource = source; };
-    StatusSource GetStatusSource() { return _statusSource; };
-
-    PlatformDigital Digital;
-    PlatformAnalog Analog;
-    PlatformPWM PWM;
-
-private:
-    char _fgetc(FILE *file);
-    int _getchar_timeout_us(uint32_t timeout_us);
-    void _statusLED(bool val);
-
-    StatusSource _statusSource;
-};
 
 class PlatformEngine {
 public:
@@ -135,6 +71,9 @@ public:
     PlatformMemory Mem;
     PlatformIO IO;
     PlatformTimer Timer;
+    PlatformUART UART;
+    PlatformI2C I2C;
+    PlatformSPI SPI;
     PlatformEngine* pEngine;
 
 private:

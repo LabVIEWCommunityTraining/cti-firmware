@@ -31,3 +31,5 @@
 *.out
 *.app
 /platform/rp2040/build
+/platform/avr/build
+/build

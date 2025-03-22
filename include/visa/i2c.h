@@ -1,14 +1,14 @@
-#ifndef visa_pwm_h_
-#define visa_pwm_h_
+#ifndef i2c_h_
+#define i2c_h_
 
 #include "visa/visa_core.h"
 
 namespace CTI {
 namespace Visa {
 
-    void initPWMCommands(Visa* visa);
+    void initI2CCommands(Visa* visa);
 
 } //namespace Visa
 } //namespace CTI
 
-#endif // visa_pwm_h_
+#endif //i2c_h_

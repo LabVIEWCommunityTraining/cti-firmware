@@ -12,7 +12,16 @@ namespace CTI {
     //store requested duty % to prevent value walks due to numeric precision, per slice
     float _duty[NUM_PWM_SLICES];
 
-    bool PlatformPWM::InitPWM(int gpio, bool phaseCorrect, bool enable) {
+    // Generated with CTI-Tools.lvlib
+    LVBlock availablePWMs = { 18,
+        { 0x00, 0x00, 0x00, 0x0E, 0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x1A, 0x1C }
+    };
+
+    LVBlock* PlatformPWM::Available() {
+        return &availablePWMs;
+    }
+
+    bool PlatformPWM::InitPWM(ChanIndex gpio, bool phaseCorrect, bool enable) {
         //For simplicity, only support even numbered GPIO to only have 1 gpio per PWM config
         if (gpio & 1u == 1) {
             return false;
@@ -36,7 +45,7 @@ namespace CTI {
         return true;
     }
 
-    bool PlatformPWM::SetDuty(int gpio, float dutyPercent) {
+    bool PlatformPWM::SetDuty(ChanIndex gpio, float dutyPercent) {
         if (dutyPercent < 0.0f || dutyPercent > 1.0f) return false;
 
         uint slice = pwm_gpio_to_slice_num(gpio);
@@ -54,7 +63,7 @@ namespace CTI {
         return true;
     }
 
-    bool PlatformPWM::SetTop(int gpio, uint16_t top) {
+    bool PlatformPWM::SetTop(ChanIndex gpio, uint16_t top) {
         uint slice = pwm_gpio_to_slice_num(gpio);
         uint chan = pwm_gpio_to_channel(gpio);
         uint16_t level = 0;
@@ -71,7 +80,7 @@ namespace CTI {
         return true;
     }
 
-    bool PlatformPWM::SetDivider(int gpio, float divider) {
+    bool PlatformPWM::SetDivider(ChanIndex gpio, float divider) {
         uint slice = pwm_gpio_to_slice_num(gpio);
 
         if (divider < 1.0f || 256.0f <= divider) {
@@ -83,18 +92,18 @@ namespace CTI {
         return true;
     }
 
-    void PlatformPWM::SetEnable(int gpio, bool enable) {
+    void PlatformPWM::SetEnable(ChanIndex gpio, bool enable) {
         uint slice = pwm_gpio_to_slice_num(gpio);
         pwm_set_enabled(slice, enable);
     }
 
-    float PlatformPWM::GetDuty(int gpio) {
+    float PlatformPWM::GetDuty(ChanIndex gpio) {
         uint slice = pwm_gpio_to_slice_num(gpio);
         float duty = (float)pwm_hw->slice[slice].cc / (float)pwm_hw->slice[slice].top;
         return duty;
     }
 
-    float PlatformPWM::GetFreq(int gpio) {
+    float PlatformPWM::GetFreq(ChanIndex gpio) {
         uint slice = pwm_gpio_to_slice_num(gpio);
         uint8_t phaseCorrect = !!(pwm_hw->slice[slice].csr & PWM_CH0_CSR_PH_CORRECT_BITS);
         float div = pwm_hw->slice[slice].div * 0.0625f;
@@ -103,7 +112,7 @@ namespace CTI {
         return f;
     }
 
-    bool PlatformPWM::SetFreq(int gpio, float freq) {
+    bool PlatformPWM::SetFreq(ChanIndex gpio, float freq) {
         //Want to determine clock divider to maximize TOP
         uint32_t fxp = 16; // default to 1.0f value, 4 bits of decimal LSB = 1/16
         uint16_t top = 65535;

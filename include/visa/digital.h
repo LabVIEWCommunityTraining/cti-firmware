@@ -1,7 +1,7 @@
 #ifndef visa_digital_h_
 #define visa_digital_h_
 
-#include "visa/core.h"
+#include "visa/visa_core.h"
 
 namespace CTI {
 namespace Visa {

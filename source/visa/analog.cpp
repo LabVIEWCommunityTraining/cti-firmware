@@ -1,4 +1,4 @@
-#include "visa/core.h"
+#include "visa/visa_core.h"
 #include "cti/platform.h"
 
 #include <string.h>
@@ -6,43 +6,56 @@
 namespace CTI {
 namespace Visa {
 
+    using namespace SCPI;
+
     //scpi_result_t scpi_LED(scpi_t * context)
 
-    scpi_result_t analog_out_setValue(scpi_t * context) {
-        return SCPI_RES_ERR;
+    CommandResult analog_out_setValue(ScpiParser* scpi) {
+        errNoCommand(scpi);
+        return CommandResult::Error;
     }
 
-    scpi_result_t analog_in_getValue(scpi_t * context) {
-        int32_t channel;
-        uint16_t val;
+    QueryResult analog_available(ScpiParser* scpi) {
+        LVBlock* adcs = gPlatform.IO.Analog.Available();
 
-        if (!SCPI_ParamInt(context, &channel, true)) {
-            return SCPI_RES_ERR;
+        PrintBlock(adcs->len, adcs->buffer);
+        gPlatform.IO.Print('\n');
+
+        return QueryResult::Success;
+    }
+
+    QueryResult analog_in_getValue(ScpiParser* scpi) {
+        ChanIndex channel = scpi->nodeNum(1);
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return QueryResult::Error;
         }
 
+        uint16_t val;
         gPlatform.IO.Analog.GetInput(channel, &val);
 
-        gPlatform.IO.Printf("%d", val);
+        gPlatform.IO.Printf("%d\n", val);
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t analog_in_enable(scpi_t * context) {
-        int32_t channel;
-        
-        if (!SCPI_ParamInt(context, &channel, true)) {
-            return SCPI_RES_ERR;
+    CommandResult analog_in_enable(ScpiParser* scpi) {
+        ChanIndex channel = scpi->nodeNum(1);
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
         gPlatform.IO.Analog.EnableInput(channel);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
     void initAnalogCommands(Visa* visa) {
-        visa->addCommand({"ANAlog:OUTput:VALue", analog_out_setValue, 0});
-        visa->addCommand({"ANAlog[:INput]:VALue?", analog_in_getValue, 0});
-        visa->addCommand({"ANAlog[:INput]:ENable", analog_in_enable, 0});
+        visa->addCommand("ANAlog:AVAILable",     nullptr,             analog_available);
+        visa->addCommand("ANAlog:OUTput#:VALue", analog_out_setValue, nullptr);
+        visa->addCommand("ANAlog:INput#:VALue",  nullptr,             analog_in_getValue);
+        visa->addCommand("ANAlog:INput#:ENable", analog_in_enable,    nullptr);
     }
 
 } //namespace Visa

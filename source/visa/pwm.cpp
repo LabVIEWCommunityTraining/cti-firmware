@@ -1,165 +1,183 @@
-#include "visa/core.h"
+#include "visa/visa_core.h"
 
 namespace CTI {
 namespace Visa {
 
-    scpi_result_t pwm_init(scpi_t* context) {
-        int32_t gpio;
+    using namespace SCPI;
+
+    CommandResult pwm_init(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
+        }
+
         bool phaseCorrect = false;
         bool enable = false;
 
-        if (!SCPI_ParamInt32(context, &gpio, true)) {
-            return SCPI_RES_ERR;
-        }
+        ParseResult res = scpi->parseBool(phaseCorrect); //optional, don't care if not present
 
-        if (SCPI_ParamBool(context, &phaseCorrect, false)) {
-            SCPI_ParamBool(context, &enable, false);
+        if (res == ParseResult::Success) {
+            scpi->parseBool(enable);
         }
 
         if (!gPlatform.IO.PWM.InitPWM(gpio, phaseCorrect, enable)) {
-            SCPI_ErrorPushEx(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE, 0, 0);
-            return SCPI_RES_ERR;
+            errCommand(scpi);
+            return CommandResult::Error;
         }
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t pwm_set_duty(scpi_t* context) {
-        int32_t gpio;
-        float duty;
+    CommandResult pwm_set_duty(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
 
-        if (!SCPI_ParamInt32(context, &gpio, true)) {
-            return SCPI_RES_ERR;
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
-        if (!SCPI_ParamFloat(context, &duty, true)) {
-            return SCPI_RES_ERR;
+        float duty;
+
+        if (scpi->parseReal(duty) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         if (!gPlatform.IO.PWM.SetDuty(gpio, duty)) {
-            SCPI_ErrorPushEx(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE, 0, 0);
-            return SCPI_RES_ERR;
+            errCommand(scpi);
+            return CommandResult::Error;
         }
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t pwm_set_freq(scpi_t* context) {
-        int32_t gpio;
-        float freq;
-
-        if (!SCPI_ParamInt32(context, &gpio, true)) {
-            return SCPI_RES_ERR;
+    CommandResult pwm_set_freq(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
-        if (!SCPI_ParamFloat(context, &freq, true)) {
-            return SCPI_RES_ERR;
+        float freq;
+
+        if (scpi->parseReal(freq) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         if (!gPlatform.IO.PWM.SetFreq(gpio, freq)) {
-            SCPI_ErrorPushEx(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE, 0, 0);
-            return SCPI_RES_ERR;
+            errCommand(scpi);
+            return CommandResult::Error;
         }
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t pwm_set_top(scpi_t* context) {
-        int32_t gpio;
-        uint32_t top;
-
-        if (!SCPI_ParamInt32(context, &gpio, true)) {
-            return SCPI_RES_ERR;
+    CommandResult pwm_set_top(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
-        if (!SCPI_ParamUInt32(context, &top, true)) {
-            return SCPI_RES_ERR;
+        uint32_t top;
+
+        if (scpi->parseInt(top) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         if (!gPlatform.IO.PWM.SetTop(gpio, top)) {
-            SCPI_ErrorPushEx(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE, 0, 0);
-            return SCPI_RES_ERR;
+            errCommand(scpi);
+            return CommandResult::Error;
         }
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t pwm_get_duty(scpi_t * context) {
-        int32_t gpio;
-        float duty;
+    QueryResult pwm_get_duty(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return QueryResult::Error;
+        }
+
+        float duty = gPlatform.IO.PWM.GetDuty(gpio);
+
+        gPlatform.IO.Printf("%f\n", duty);
+
+        return QueryResult::Success;
+    }
+
+    QueryResult pwm_available(ScpiParser* scpi) {
+        LVBlock* pwms = gPlatform.IO.PWM.Available();
+
+        PrintBlock(pwms->len, pwms->buffer);
+        gPlatform.IO.Print('\n');
         
-        if (!SCPI_ParamInt(context, &gpio, true))  {
-            return SCPI_RES_ERR;
-        }
-
-        duty = gPlatform.IO.PWM.GetDuty(gpio);
-
-        gPlatform.IO.Printf("%f", duty);
-
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t pwm_get_freq(scpi_t * context) {
-        int32_t gpio;
-        float freq;
-        
-        if (!SCPI_ParamInt(context, &gpio, true))  {
-            return SCPI_RES_ERR;
+    QueryResult pwm_get_freq(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return QueryResult::Error;
         }
 
-        freq = gPlatform.IO.PWM.GetFreq(gpio);
+        float freq = gPlatform.IO.PWM.GetFreq(gpio);
 
-        gPlatform.IO.Printf("%f", freq);
+        gPlatform.IO.Printf("%f\n", freq);
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t pwm_set_enable(scpi_t* context) {
-        int32_t gpio;
+    CommandResult pwm_set_enable(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
+        }
+
         bool enable;
 
-        if (!SCPI_ParamInt32(context, &gpio, true)) {
-            return SCPI_RES_ERR;
-        }
-
-        if (!SCPI_ParamBool(context, &enable, true)) {
-            return SCPI_RES_ERR;
+        if (scpi->parseBool(enable) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.PWM.SetEnable(gpio, enable);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t pwm_set_divider(scpi_t* context) {
-        int32_t gpio;
-        float divider;
-
-        if (!SCPI_ParamInt32(context, &gpio, true)) {
-            return SCPI_RES_ERR;
+    CommandResult pwm_set_divider(ScpiParser* scpi) {
+        ChanIndex gpio = scpi->nodeNum(0);
+        if (gpio < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
-        if (!SCPI_ParamFloat(context, &divider, true)) {
-            return SCPI_RES_ERR;
+        float divider;
+
+        if (scpi->parseReal(divider) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         if (!gPlatform.IO.PWM.SetDivider(gpio, divider)) {
-            SCPI_ErrorPushEx(context, SCPI_ERROR_ILLEGAL_PARAMETER_VALUE, 0, 0);
-            return SCPI_RES_ERR;
+            errCommand(scpi);
+            return CommandResult::Error;
         }
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
     void initPWMCommands(Visa* visa) {
-        visa->addCommand({"PWM:INIT", pwm_init, 0});
-        visa->addCommand({"PWM:DUTY", pwm_set_duty, 0});
-        visa->addCommand({"PWM:TOP", pwm_set_top, 0});
-        visa->addCommand({"PWM:DUTY?", pwm_get_duty, 0});
-        visa->addCommand({"PWM:FREQ", pwm_set_freq, 0});
-        visa->addCommand({"PWM:FREQ?", pwm_get_freq, 0});
-        visa->addCommand({"PWM:ENable", pwm_set_enable, 0});
-        visa->addCommand({"PWM:DIVider", pwm_set_divider, 0});
+        visa->addCommand("PWM:AVAILable", nullptr, pwm_available);
+        visa->addCommand("PWM#:INIT", pwm_init, nullptr);
+        visa->addCommand("PWM#:DUTY", pwm_set_duty, pwm_get_duty);
+        visa->addCommand("PWM#:FREQ", pwm_set_freq, pwm_get_freq);
+        visa->addCommand("PWM#:TOP", pwm_set_top, nullptr);
+        visa->addCommand("PWM#:ENable", pwm_set_enable, nullptr);
+        visa->addCommand("PWM#:DIVider", pwm_set_divider, nullptr);
     }
 }
 }

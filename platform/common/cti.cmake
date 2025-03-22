@@ -4,8 +4,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 #determine CTI source root
-get_filename_component(CTI_SOURCE_DIR "../../source" ABSOLUTE)
-get_filename_component(CTI_INCLUDE_DIR "../../include" ABSOLUTE)
+get_filename_component(CTI_SOURCE_DIR "./source" ABSOLUTE)
+get_filename_component(CTI_INCLUDE_DIR "./include" ABSOLUTE)
 
 if (NOT CTI_PLATFORM)
     message("No CTI_PLATFORM set, defaulting to ${DEFAULT_CTI_PLATFORM}")
@@ -45,13 +45,14 @@ set(BUILD_HEADER "${CTI_INCLUDE_DIR}/cti/build.h")
 set(BUILD_CACHE "${CTI_INCLUDE_DIR}/cti/version_build.txt")
 
 get_filename_component(BUILD_INC_PATH "${CMAKE_CURRENT_LIST_DIR}/build_timestamp.cmake" ABSOLUTE)
-get_filename_component(CTI_BUILD_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/../common/include" ABSOLUTE)
+get_filename_component(CTI_BUILD_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/include" ABSOLUTE)
 
 message("CTI_BUILD_INCLUDE is ${CTI_BUILD_INCLUDE}")
 
 set(CTI_VERSION "${CTI_VER_MAJOR}.${CTI_VER_MINOR}.${CTI_VER_PATCH}")
 
-#Creates a dependency target that handles updating the version within the firmware and can be depended on by firmware targets to get run before the firmwar build.
+#Creates a dependency target that handles updating the version within the firmware
+# and can be depended on by firmware targets to get run before the firmware build.
 add_custom_target(cti_Version)
 add_custom_command(
     TARGET cti_Version
@@ -83,14 +84,13 @@ function(create_cti_build prefix target output)
     target_sources(${CTI_TARGET} PUBLIC
         ${CTI_SOURCE_CORE}
         ${CTI_SOURCE_PLATFORM}
+        ${CTI_SOURCE_SCPI}
         ${CTI_SOURCE_VISA}
-        ${SCPI_PARSER_SOURCE}
     )
 
     target_include_directories(${CTI_TARGET}
         PUBLIC ${CTI_INCLUDE}
         PUBLIC ${CTI_BUILD_INCLUDE}
-        PUBLIC ${SCPI_INCLUDE_DIR}
     )
 
     add_dependencies(${CTI_TARGET} cti_Version)

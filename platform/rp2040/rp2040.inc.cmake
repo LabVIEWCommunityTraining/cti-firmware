@@ -1,5 +1,6 @@
-function (configure_rp2040 RP2040_TARGET)
+set (RP2040_PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+function (configure_rp2040 RP2040_TARGET)
 
 #Sets the driver to use for stdio
 if (RP2040_STDIO STREQUAL "usb")
@@ -29,20 +30,25 @@ endif ()
 
 #Add the source files specific to rp2040 to the build
 target_sources(${RP2040_TARGET} PRIVATE
-    platform/pi_pico_platform.cpp
-    platform/pi_pico_io.cpp
-    platform/pi_pico_timer.cpp
-    platform/pi_pico_pwm.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_platform.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_io.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_timer.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_pwm.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_visa.cpp
+    ${RP2040_PLATFORM_DIR}/platform/pi_pico_comms.cpp
 )
 
 # These are the components we're using from the pico-sdk
 # building a list variable to use with target_link_library command below.
 set(PICO_SDK_COMPONENTS
     pico_stdlib
+    pico_unique_id
+    hardware_uart
     hardware_i2c
     hardware_adc
     hardware_pwm
     hardware_clocks
+    hardware_spi
 )
 
 target_link_libraries(${RP2040_TARGET}

@@ -62,9 +62,9 @@ message("STDIO configured over ${RP2040_STDIO}")
 # VISA_TARGET and VISA_OUTPUT are output variables from the command
 create_cti_build("visa" VISA_TARGET VISA_OUTPUT)
 
-target_sources(${VISA_TARGET} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/platform/pi_pico_visa.cpp
-)
+#target_sources(${VISA_TARGET} PRIVATE
+#    ${CMAKE_CURRENT_LIST_DIR}/platform/pi_pico_visa.cpp
+#)
 
 #enable visa firmware mode for this firmware
 target_compile_definitions(${VISA_TARGET}

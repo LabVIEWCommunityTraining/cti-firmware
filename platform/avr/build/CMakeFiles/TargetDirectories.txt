@@ -1,4 +1,0 @@
-C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/cti_Version.dir
-C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/cti_visa_avr_arduino-uno.dir
-C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/edit_cache.dir
-C:/dev/cti/cti-firmware/platform/avr/build/CMakeFiles/rebuild_cache.dir

@@ -2,7 +2,7 @@
 #include "cti/version.h"
 
 #ifdef CTI_VISA
-    #include "visa/core.h"
+    #include "visa/visa_core.h"
     #define CTI_ENGINE gVisa
 #else
     #ifdef CTI_UDAQ

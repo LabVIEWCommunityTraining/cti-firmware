@@ -1,120 +1,150 @@
-#include "visa/core.h"
+#include "visa/visa_core.h"
 
 #include <string.h>
 
 namespace CTI {
 namespace Visa {
 
-    scpi_choice_def_t digitalDirectionOptions[] = {
-        {"IN", 0},
+    using namespace SCPI;
+
+    ScpiChoice digitalDirectionOptions[] = {
+        {"IN",  0},
         {"OUT", 1},
-        SCPI_CHOICE_LIST_END
+        EndScpiChoice
     };
 
-    scpi_choice_def_t digitalPullOptions[] = {
-        {"NONE", (int32_t)PlatformDigital::None},
-        {"UP", (int32_t)PlatformDigital::Up},
-        {"DOWN", (int32_t)PlatformDigital::Down},
-        {"BOTH", (int32_t)PlatformDigital::Both},
-        SCPI_CHOICE_LIST_END
+    ScpiChoice digitalPullOptions[] = {
+        {"NONE", (uint8_t)PlatformDigital::None},
+        {"UP",   (uint8_t)PlatformDigital::Up},
+        {"DOWN", (uint8_t)PlatformDigital::Down},
+        {"BOTH", (uint8_t)PlatformDigital::Both},
+        EndScpiChoice
     };
 
-    //scpi_result_t scpi_LED(scpi_t * context)
+    CommandResult digital_setValue(ScpiParser* scpi) {
+        //DIGital:PIN#:VALue
 
-    scpi_result_t digital_setValue(scpi_t * context) {
-        int32_t channel;
+        ChanIndex channel = scpi->nodeNum(1);
+
+        // gPlatform.IO.Printf("channel: %d\n", channel);
+
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
+        }
+
         bool val;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+        if (scpi->parseBool(val) != ParseResult::Success)  {
+            return CommandResult::MissingParam;
         }
-        
-        if (!SCPI_ParamBool(context, &val, true))  {
-            return SCPI_RES_ERR;
-        }
+
+        // gPlatform.IO.Printf("val: %d\n\n", val ? 1 : 0);
 
         gPlatform.IO.Digital.SetOutput(channel, val);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t digital_getValue(scpi_t * context) {
-        int32_t channel;
-        bool val;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    QueryResult digital_getValue(ScpiParser* scpi) {
+        // DIGital:PIN#:VALue?
+        ChanIndex channel = scpi->nodeNum(1);
+
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return QueryResult::Error;
         }
+
+        bool val;
 
         gPlatform.IO.Digital.GetValue(channel, &val);
         
         if (val) {
-            gPlatform.IO.Print("ON");
+            gPlatform.IO.Print("1\n");
         } else {
-            gPlatform.IO.Print("OFF");
+            gPlatform.IO.Print("0\n");
         }
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t digital_setDirection(scpi_t * context) {
-        int32_t channel;
-        int32_t choice;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    CommandResult digital_setDirection(ScpiParser* scpi) {
+        //DIGital:PIN#:DIRection
+        ChanIndex channel = scpi->nodeNum(1);
+
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
-        if (!SCPI_ParamChoice(context, digitalDirectionOptions, &choice, true)) {
-            return SCPI_RES_ERR;
+        int32_t choice;
+
+        if (scpi->parseChoice(digitalDirectionOptions, choice) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.Digital.SetDirection(channel, choice == 1);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t digital_getDirection(scpi_t * context) {
-        int32_t channel;
-        bool out;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    QueryResult digital_getDirection(ScpiParser* scpi) {
+        //DIGital:PIN#:DIRection?
+        ChanIndex channel = scpi->nodeNum(1);
+
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return QueryResult::Error;
         }
+
+        bool out;
 
         gPlatform.IO.Digital.GetDirection(channel, &out);
 
         if (out) {
-            gPlatform.IO.Print("OUT");
+            gPlatform.IO.Print("OUT\n");
         } else {
-            gPlatform.IO.Print("IN");
+            gPlatform.IO.Print("IN\n");
         }
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
-    scpi_result_t digital_setPull(scpi_t * context) {
-        int32_t channel;
-        int32_t choice;
-        
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+    CommandResult digital_setPull(ScpiParser* scpi) {
+        //DIGital:PIN#:PULL
+        ChanIndex channel = scpi->nodeNum(1);
+
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return CommandResult::Error;
         }
 
-        if (!SCPI_ParamChoice(context, digitalPullOptions, &choice, true)) {
-            return SCPI_RES_ERR;
+        int32_t choice;
+
+        if (scpi->parseChoice(digitalPullOptions, choice) != ParseResult::Success) {
+            return CommandResult::MissingParam;
         }
 
         gPlatform.IO.Digital.SetPull(channel, (PlatformDigital::PullDirection)choice);
 
-        return SCPI_RES_OK;
+        return CommandResult::Success;
     }
 
-    scpi_result_t digital_getPull(scpi_t * context) {
-        int32_t channel;
+    QueryResult digital_available(ScpiParser* scpi) {
+        LVBlock* gpios = gPlatform.IO.Digital.Available();
+
+        PrintBlock(gpios->len, gpios->buffer);
+        gPlatform.IO.Print('\n');
         
-        if (!SCPI_ParamInt(context, &channel, true))  {
-            return SCPI_RES_ERR;
+        return QueryResult::Success;
+    }
+
+    QueryResult digital_getPull(ScpiParser* scpi) {
+        //DIGital:PIN#:PULL?
+        ChanIndex channel = scpi->nodeNum(1);
+
+        if (channel < 0) {
+            errSuffixOutOfRange(scpi);
+            return QueryResult::Error;
         }
 
         PlatformDigital::PullDirection pull;
@@ -123,33 +153,30 @@ namespace Visa {
 
         switch (pull) {
             case PlatformDigital::None:
-                gPlatform.IO.Print("NONE");
+                gPlatform.IO.Print("NONE\n");
                 break;
             
             case PlatformDigital::Up:
-                gPlatform.IO.Print("UP");
+                gPlatform.IO.Print("UP\n");
                 break;
             
             case PlatformDigital::Down:
-                gPlatform.IO.Print("DOWN");
+                gPlatform.IO.Print("DOWN\n");
                 break;
             
             case PlatformDigital::Both:
-                gPlatform.IO.Print("BOTH");
+                gPlatform.IO.Print("BOTH\n");
                 break;
         }
 
-        return SCPI_RES_OK;
+        return QueryResult::Success;
     }
 
     void initDigitalCommands(Visa* visa) {
-        visa->addCommand({"DIGital:DIRection", digital_setDirection, 0});
-        visa->addCommand({"DIGital:DIRection?", digital_getDirection, 0});
-        visa->addCommand({"DIGital[:OUTput]:VALue", digital_setValue, 0});
-        visa->addCommand({"DIGital[:OUTput]:VALue?", digital_getValue, 0});
-        visa->addCommand({"DIGital[:INput]:VALue?", digital_getValue, 0});
-        visa->addCommand({"DIGital[:INput]:PULL", digital_setPull, 0});
-        visa->addCommand({"DIGital[:INput]:PULL?", digital_getPull, 0});
+        visa->addCommand("DIGital:AVAILable",      nullptr,              digital_available);
+        visa->addCommand("DIGital:PIN#:DIRection", digital_setDirection, digital_getDirection);
+        visa->addCommand("DIGital:PIN#:VALue",     digital_setValue,     digital_getValue);
+        visa->addCommand("DIGital:PIN#:PULL",      digital_setPull,      digital_getPull);
     }
 
 } //namespace Visa
