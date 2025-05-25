@@ -42,7 +42,6 @@ private:
 };
 
 
-
 class PlatformEngine {
 public:
     virtual int Ready() = 0;
@@ -64,6 +63,7 @@ public:
 class Platform {
 public:
     static void Preinit();
+    static void BoardInit();
     static void Setup();
     static void Shutdown();
 

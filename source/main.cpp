@@ -15,6 +15,9 @@ using namespace Visa;
 
 int main() {
 
+    //Allow any board specific initialization to happen.
+    gPlatform.BoardInit();
+
     //First interfacing for debugging capabilities is a built in LED, if available.
     // this can be blinked and much more robust than other comm mechanisms for
     // complete initialization failures.
@@ -25,7 +28,7 @@ int main() {
     // ensuring any communication and debugging hooks are available and
     // and customized startup logic for a specific platform.
     gPlatform.Preinit();
-    
+
     //Initialize the global platform abstractions
     gPlatform.Setup();
 

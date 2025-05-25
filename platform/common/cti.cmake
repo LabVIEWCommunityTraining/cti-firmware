@@ -94,4 +94,6 @@ function(create_cti_build prefix target output)
     )
 
     add_dependencies(${CTI_TARGET} cti_Version)
+
+    cti_configure_board(${CTI_BOARD_DIR} ${CTI_TARGET})
 endfunction()

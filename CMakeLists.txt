@@ -39,6 +39,8 @@ endif()
 # ====================================================================================
 set(PICO_BOARD pico_w CACHE STRING "Board type")
 
+message("\n-- Including Pico SDK from ${PICO_SDK_PATH} --")
+
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
@@ -47,7 +49,7 @@ set(CtiProject "CtiFirmware")
 #These defaults are used if cmake if this cmake is invoked without specifying
 #CTI_PLATFORM or CTI_BOARD as a commandline option
 set(DEFAULT_CTI_PLATFORM rp2040)
-set(DEFAULT_CTI_BOARD pico)
+set(DEFAULT_CTI_BOARD ${PICO_BOARD})
 
 include(platform/common/cti.cmake)
 include(platform/${PICO_PLATFORM}/${PICO_PLATFORM}.inc.cmake)
