@@ -3,10 +3,6 @@
 #include <pico/stdlib.h>
 #include <pico/cyw43_arch.h>
 
-void CTI::Platform::BoardInit() {
-    cyw43_arch_init();
-}
-
 void CTI::PlatformIO::InitStatusLED() {
     //nothing to do with PicoW, is handled by initializing cyw43 in BoardInit
 }

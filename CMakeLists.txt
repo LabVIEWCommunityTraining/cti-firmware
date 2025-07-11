@@ -79,6 +79,7 @@ target_include_directories(${VISA_TARGET} PRIVATE
 #enable visa firmware mode for this firmware
 target_compile_definitions(${VISA_TARGET}
     PUBLIC CTI_VISA=1
+    PUBLIC NDEBUG=1
 )
 configure_rp2040(${VISA_TARGET})
 message("CTI-Visa output will be ${VISA_OUTPUT}.uf2")

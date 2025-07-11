@@ -3,7 +3,7 @@
 #include <pico/stdlib.h>
 
 //On non-WiFi boards the LED is connected to pin 25
-const CTI::ChaneIndex led = 25;
+const CTI::ChanIndex led = 25;
 
 void CTI::PlatformIO::InitStatusLED() {
     gpio_init(led);

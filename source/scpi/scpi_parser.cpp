@@ -214,13 +214,13 @@ namespace SCPI {
         for (; cur <= _bufSize; ++cur) {
             if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ' || _buf[cur] == '\n') {
                 //reached end of tree portion, perform lookup
-                ScpiNode* child = node->lookupChild(_buf + start, cur - start);
+                ScpiNode* child = node->lookupChild((char*)(_buf + start), cur - start);
 
                 if (child == nullptr) {
                     return ParserStatus::UnknownCommand;
                 }
 
-                int8_t num = child->nodeNum(_buf + start, cur - start);
+                int8_t num = child->nodeNum((char*)(_buf + start), cur - start);
                 _nodeNums.set(depth, num);
                 depth++;
 

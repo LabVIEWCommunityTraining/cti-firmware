@@ -57,15 +57,19 @@ CommandResult uart_write(ScpiParser* scpi) {
     }
 
     int len = 0;
-    char* buf;
-    if (scpi->parseBlock(&buf, &len) != ParseResult::Success) {
+    if (scpi->parseBlock((char**)&uart_buf, &len) != ParseResult::Success) {
         return CommandResult::MissingParam;
     }
 
     if (len > 0) {
-        gPlatform.UART.write(uart, len, (uint8_t*) buf);
+        gPlatform.UART.write(uart, len, uart_buf);
         //gPlatform.IO.Print(len, buf);
         //gPlatform.IO.Print('\n');
+
+        uint8_t term = gPlatform.UART.termChar(uart);
+        if (term != 0) {
+            gPlatform.UART.write(uart, 1, &term);
+        }
 
         return CommandResult::Success;
     }

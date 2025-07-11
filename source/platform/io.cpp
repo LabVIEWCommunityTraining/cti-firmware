@@ -6,34 +6,36 @@
 namespace CTI {
 
     PlatformIO::PlatformIO() {
-
+        _curStream = 0;
+        _streams = nullptr;
     }
 
-    void PlatformIO::Print(int32_t len, const char* str) {
-        fwrite(str, 1, len, stdout);
+    void PlatformIO::RegisterStreams(StreamIOImpl *streams[CTI_NUM_STREAMS]) {
+        _streams = streams;
     }
 
-    void PlatformIO::Print(const char* str) {
-        fwrite(str, 1, strlen(str), stdout);
-    }
+    int PlatformIO::FGetCtimeout(uint32_t timeout_us, bool allStreams) {
+        int c;
+        CTI_DEBUG(" S!:%d", _curStream);
+        c = _streams[_curStream]->getchar(timeout_us);
 
-    void PlatformIO::Print(char c) {
-        fwrite(&c, 1, 1, stdout);
-    }
+        if (c == -1 && allStreams) {
+            //timed out on current stream, check others and update curStream
+            for (int i = 0; i < CTI_NUM_STREAMS; ++i) {
+                if (i != _curStream) {
+                    CTI_DEBUG(" S:%d", i);
+                    c = _streams[i]->getchar(timeout_us);
+                    if (c != -1) {
+                        _curStream = i;
+                        break;
+                    }
+                }
+            }
+        }
 
-    void PlatformIO::Printf(const char* format, ...) const {
-        va_list args;
-        va_start(args, format);
-        vprintf(format, args);
-        va_end(args);
-    }
+        CTI_DEBUG(" c:%d '%c'", c, c);
 
-    void PlatformIO::Flush() {
-        fflush(stdout);
-    }
-
-    void PlatformIO::ReadStdin(char** buffer, size_t maxLen) {
-
+        return c;
     }
 
     void PlatformIO::StatusLED(bool val, StatusSource source) {

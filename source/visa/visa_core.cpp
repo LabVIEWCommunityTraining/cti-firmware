@@ -6,6 +6,10 @@
 #include "visa/i2c.h"
 #include "visa/spi.h"
 
+#ifdef CTI_FEATURE_WIFI
+#include "visa/wifi.h"
+#endif
+
 #include "scpi.h"
 
 #include <cstring>
@@ -183,8 +187,25 @@ namespace Visa {
         int val; // timeout read value, will be -1 if timed out
         char c;
 
+        // store the stream that was set before reading data, if it changes
+        // the parser will need to be reset. In the future maybe there could
+        // just be a parser implementation per stream but for now we still
+        // have a single parser instance.
+
         while(true) {
-            val = gPlatform.IO.FGetCtimeout(20000); //20 ms
+            CTI_DEBUG("I");
+            int curStream = gPlatform.IO.CurStream();
+
+            // Allow checking all streams if current one times out
+            val = gPlatform.IO.FGetCtimeout(20000, true); //1 ms
+
+            if (curStream != gPlatform.IO.CurStream()) {
+                CTI_DEBUG("R");
+                // stream changed, need to reset parser
+                _parser.reset();
+            }
+
+            CTI_DEBUG("\n");
 
             if (val == -1) {
                 gPlatform.IO.StatusLED(false, Comms);
@@ -196,13 +217,18 @@ namespace Visa {
 
                     //consume rest of input and reset parser
                     while (true) {
-                        val = gPlatform.IO.FGetCtimeout(20000);
+                        // don't allow changing streams so we don't have to
+                        // handle data from a changed stream here
+                        // just want to finish up the current exchange
+                        val = gPlatform.IO.FGetCtimeout(20000, false);
                         if (val == -1 || val == '\n') {
                             _parser.reset();
                             break;
                         }
                     }
                 }
+
+                gPlatform.IO.Flush(); //ensure all buffered output is sent out.
             }
         }
     }

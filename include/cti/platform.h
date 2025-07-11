@@ -7,6 +7,10 @@
 #include "platform/io.h"
 #include "platform/comms.h"
 
+#ifdef CTI_FEATURE_WIFI
+#include "platform/wifi.h"
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 
@@ -74,6 +78,11 @@ public:
     PlatformUART UART;
     PlatformI2C I2C;
     PlatformSPI SPI;
+
+#ifdef CTI_FEATURE_WIFI
+    PlatformWifi WIFI;
+#endif
+
     PlatformEngine* pEngine;
 
 private:

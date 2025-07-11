@@ -1,6 +1,8 @@
 #This is the top-level cmake file to configure and build firmware for RP2040 based
 #microcontroller boards.
 
+# !!NOTE!! - This is not used when the Pico VS Code extension is used and this is probably out of date at this point.
+
 cmake_minimum_required(VERSION 3.13)
 
 message("\n-- Initializing Pi Pico SDK --")

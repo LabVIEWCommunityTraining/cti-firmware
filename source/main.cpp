@@ -21,7 +21,7 @@ int main() {
     //First interfacing for debugging capabilities is a built in LED, if available.
     // this can be blinked and much more robust than other comm mechanisms for
     // complete initialization failures.
-    gPlatform.IO.InitStatusLED();
+    //gPlatform.IO.InitStatusLED();
 
     //This kicks off any initialization the platform specific code needs to do
     // before initializing the platform abstraction code. This usually means

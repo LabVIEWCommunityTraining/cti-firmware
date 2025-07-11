@@ -3,16 +3,6 @@
 #include <pico/stdlib.h>
 #include <hardware/adc.h>
 
-int CTI::PlatformIO::_getchar_timeout_us(uint32_t timeout_us) {
-    int c;
-    c = getchar_timeout_us(timeout_us);
-    if (c == PICO_ERROR_TIMEOUT) {
-        return -1;
-    }
-
-    return c;
-}
-
 // Generated with CTI-Tools.lvlib
 CTI::LVBlock availableGPIOs = { 30, {
     // Comments are whats returned by VISA Read
