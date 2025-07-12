@@ -66,6 +66,11 @@ CommandResult uart_write(ScpiParser* scpi) {
         gPlatform.UART.write(uart, len, (uint8_t*) buf);
         //gPlatform.IO.Print(len, buf);
         //gPlatform.IO.Print('\n');
+        
+        uint8_t term = gPlatform.UART.termChar(uart);
+        if (term != 0) {
+            gPlatform.UART.write(uart, 1, &term);
+        }
 
         return CommandResult::Success;
     }
