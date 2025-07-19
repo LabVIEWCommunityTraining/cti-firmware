@@ -20,7 +20,7 @@ function (cti_configure_board CTI_BOARD_DIR TARGET)
     target_compile_definitions(${TARGET} PUBLIC
         CTI_NUM_STREAMS=2
         CTI_FEATURE_WIFI=1
-        CTI_FEATURE_DEBUG=1
+        CTI_FEATURE_DEBUG=0
         CTI_DEBUG_STREAM=0
     )
 endfunction()
