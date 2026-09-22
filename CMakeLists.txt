@@ -17,9 +17,9 @@ if(WIN32)
 else()
     set(USERHOME $ENV{HOME})
 endif()
-set(sdkVersion 2.2.0)
+set(sdkVersion 2.3.1)
 set(toolchainVersion 15_2_Rel1)
-set(picotoolVersion 2.2.0-a4)
+set(picotoolVersion 2.3.1)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -36,11 +36,15 @@ set(CtiProject "CtiFirmware")
 
 #These defaults are used if cmake if this cmake is invoked without specifying
 #CTI_PLATFORM or CTI_BOARD as a commandline option
-set(DEFAULT_CTI_PLATFORM rp2040)
+if(PICO_PLATFORM MATCHES "^rp2350")
+    set(DEFAULT_CTI_PLATFORM rp2350)
+else()
+    set(DEFAULT_CTI_PLATFORM ${PICO_PLATFORM})
+endif()
 set(DEFAULT_CTI_BOARD ${PICO_BOARD})
 
 include(platform/common/cti.cmake)
-include(platform/${PICO_PLATFORM}/${PICO_PLATFORM}.inc.cmake)
+include(platform/${CTI_PLATFORM}/${CTI_PLATFORM}.inc.cmake)
 
 project(${CtiProject} C CXX ASM)
 
@@ -68,7 +72,7 @@ target_include_directories(${VISA_TARGET} PRIVATE
 target_compile_definitions(${VISA_TARGET}
     PUBLIC CTI_VISA=1
 )
-configure_rp2040(${VISA_TARGET})
+cmake_language(CALL configure_${CTI_PLATFORM} ${VISA_TARGET})
 message("CTI-Visa output will be ${VISA_OUTPUT}.uf2")
 
 add_custom_command(TARGET ${VISA_TARGET} POST_BUILD

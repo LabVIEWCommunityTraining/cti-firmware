@@ -31,6 +31,7 @@
 *.out
 *.app
 /platform/rp2040/build
+/platform/rp2350/build
 /platform/avr/build
 /build
 /uf2
