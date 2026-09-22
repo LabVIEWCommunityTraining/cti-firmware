@@ -1,399 +1,385 @@
 #include "scpi/scpi_core.h"
 #include "scpi/scpi_errors.h"
 
-#include <cstdlib>
-#include <cstring>
+#include <ctype.h>
+#include <string.h>
 
 namespace CTI {
 namespace SCPI {
 
-    // ScpiChoice array terminator has a null string
-    ScpiChoice EndScpiChoice { nullptr, 0 };
+ScpiChoice EndScpiChoice {nullptr, 0};
 
-    ScpiParser::ScpiParser(int bufCapacity) {
-        _buf = (char*)malloc(bufCapacity);
-        _bufCapacity = bufCapacity;
-        _bufSize = 0;
-
-        _maxDepth = 0;
-
-        _treeRoot = new ScpiNode();
-        _curNode = nullptr;
-
-        _state = ParserState::FindCommand;
-        _paramPos = 0;
+namespace {
+bool matchSegment(
+    const char* pattern, uint8_t patternLength,
+    const char* candidate, uint8_t candidateLength,
+    int8_t& number) {
+    bool hasNumber = patternLength && pattern[patternLength - 1] == '#';
+    if (hasNumber) {
+        --patternLength;
     }
 
-    ScpiParser::~ScpiParser() {
-        if (_buf) {
-            free(_buf);
+    uint8_t textLength = candidateLength;
+    number = -1;
+    if (hasNumber) {
+        while (textLength && isdigit(candidate[textLength - 1])) {
+            --textLength;
         }
+        if (textLength == candidateLength) {
+            return false;
+        }
+
+        int16_t parsed = 0;
+        for (uint8_t i = textLength; i < candidateLength; ++i) {
+            parsed = static_cast<int16_t>(parsed * 10 + candidate[i] - '0');
+            if (parsed > 127) {
+                return false;
+            }
+        }
+        number = static_cast<int8_t>(parsed);
     }
 
-    void ScpiParser::reset() {
-        _bufSize = 0;
-        _state = ParserState::FindCommand;
-        _curNode = nullptr;
+    uint8_t requiredLength = 0;
+    while (requiredLength < patternLength && !islower(pattern[requiredLength])) {
+        ++requiredLength;
     }
-
-    int ScpiParser::bufferInput(const char* data, int n) {
-        for (int i = 0; i < n; ++i) {
-            if (_bufSize >= _bufCapacity) {
-                return i; //buffer full, return the count of data actually buffered.
-            }
-
-            _buf[_bufSize] = data[i];
-
-            _bufSize++;
-
-            //Parse the tree portion separately from the full message so the
-            //buffer can be reset and fully used for any supplied parameters.
-            //This lets the command tree length not eat into available parameter
-            //length.
-            if (_state == ParserState::FindCommand ) {
-                if (data[i] == ' ' || data[i] == '?' || data[i] == '\n') {
-                    ParserStatus res = parseNode();
-
-                    if (res != ParserStatus::Success) {
-                        _state = ParserState::InvalidNode;
-                    }
-
-                    _bufSize = 0;
-
-                    if (data[i] == '\n') {
-                        res = invokeNode();
-                        reset();
-                    }
-                }
-            } else if (_state == ParserState::FindEndOfLine) {
-                if (data[i] == '\n') {
-                    ParserStatus res = invokeNode();
-                    reset();
-                }
-            } else if (_state == ParserState::InvalidNode) {
-                if (data[i] == '\n') {
-                    _state = ParserState::FindCommand;
-                    reset();
-                }
-            }
-        }
-
-        //made it to the end, able to buffer as much as provided
-        return n;
-    }
-
-    ParseResult ScpiParser::parseChoice(const ScpiChoice* choices, int32_t& value) {
-        consumeWhiteSpace();
-
-        int32_t choice = 0;
-        uint8_t cur;
-        bool match = false;
-
-        while (choices[choice].choiceString != nullptr && !match) {
-            cur = 0;
-            const char* str = choices[choice].choiceString;
-
-            while (_paramPos + cur < _bufSize && str[cur] != 0) {
-                if (!cmpIChar(_buf[_paramPos + cur], str[cur])) {
-                    choice++; //mismatch, try next choice
-                    break;
-                }
-
-                cur++;
-            }
-
-            if (str[cur] == 0) {
-                //made it to the end without a mismatch, we've got a winner
-                match = true;
-                _paramPos += cur;
-            }
-        }
-
-        if (!match || !isEndOfParam()) {
-            return ParseResult::Invalid;
-        }
-
-        value = choices[choice].value;
-
-        return ParseResult::Success;
-    }
-
-    ParseResult ScpiParser::parseBool(bool& value) {
-        consumeWhiteSpace();
-
-        if (_buf[_paramPos] == '0') {
-            value = false;
-            _paramPos++;
-        } else if (_buf[_paramPos] == '1') {
-            
-            value = true;
-            _paramPos++;
-        } else if (_buf[_paramPos] == 'O' || _buf[_paramPos] == 'o') {
-            //on or off, case-insensitive
-            _paramPos++;
-            if (_paramPos == _bufSize) {
-                return ParseResult::EndOfData;
-            }
-
-            if (_buf[_paramPos] == 'N' || _buf[_paramPos] == 'n') {
-                value = true;
-                _paramPos++;
-            } else {
-                if (_buf[_paramPos] == 'F' || _buf[_paramPos] == 'f') {
-                    _paramPos++;
-                    if (_paramPos == _bufSize) {
-                        return ParseResult::EndOfData;
-                    }
-
-                    if (_buf[_paramPos] == 'F' || _buf[_paramPos] == 'f') {
-                        value = true;
-                        _paramPos++;
-                    }
-                }
-            }
-        }
-
-        // Ensure param is separated from next param, not mispelled, or at end of string
-        if (!isEndOfParam()) {
-            return ParseResult::Invalid;
-        }
-
-        return ParseResult::Success;
-    }
-    
-    ParseResult ScpiParser::parseBlock(char** buf, int* len) {
-        consumeWhiteSpace();
-
-        if (_buf[_paramPos] != '#') {
-            return ParseResult::Invalid;
-        }
-        
-        _paramPos++; // consume #
-
-        uint8_t digitsLen = 0;
-        if (_buf[_paramPos] <= '9' && _buf[_paramPos] >= '0') {
-            digitsLen = _buf[_paramPos] - '0';
-            _paramPos++;
-        } else {
-            return ParseResult::Invalid;
-        }
-
-        int dataLen = 0;
-        for (int i = 0; i < digitsLen; ++i) {
-            dataLen *= 10;
-            dataLen += _buf[_paramPos] - '0';
-            _paramPos++;
-        }
-
-        //point buffer at visa read buffer, data will remain valid while
-        //command/query is invoked. Caller just needs to behave themselves
-        //but this means no extra copies or memory space needed for buffer.
-        *buf = _buf + _paramPos;
-        *len = dataLen;
-
-        //move parse location past end of block
-        _paramPos += dataLen;
-
-        if (!isEndOfParam()) {
-            return ParseResult::Invalid;
-        }
-
-        return ParseResult::Success;
-    }
-    
-
-    ParserStatus ScpiParser::parseNode() {
-        //determine leaf node, split on ':' or end of string
-
-        ScpiNode* node = _treeRoot;
-        uint8_t cur = 0;
-        uint8_t start = 0;
-        uint8_t depth = 0;
-
-        if (_buf[0] == ':') { //skip optional leading ':'
-            cur = 1;
-            start = 1;
-        }
-
-        for (; cur <= _bufSize; ++cur) {
-            if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ' || _buf[cur] == '\n') {
-                //reached end of tree portion, perform lookup
-                ScpiNode* child = node->lookupChild(_buf + start, cur - start);
-
-                if (child == nullptr) {
-                    return ParserStatus::UnknownCommand;
-                }
-
-                int8_t num = child->nodeNum(_buf + start, cur - start);
-                _nodeNums.set(depth, num);
-                depth++;
-
-                if (_buf[cur] == ':') {
-                    cur++;
-                }
-
-                if (cur == _bufSize || _buf[cur] == ' ' || _buf[cur] == '\n') {
-                    _bufSize = 0;
-                    _curNode = child;
-                    _state = ParserState::FindEndOfLine;
-
-                    return ParserStatus::Success;
-                }
-
-                if (_buf[cur] == '?') {
-                    _isQuery = true;
-                    _bufSize = 0;
-                    _curNode = child;
-                    _state = ParserState::FindEndOfLine;
-
-                    return ParserStatus::Success;
-                }
-                
-                start = cur;
-                node = child;
-            }
-        }
-
-        //Got to the end and didn't find a leaf node match, uh oh!
-        return ParserStatus::Incomplete;
-    }
-
-    ParserStatus ScpiParser::invokeNode() {
-        if (_curNode == nullptr) {
-            errUndefinedHeader(this);
-            return ParserStatus::Unknown;
-        }
-
-        _paramPos = 0;
-
-        if (_isQuery) {
-            QueryResult res = _curNode->invokeQuery(this);
-
-            if (res != QueryResult::Success) {
-                if (res == QueryResult::NoHandler) {
-                    errNoQuery(this);
-                }
-
-                return ParserStatus::Unknown;
-            }
-        } else {
-            CommandResult res = _curNode->invokeCommand(this);
-
-            if (res != CommandResult::Success) {
-                if (res == CommandResult::NoHandler) {
-                    return ParserStatus::UnknownCommand;
-                } else if (res == CommandResult::MissingParam) {
-                    errMissingParam(this);
-                } else if (res == CommandResult::UnexpectedParam) {
-                    errTooManyParams(this);
-                } else if (res == CommandResult::SyntaxError) {
-                    errSyntax(this);
-                } else if (res == CommandResult::NoHandler) {
-                    errNoCommand(this);
-                }
-
-                return ParserStatus::Unknown;
-            }
-        }
-
-        _bufSize = 0;
-        _curNode = nullptr;
-        _isQuery = false;
-        _state = ParserState::FindCommand;
-
-        return ParserStatus::Success;
-    }
-
-    bool ScpiParser::enqueueError(int16_t code, const char* str) {
+    if (textLength != requiredLength && textLength != patternLength) {
         return false;
     }
 
-    void ScpiParser::finalize() {
-        _finalized = true;
-        _nodeNums.reserve(_maxDepth);
-
-        for (uint8_t i = 0; i < _maxDepth; ++i) {
-            _nodeNums.set(i, 0);
+    for (uint8_t i = 0; i < textLength; ++i) {
+        if (toupper(candidate[i]) != toupper(pattern[i])) {
+            return false;
         }
     }
-    
-    RegistrationResult ScpiParser::registerNode(const char* str, ScpiCommand cmdHandler, ScpiQuery queryHandler) {
-        if (_finalized) {
-            return RegistrationResult::AlreadyFinalized;
+    return true;
+}
+
+bool matchCommand(
+    const char* pattern, const char* candidate, uint8_t candidateLength,
+    NumParamVector& numbers, uint8_t& depth) {
+    uint8_t patternPosition = pattern[0] == ':' ? 1 : 0;
+    uint8_t candidatePosition = candidateLength && candidate[0] == ':' ? 1 : 0;
+    depth = 0;
+
+    while (pattern[patternPosition] != 0 && candidatePosition < candidateLength) {
+        uint8_t patternEnd = patternPosition;
+        while (pattern[patternEnd] != 0 && pattern[patternEnd] != ':') {
+            ++patternEnd;
         }
 
-        int len = 0;
-        while (len < _bufCapacity && str[len] != 0) {
-            len++;
+        uint8_t candidateEnd = candidatePosition;
+        while (candidateEnd < candidateLength && candidate[candidateEnd] != ':') {
+            ++candidateEnd;
         }
 
-        len++; // account for null terminator
+        int8_t number;
+        if (depth >= SCPI_MAX_DEPTH ||
+            !matchSegment(
+                pattern + patternPosition,
+                static_cast<uint8_t>(patternEnd - patternPosition),
+                candidate + candidatePosition,
+                static_cast<uint8_t>(candidateEnd - candidatePosition),
+                number)) {
+            return false;
+        }
+        numbers.set(depth++, number);
 
-        uint8_t cur = 0;
-        uint8_t start = 0;
-        uint8_t depth = 0;
-        ScpiNode* curNode = _treeRoot;
+        bool patternDone = pattern[patternEnd] == 0;
+        bool candidateDone = candidateEnd == candidateLength;
+        if (patternDone || candidateDone) {
+            return patternDone && candidateDone;
+        }
+        patternPosition = static_cast<uint8_t>(patternEnd + 1);
+        candidatePosition = static_cast<uint8_t>(candidateEnd + 1);
+    }
+    return pattern[patternPosition] == 0 && candidatePosition == candidateLength;
+}
+}
 
-        //check if specifier starts with root ':' and skip if so
-        if (str[0] == ':') {
-            cur = 1;
-            start = 1;
+ScpiParser::ScpiParser(int bufferCapacity) {
+    _buf = _bufferStorage;
+    _bufCapacity = bufferCapacity < SCPI_INPUT_BUFFER_LENGTH
+        ? bufferCapacity
+        : SCPI_INPUT_BUFFER_LENGTH;
+    _bufSize = 0;
+    _maxDepth = 0;
+    _commandCount = 0;
+    _curCommand = nullptr;
+    _state = ParserState::FindCommand;
+    _paramPos = 0;
+    _finalized = false;
+    _isQuery = false;
+}
+
+ScpiParser::~ScpiParser() {
+}
+
+void ScpiParser::reset() {
+    _bufSize = 0;
+    _state = ParserState::FindCommand;
+    _curCommand = nullptr;
+    _isQuery = false;
+}
+
+int ScpiParser::bufferInput(const char* data, int count) {
+    for (int i = 0; i < count; ++i) {
+        if (_state == ParserState::FindCommand && _bufSize == 0 &&
+            (data[i] == '\r' || data[i] == '\n')) {
+            continue;
         }
 
-        for (;cur < len; ++cur) {
-            //Split up string by ':' or null-terminator
-            if (str[cur] == ':' || str[cur] == 0) {
+        if (_bufSize >= _bufCapacity) {
+            return i;
+        }
 
-                //First check to see if node already has that child
-                ScpiNode* node = curNode->lookupChild(str + start, cur - start);
-                if (node == nullptr) {
-
-                    node = new ScpiNode(str + start, cur - start, depth,
-                        cmdHandler, queryHandler);
-                    
-                    RegistrationResult res = curNode->addChild(node);
-
-                    if (res != RegistrationResult::Success) {
-                        return res;
-                    }
+        _buf[_bufSize++] = data[i];
+        if (_state == ParserState::FindCommand) {
+            if (data[i] == ' ' || data[i] == '?' || data[i] == '\n') {
+                ParserStatus result = parseNode();
+                if (result != ParserStatus::Success) {
+                    errUndefinedHeader(this);
+                    _state = ParserState::InvalidNode;
                 }
-                
-                curNode = node;
-                
-                start = cur + 1;
-                depth++;
-
-                if (str[cur] == 0) {
-                    break;
+                _bufSize = 0;
+                if (data[i] == '\n') {
+                    if (result == ParserStatus::Success) {
+                        invokeNode();
+                    }
+                    reset();
                 }
             }
+        } else if (_state == ParserState::FindEndOfLine) {
+            if (data[i] == '\n' && isMessageTerminator()) {
+                invokeNode();
+                reset();
+            }
+        } else if (_state == ParserState::InvalidNode && data[i] == '\n') {
+            reset();
         }
+    }
+    return count;
+}
 
-        if (depth > _maxDepth) {
-            _maxDepth = depth;
-        }
-
-        return RegistrationResult::Success;
+bool ScpiParser::isMessageTerminator() const {
+    if (_bufSize == 0 || _buf[_bufSize - 1] != '\n') {
+        return false;
     }
 
-    bool cmpIChar(char a, char b) {
-        //make sure a is smaller value (upper case if different)
-        if (a > b) {
-            char t = a;
-            a = b;
-            b = t;
+    int position = 0;
+    const int end = _bufSize - 1;
+    while (position < end) {
+        if (_buf[position] != '#' || position + 1 >= end ||
+            !isdigit(static_cast<unsigned char>(_buf[position + 1]))) {
+            ++position;
+            continue;
         }
 
-        bool aUCase = (a <= 'Z' && a >= 'A');
-        bool bUCase = (b <= 'Z' && b >= 'A');
-
-        if (aUCase != bUCase) {
-            //not the same case, a must be upper case and b must be lower case
-            b -= 32;
+        int digitCount = _buf[position + 1] - '0';
+        int lengthStart = position + 2;
+        int payloadStart = lengthStart + digitCount;
+        if (digitCount == 0 || payloadStart > end) {
+            return false;
         }
 
-        return a == b;
+        int payloadLength = 0;
+        for (int digit = lengthStart; digit < payloadStart; ++digit) {
+            if (!isdigit(static_cast<unsigned char>(_buf[digit]))) {
+                return true;
+            }
+            payloadLength = payloadLength * 10 + _buf[digit] - '0';
+        }
+
+        if (payloadStart + payloadLength > end) {
+            return false;
+        }
+        position = payloadStart + payloadLength;
     }
+    return true;
+}
+
+ParseResult ScpiParser::parseChoice(const ScpiChoice* choices, int32_t& value) {
+    consumeWhiteSpace();
+    int32_t choice = 0;
+
+    while (choices[choice].choiceString != nullptr) {
+        uint8_t current = 0;
+        const char* text = choices[choice].choiceString;
+        while (_paramPos + current < _bufSize && text[current] != 0 &&
+               cmpIChar(_buf[_paramPos + current], text[current])) {
+            ++current;
+        }
+        if (text[current] == 0) {
+            _paramPos += current;
+            if (!isEndOfParam()) {
+                return ParseResult::Invalid;
+            }
+            value = choices[choice].value;
+            return ParseResult::Success;
+        }
+        ++choice;
+    }
+    return ParseResult::Invalid;
+}
+
+ParseResult ScpiParser::parseBool(bool& value) {
+    consumeWhiteSpace();
+    if (_paramPos >= _bufSize) {
+        return ParseResult::EndOfData;
+    }
+
+    if (_buf[_paramPos] == '0') {
+        value = false;
+        ++_paramPos;
+    } else if (_buf[_paramPos] == '1') {
+        value = true;
+        ++_paramPos;
+    } else if (_paramPos + 1 < _bufSize &&
+               toupper(_buf[_paramPos]) == 'O' &&
+               toupper(_buf[_paramPos + 1]) == 'N') {
+        value = true;
+        _paramPos += 2;
+    } else if (_paramPos + 2 < _bufSize &&
+               toupper(_buf[_paramPos]) == 'O' &&
+               toupper(_buf[_paramPos + 1]) == 'F' &&
+               toupper(_buf[_paramPos + 2]) == 'F') {
+        value = false;
+        _paramPos += 3;
+    } else {
+        return ParseResult::Invalid;
+    }
+    return isEndOfParam() ? ParseResult::Success : ParseResult::Invalid;
+}
+
+ParseResult ScpiParser::parseBlock(char** buffer, int* length) {
+    consumeWhiteSpace();
+    if (_paramPos + 2 > _bufSize || _buf[_paramPos++] != '#') {
+        return ParseResult::Invalid;
+    }
+
+    uint8_t digitCount = static_cast<uint8_t>(_buf[_paramPos++] - '0');
+    if (digitCount > 5 || _paramPos + digitCount > _bufSize) {
+        return ParseResult::Invalid;
+    }
+
+    int dataLength = 0;
+    for (uint8_t i = 0; i < digitCount; ++i) {
+        if (!isdigit(_buf[_paramPos])) {
+            return ParseResult::Invalid;
+        }
+        dataLength = dataLength * 10 + _buf[_paramPos++] - '0';
+    }
+    if (dataLength < 0 || _paramPos + dataLength > _bufSize) {
+        return ParseResult::InsufficientBuffer;
+    }
+
+    *buffer = _buf + _paramPos;
+    *length = dataLength;
+    _paramPos += dataLength;
+    return isEndOfParam() ? ParseResult::Success : ParseResult::Invalid;
+}
+
+ParserStatus ScpiParser::parseNode() {
+    _curCommand = nullptr;
+
+    uint8_t commandLength = _bufSize;
+    char terminator = _buf[commandLength - 1];
+    --commandLength;
+    _isQuery = terminator == '?';
+
+    for (uint8_t i = 0; i < _commandCount; ++i) {
+        uint8_t depth = 0;
+        if (matchCommand(_commands[i].pattern, _buf, commandLength, _nodeNums, depth)) {
+            _curCommand = &_commands[i];
+            _state = ParserState::FindEndOfLine;
+            return ParserStatus::Success;
+        }
+    }
+    return ParserStatus::UnknownCommand;
+}
+
+ParserStatus ScpiParser::invokeNode() {
+    if (_curCommand == nullptr) {
+        errUndefinedHeader(this);
+        return ParserStatus::Unknown;
+    }
+
+    _paramPos = 0;
+    if (_isQuery) {
+        if (_curCommand->query == nullptr) {
+            errNoQuery(this);
+            return ParserStatus::Unknown;
+        }
+        if (_curCommand->query(this) != QueryResult::Success) {
+            return ParserStatus::Unknown;
+        }
+    } else {
+        if (_curCommand->command == nullptr) {
+            errNoCommand(this);
+            return ParserStatus::UnknownCommand;
+        }
+        CommandResult result = _curCommand->command(this);
+        if (result != CommandResult::Success) {
+            if (result == CommandResult::MissingParam) {
+                errMissingParam(this);
+            } else if (result == CommandResult::UnexpectedParam) {
+                errTooManyParams(this);
+            } else if (result == CommandResult::SyntaxError) {
+                errSyntax(this);
+            }
+            return ParserStatus::Unknown;
+        }
+    }
+    return ParserStatus::Success;
+}
+
+bool ScpiParser::enqueueError(int16_t code, const char* text) {
+    return _err.enqueue(code, text);
+}
+
+void ScpiParser::finalize() {
+    _finalized = true;
+    _nodeNums.reserve(_maxDepth);
+}
+
+RegistrationResult ScpiParser::registerNode(
+    const char* pattern, ScpiCommand commandHandler, ScpiQuery queryHandler) {
+    if (_finalized) {
+        return RegistrationResult::AlreadyFinalized;
+    }
+    if (!commandHandler && !queryHandler) {
+        return RegistrationResult::InvalidHandler;
+    }
+    if (_commandCount >= SCPI_MAX_COMMANDS) {
+        return RegistrationResult::CapacityExceeded;
+    }
+
+    for (uint8_t i = 0; i < _commandCount; ++i) {
+        if (strcmp(_commands[i].pattern, pattern) == 0) {
+            return RegistrationResult::Ambiguous;
+        }
+    }
+
+    uint8_t depth = 1;
+    for (const char* current = pattern; *current; ++current) {
+        if (*current == ':') {
+            ++depth;
+        }
+    }
+    if (depth > _maxDepth) {
+        _maxDepth = depth;
+    }
+    if (depth > SCPI_MAX_DEPTH) {
+        return RegistrationResult::CapacityExceeded;
+    }
+
+    _commands[_commandCount++] = {pattern, commandHandler, queryHandler};
+    return RegistrationResult::Success;
+}
+
+bool cmpIChar(char first, char second) {
+    return toupper(first) == toupper(second);
+}
 
 } // namespace SCPI
 } // namespace CTI

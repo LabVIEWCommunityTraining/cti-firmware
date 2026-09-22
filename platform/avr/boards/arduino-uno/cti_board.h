@@ -1,0 +1,10 @@
+#ifndef CTI_ARDUINO_UNO_BOARD_H
+#define CTI_ARDUINO_UNO_BOARD_H
+
+#define CTI_HW_BOARD_NAME "Arduino Uno"
+#define CTI_HW_MCU_NAME "ATmega328P"
+#define CTI_HW_STATUS_LED_PIN 13
+#define CTI_HW_FLASH_BYTES 32768UL
+#define CTI_HW_SRAM_BYTES 2048U
+
+#endif

@@ -6,7 +6,11 @@ namespace Visa {
 
 using namespace SCPI;
 
-const uint8_t uart_buf_len = 255;
+#ifndef CTI_IO_BUFFER_LENGTH
+#define CTI_IO_BUFFER_LENGTH 255
+#endif
+
+const uint8_t uart_buf_len = CTI_IO_BUFFER_LENGTH;
 uint8_t uart_buf[uart_buf_len]; // extra byte to accomodate null termination
 
 QueryResult uart_avail(ScpiParser* scpi) {
@@ -19,7 +23,7 @@ QueryResult uart_avail(ScpiParser* scpi) {
 }
 
 CommandResult uart_init(ScpiParser* scpi) {
-    uint8_t uart = scpi->nodeNum(1);
+    ChanIndex uart = scpi->nodeNum(1);
     if (uart < 0) {
         errSuffixOutOfRange(scpi);
         return CommandResult::Error;
@@ -45,12 +49,16 @@ CommandResult uart_init(ScpiParser* scpi) {
     scpi->parseInt(lineTerm); // optional, doesn't matter if not specified
 
     baud = gPlatform.UART.init(uart, baud, txPin, rxPin, lineTerm);
+    if (baud == 0) {
+        errParamOutOfRange(scpi);
+        return CommandResult::Error;
+    }
 
     return CommandResult::Success;
 }
 
 CommandResult uart_write(ScpiParser* scpi) {
-    uint8_t uart = scpi->nodeNum(1);
+    ChanIndex uart = scpi->nodeNum(1);
     if (uart < 0) {
         errSuffixOutOfRange(scpi);
         return CommandResult::Error;
@@ -63,13 +71,19 @@ CommandResult uart_write(ScpiParser* scpi) {
     }
 
     if (len > 0) {
-        gPlatform.UART.write(uart, len, (uint8_t*) buf);
+        if (gPlatform.UART.write(uart, len, (uint8_t*)buf) != static_cast<size_t>(len)) {
+            errCommand(scpi);
+            return CommandResult::Error;
+        }
         //gPlatform.IO.Print(len, buf);
         //gPlatform.IO.Print('\n');
         
         uint8_t term = gPlatform.UART.termChar(uart);
         if (term != 0) {
-            gPlatform.UART.write(uart, 1, &term);
+            if (gPlatform.UART.write(uart, 1, &term) != 1) {
+                errCommand(scpi);
+                return CommandResult::Error;
+            }
         }
 
         return CommandResult::Success;
@@ -79,7 +93,7 @@ CommandResult uart_write(ScpiParser* scpi) {
 }
 
 QueryResult uart_read(ScpiParser* scpi) {
-    uint8_t uart = scpi->nodeNum(1);
+    ChanIndex uart = scpi->nodeNum(1);
     if (uart < 0) {
         errSuffixOutOfRange(scpi);
         return QueryResult::Error;
@@ -103,7 +117,12 @@ QueryResult uart_read(ScpiParser* scpi) {
             return QueryResult::Error;
         }
 
+        uint8_t requested = len;
         len = gPlatform.UART.read(uart, len, uart_buf);
+        if (len != requested) {
+            errCommand(scpi);
+            return QueryResult::Error;
+        }
         PrintBlock(len, uart_buf);
         gPlatform.IO.Print('\n');
     } else if (term != 0) {
@@ -113,7 +132,10 @@ QueryResult uart_read(ScpiParser* scpi) {
         gPlatform.IO.Print(',');
 
         while (byte != term) {
-            gPlatform.UART.read(uart, 1, &byte);
+            if (gPlatform.UART.read(uart, 1, &byte) != 1) {
+                errCommand(scpi);
+                return QueryResult::Error;
+            }
             gPlatform.IO.Print((char)byte);
         }
     } else {

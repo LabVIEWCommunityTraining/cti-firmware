@@ -1,9 +1,6 @@
-set(AVR_UPLOADTOOL avrdude)
-set(AVR_PROGRAMMER avrispmkII)
-set(AVR_UPLOADTOOL_PORT usb)
-
-##########################################################################
-# AVR and fuses needs to be set
-##########################################################################
-set(AVR_MCU atmega328p)
-set(MCU_SPEED 16000000ul)
+function(cti_configure_board CTI_BOARD_DIR TARGET)
+    target_sources(${TARGET} PRIVATE
+        "${CTI_BOARD_DIR}/arduino_uno_board.cpp"
+    )
+    target_include_directories(${TARGET} PRIVATE "${CTI_BOARD_DIR}")
+endfunction()

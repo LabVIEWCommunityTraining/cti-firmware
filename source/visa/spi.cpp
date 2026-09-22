@@ -6,11 +6,15 @@ namespace Visa {
 
 using namespace SCPI;
 
-const uint8_t spi_buf_len = 255;
+#ifndef CTI_IO_BUFFER_LENGTH
+#define CTI_IO_BUFFER_LENGTH 255
+#endif
+
+const uint8_t spi_buf_len = CTI_IO_BUFFER_LENGTH;
 uint8_t spi_buf[spi_buf_len + 1]; // extra byte to accomodate null termination
 
 CommandResult spi_init(ScpiParser* scpi) {
-    uint8_t bus = scpi->nodeNum(1);
+    ChanIndex bus = scpi->nodeNum(1);
     if (bus < 0) {
         errSuffixOutOfRange(scpi);
         return CommandResult::Error;
@@ -48,12 +52,16 @@ CommandResult spi_init(ScpiParser* scpi) {
     }
 
     baud = gPlatform.SPI.init(bus, baud, spiMode, bits, mosiPin, misoPin, sckPin);
+    if (baud == 0) {
+        errParamOutOfRange(scpi);
+        return CommandResult::Error;
+    }
 
     return CommandResult::Success;
 }
 
 CommandResult spi_write(ScpiParser* scpi) {
-    uint8_t bus = scpi->nodeNum(1);
+    ChanIndex bus = scpi->nodeNum(1);
     if (bus < 0) {
         errSuffixOutOfRange(scpi);
         return CommandResult::Error;
@@ -67,7 +75,10 @@ CommandResult spi_write(ScpiParser* scpi) {
     }
 
     if (len > 0) {
-        gPlatform.SPI.write(bus, len, (uint8_t*)buf);
+        if (gPlatform.SPI.write(bus, len, (uint8_t*)buf) != static_cast<size_t>(len)) {
+            errCommand(scpi);
+            return CommandResult::Error;
+        }
         //gPlatform.IO.Print(len, buf);
         //gPlatform.IO.Print('\n');
 
@@ -88,7 +99,7 @@ QueryResult spi_available(ScpiParser* scpi) {
 }
 
 QueryResult spi_read(ScpiParser* scpi) {
-    uint8_t bus = scpi->nodeNum(1);
+    ChanIndex bus = scpi->nodeNum(1);
     if (bus < 0) {
         errSuffixOutOfRange(scpi);
         return QueryResult::Error;
@@ -109,7 +120,12 @@ QueryResult spi_read(ScpiParser* scpi) {
         return QueryResult::Error;
     }
 
+    uint8_t requested = len;
     len = gPlatform.SPI.read(bus, len, spi_buf, (uint8_t*)data);
+    if (len != requested) {
+        errCommand(scpi);
+        return QueryResult::Error;
+    }
 
     PrintBlock(len, spi_buf);
     gPlatform.IO.Print('\n');

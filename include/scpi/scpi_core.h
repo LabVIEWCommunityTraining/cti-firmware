@@ -3,9 +3,8 @@
 
 #include "cti/platform.h"
 
-#include <cstdint>
-#include <cstdlib>
-#include <vector>
+#include <stdint.h>
+#include <stdlib.h>
 
 #ifndef SCPI_ERROR_QUEUE_SIZE
 #define SCPI_ERROR_QUEUE_SIZE 10
@@ -13,6 +12,18 @@
 
 #ifndef SCPI_ERROR_STR_SIZE
 #define SCPI_ERROR_STR_SIZE 256
+#endif
+
+#ifndef SCPI_MAX_COMMANDS
+#define SCPI_MAX_COMMANDS 40
+#endif
+
+#ifndef SCPI_MAX_DEPTH
+#define SCPI_MAX_DEPTH 4
+#endif
+
+#ifndef SCPI_INPUT_BUFFER_LENGTH
+#define SCPI_INPUT_BUFFER_LENGTH 2048
 #endif
 
 namespace CTI {
@@ -50,6 +61,7 @@ namespace SCPI {
         Ambiguous,
         InvalidHandler,
         AlreadyFinalized,
+        CapacityExceeded,
     } ;
 
     enum class ParserState {
@@ -83,14 +95,15 @@ namespace SCPI {
         Unknown,
     };
 
-    class ScpiNode;
     class ScpiParser;
 
     class NumParamVector {
     public:
         NumParamVector() {
-            _nums = nullptr;
             _count = 0;
+            for (uint8_t i = 0; i < SCPI_MAX_DEPTH; ++i) {
+                _nums[i] = -1;
+            }
         }
 
         int8_t get(uint8_t index) const {
@@ -111,16 +124,14 @@ namespace SCPI {
         }
 
         bool reserve(uint8_t size) {
-            if (!_nums) {
-                _nums = (int8_t*)malloc(size);
-                _count = size;
-                return true;
+            if (size > SCPI_MAX_DEPTH) {
+                return false;
             }
-
-            return false;
+            _count = size;
+            return true;
         }
     private:
-        int8_t* _nums;
+        int8_t _nums[SCPI_MAX_DEPTH];
         uint8_t _count;
     };
 
@@ -166,65 +177,6 @@ namespace SCPI {
     } ScpiChoice;
 
     extern ScpiChoice EndScpiChoice;
-
-    class ScpiNode {
-    public:
-        ScpiNode();
-        ScpiNode(const char* nodeString, uint8_t strLen, uint8_t depth, ScpiCommand cmdHandler, ScpiQuery queryHandler);
-        
-        RegistrationResult addChild(ScpiNode* node);
-
-        bool matches (const char* candidate, uint8_t len);
-
-        int8_t nodeNum (const char* str, uint8_t len);
-
-        bool hasNum() {
-            return _hasNum;
-        }
-
-        uint8_t depth() {
-            return _depth;
-        }
-
-        ScpiNode* lookupChild(const char* str, uint8_t len);
-
-        CommandResult invokeCommand(ScpiParser* parser) {
-            if (_cmdHandler != nullptr) {
-                return _cmdHandler(parser);
-            }
-
-            return CommandResult::NoHandler;
-        };
-
-        QueryResult invokeQuery(ScpiParser* parser) {
-            if (_queryHandler != nullptr) {
-                return _queryHandler(parser);
-            }
-
-            return QueryResult::NoHandler;
-        };
-
-        void printNode(bool recurse);
-
-    private:
-        const char* _nodeStr;
-        uint8_t _strLen;
-        
-        uint8_t _reqLen;
-
-        bool _hasNum;
-        bool _optional;
-
-        uint8_t _depth;
-
-        ScpiNode* _parent;
-
-        std::vector<ScpiNode*> _children;
-
-        ScpiCommand _cmdHandler;
-
-        ScpiQuery _queryHandler;
-    };
 
     class ScpiParser {
     public:
@@ -293,9 +245,7 @@ namespace SCPI {
             return _buf[_paramPos];
         }
 
-        ScpiNode* curNode() {
-            return _curNode;
-        }
+
 
         ChanIndex nodeNum(uint8_t level) {
             return _nodeNums.get(level);
@@ -304,6 +254,7 @@ namespace SCPI {
     private:
         ParserStatus parseNode();
         ParserStatus invokeNode();
+        bool isMessageTerminator() const;
 
         void consumeWhiteSpace() {
             while (_paramPos < _bufSize &&
@@ -314,9 +265,11 @@ namespace SCPI {
         }
 
         bool isEndOfParam() {
+            if (_paramPos >= _bufSize) {
+                return true;
+            }
             char c = _buf[_paramPos];
-            bool isEnd = (_paramPos == _bufSize || 
-                c == ' ' ||
+            bool isEnd = (c == ' ' ||
                 c == '\n' ||
                 c == '\t' ||
                 c == '\r' ||
@@ -331,6 +284,9 @@ namespace SCPI {
         }
 
         NumberFormat numberFormat() {
+            if (_paramPos >= _bufSize) {
+                return NumberFormat::Invalid;
+            }
             if (_buf[_paramPos] == '#') {
                 //Has a numeric format specifier
                 _paramPos++;
@@ -452,7 +408,7 @@ namespace SCPI {
         ParseResult parseHex(T& val, uint8_t maxDigits) {
             val = 0;
 
-            for (int i = 0; i < maxDigits & _paramPos < _bufSize; ++i) {
+            for (int i = 0; i < maxDigits && _paramPos < _bufSize; ++i) {
                 char c = _buf[_paramPos];
                 val = val << 4;
 
@@ -481,7 +437,7 @@ namespace SCPI {
         ParseResult parseOct(T& val, uint8_t maxDigits) {
             val = 0;
 
-            for (int i = 0; i < maxDigits & _paramPos < _bufSize; ++i) {
+            for (int i = 0; i < maxDigits && _paramPos < _bufSize; ++i) {
                 char c = _buf[_paramPos];
                 val = val << 3;
 
@@ -503,6 +459,9 @@ namespace SCPI {
         template <class T>
         ParseResult parseRealFormat(T& val) {
             consumeWhiteSpace();
+            if (_paramPos >= _bufSize) {
+                return ParseResult::EndOfData;
+            }
 
             val = 0;
             bool neg = false;
@@ -524,7 +483,7 @@ namespace SCPI {
                 }
             }
 
-            if (_buf[_paramPos] == '.') {
+            if (_paramPos < _bufSize && _buf[_paramPos] == '.') {
                 _paramPos++;
 
                 int frac = 0;
@@ -555,6 +514,13 @@ namespace SCPI {
             return ParseResult::Success;
         }
 
+        struct CommandEntry {
+            const char* pattern;
+            ScpiCommand command;
+            ScpiQuery query;
+        };
+
+        char _bufferStorage[SCPI_INPUT_BUFFER_LENGTH];
         char* _buf;
         int _bufSize;
         int _bufCapacity;
@@ -567,13 +533,13 @@ namespace SCPI {
 
         uint8_t _maxDepth;
 
-        ScpiNode* _treeRoot;
-
         NumParamVector _nodeNums;
 
         ParserState _state;
 
-        ScpiNode* _curNode;
+        CommandEntry _commands[SCPI_MAX_COMMANDS];
+        uint8_t _commandCount;
+        CommandEntry* _curCommand;
 
         ScpiErrorQueue _err;
     };

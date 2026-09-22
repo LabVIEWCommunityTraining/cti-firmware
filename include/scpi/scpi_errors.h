@@ -6,7 +6,9 @@
 namespace CTI {
 namespace SCPI {
 
+#ifndef SCPI_ERR_BUFFER_SIZE
 #define SCPI_ERR_BUFFER_SIZE 255
+#endif
 
 bool errCommand(ScpiParser* scpi);
 

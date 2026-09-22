@@ -1,93 +1,54 @@
 #include "avr_timer.h"
 
-#include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/io.h>
+#include <util/atomic.h>
 
-#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
-#define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
-#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
-
-// the prescaler is set so that timer0 ticks every 64 clock cycles, and the
-// the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
-
-// the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
-
-// the fractional number of milliseconds per timer0 overflow. we shift right
-// by three to fit these numbers into a byte. (for the clock speeds we care
-// about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
-#define FRACT_MAX (1000 >> 3)
-
-volatile unsigned long timer0_overflow_count = 0;
-volatile unsigned long timer0_millis = 0;
-static unsigned char timer0_fract = 0;
+namespace {
+volatile uint32_t timer0OverflowCount;
+volatile uint32_t timer0Millis;
+volatile uint8_t timer0Fraction;
+}
 
 ISR(TIMER0_OVF_vect) {
-	// copy these to local variables so they can be stored in registers
-	// (volatile variables must be read from memory on every access)
-	unsigned long m = timer0_millis;
-	unsigned char f = timer0_fract;
+    uint32_t millisValue = timer0Millis + 1;
+    uint8_t fraction = static_cast<uint8_t>(timer0Fraction + 3);
 
-	m += MILLIS_INC;
-	f += FRACT_INC;
-	if (f >= FRACT_MAX) {
-		f -= FRACT_MAX;
-		m += 1;
-	}
+    if (fraction >= 125) {
+        fraction = static_cast<uint8_t>(fraction - 125);
+        ++millisValue;
+    }
 
-	timer0_fract = f;
-	timer0_millis = m;
-	timer0_overflow_count++;
+    timer0Fraction = fraction;
+    timer0Millis = millisValue;
+    ++timer0OverflowCount;
 }
 
-unsigned long millis() {
-	unsigned long m;
-	uint8_t oldSREG = SREG;
-
-	// disable interrupts while we read timer0_millis or we might get an
-	// inconsistent value (e.g. in the middle of a write to timer0_millis)
-	cli();
-	m = timer0_millis;
-	SREG = oldSREG;
-
-	return m;
+uint32_t millis() {
+    uint32_t value;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        value = timer0Millis;
+    }
+    return value;
 }
 
-unsigned long micros() {
-    return (millis() * 1000) + (TCNT0 * 4) ;
-}
+uint32_t micros() {
+    uint32_t overflows;
+    uint8_t counter;
 
-void delay_us(unsigned int us)
-{
-    // calling avrlib's delay_us() function with low values (e.g. 1 or
-    // 2 microseconds) gives delays longer than desired.
-    //delay_us(us);
-    // for the 16 MHz clock on most Arduino boards
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+        overflows = timer0OverflowCount;
+        counter = TCNT0;
+        if ((TIFR0 & _BV(TOV0)) && counter < 255) {
+            ++overflows;
+        }
+    }
 
-    // for a one-microsecond delay, simply return.  the overhead
-    // of the function call yields a delay of approximately 1 1/8 us.
-    if (--us == 0)
-            return;
-
-    // the following loop takes a quarter of a microsecond (4 cycles)
-    // per iteration, so execute it four times for each microsecond of
-    // delay requested.
-    us <<= 2;
-
-    // account for the time taken in the preceeding commands.
-    us -= 2;
-
-    // busy wait
-    __asm__ __volatile__ (
-            "1: sbiw %0,1" "\n\t" // 2 cycles
-            "brne 1b" : "=w" (us) : "0" (us) // 2 cycles
-    );
+    return ((overflows << 8) + counter) * 4UL;
 }
 
 void initTimer() {
-    TCCR0A |= (1<<WGM01) | (1<<WGM00);
-    TCCR0B |= (1<<CS01) | (1<<CS00);
-	TIMSK0 |= (1<<TOIE0);
+    TCCR0A = _BV(WGM01) | _BV(WGM00);
+    TCCR0B = _BV(CS01) | _BV(CS00);
+    TIMSK0 = _BV(TOIE0);
 }

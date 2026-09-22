@@ -8,7 +8,7 @@
 
 #include "scpi.h"
 
-#include <cstring>
+#include <string.h>
 
 namespace CTI {
 namespace Visa {
@@ -231,7 +231,10 @@ namespace Visa {
         }
 
         //Arbitrary block header #<LenDigitCount><Len>
-        gPlatform.IO.Printf("#%d%d", digits, len);
+        gPlatform.IO.Printf(
+            "#%u%u",
+            static_cast<unsigned>(digits),
+            static_cast<unsigned>(len));
 
         //iterate over data portion of block and send as-is
         for (size_t i = 0; i < len; ++i) {
