@@ -1,7 +1,10 @@
 #include "cti/platform.h"
+#include "cti_board.h"
 
 #include <esp_adc/adc_oneshot.h>
 #include <driver/gpio.h>
+#include <driver/uart.h>
+#include <esp_err.h>
 #include <esp_rom_sys.h>
 
 #include <cstdio>
@@ -12,13 +15,14 @@ namespace CTI {
 
 static adc_oneshot_unit_handle_t adc_unit = nullptr;
 static bool gpio_output[GPIO_NUM_MAX] = {};
+static bool console_uart_ready = false;
 
-static LVBlock availableGPIOs = { 44, {
-    0x00, 0x00, 0x00, 0x28,
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
-    0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
-    0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D,
-    0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27
+static LVBlock availableGPIOs = { 32, {
+    0x00, 0x00, 0x00, 0x1C,
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+    0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
+    0x15, 0x16, 0x17, 0x19, 0x1A, 0x1B,
+    0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27
 }};
 
 LVBlock* PlatformDigital::Available() { return &availableGPIOs; }
@@ -51,11 +55,27 @@ void PlatformDigital::GetPull(ChanIndex, PullDirection* dir) {
     *dir = None;
 }
 
-static LVBlock availableAIs = { 10, { 0x00, 0x00, 0x00, 0x03, 0x00, 0x32, 0x01, 0x33, 0x02, 0x34 } };
+static LVBlock availableAIs = { 12, {
+    0x00, 0x00, 0x00, 0x04,
+    0x00, CTI_BOARD_ADC0_GPIO,
+    0x01, CTI_BOARD_ADC1_GPIO,
+    0x02, CTI_BOARD_ADC2_GPIO,
+    0x03, CTI_BOARD_ADC3_GPIO
+} };
+
+static constexpr adc_channel_t adc_channels[] = {
+    ADC_CHANNEL_0,
+    ADC_CHANNEL_1,
+    ADC_CHANNEL_2,
+    ADC_CHANNEL_3
+};
 
 LVBlock* PlatformAnalog::Available() { return &availableAIs; }
 
 void PlatformAnalog::EnableInput(ChanIndex channel) {
+    if (channel < 0 || channel >= static_cast<ChanIndex>(sizeof(adc_channels) / sizeof(adc_channels[0]))) {
+        return;
+    }
     if (!adc_unit) {
         adc_oneshot_unit_init_cfg_t unit_config = {};
         unit_config.unit_id = ADC_UNIT_1;
@@ -64,19 +84,36 @@ void PlatformAnalog::EnableInput(ChanIndex channel) {
     adc_oneshot_chan_cfg_t channel_config = {};
     channel_config.atten = ADC_ATTEN_DB_12;
     channel_config.bitwidth = ADC_BITWIDTH_12;
-    adc_oneshot_config_channel(adc_unit, static_cast<adc_channel_t>(channel), &channel_config);
+    adc_oneshot_config_channel(adc_unit, adc_channels[channel], &channel_config);
 }
 
 void PlatformAnalog::GetInput(ChanIndex channel, uint16_t* value) {
+    if (channel < 0 || channel >= static_cast<ChanIndex>(sizeof(adc_channels) / sizeof(adc_channels[0]))) {
+        *value = 0;
+        return;
+    }
     if (!adc_unit) EnableInput(channel);
     int raw = 0;
-    adc_oneshot_read(adc_unit, static_cast<adc_channel_t>(channel), &raw);
+    adc_oneshot_read(adc_unit, adc_channels[channel], &raw);
     *value = static_cast<uint16_t>(raw);
 }
 
 int PlatformIO::_getchar_timeout_us(uint32_t timeout_us) {
-    int c = getchar();
-    return c == EOF ? -1 : c;
+    static constexpr uint32_t kMaxWaitMs = 1000;
+
+    if (!console_uart_ready) {
+        const esp_err_t err = uart_driver_install(UART_NUM_0, 256, 0, 0, nullptr, 0);
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            return -1;
+        }
+        console_uart_ready = true;
+    }
+
+    uint8_t c = 0;
+    const uint32_t timeout_ms = (timeout_us > 1000U * 1000U) ? kMaxWaitMs : (timeout_us + 999U) / 1000U;
+
+    const int count = uart_read_bytes(UART_NUM_0, &c, 1, timeout_ms);
+    return (count == 1) ? c : -1;
 }
 
 void PlatformIO::InitStatusLED() {}

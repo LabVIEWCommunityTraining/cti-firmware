@@ -86,6 +86,36 @@ Before merging a new family or board:
 
 For ESP32, first choose the exact family and framework (ESP-IDF or the repository's supported Arduino integration), then add `platform/esp32/` and one board directory per module. Resolve GPIO matrix/pin-strap restrictions, ADC attenuation and calibration, LEDC PWM clock behavior, UART/I2C/SPI controller assignment, flash/partition layout, and reset/log output before attempting feature parity. Keep Wi-Fi/BLE and FreeRTOS integration board-local until the core CTI transport and command behavior pass the validation gate.
 
+### ESP32 porting lessons
+
+Apply these checks before writing platform code:
+
+- Start from the exact board/module pinout or schematic, not the product name or a similar board. Heltec-style ESP32 LoRa boards commonly differ from other ESP32 LoRa boards: for the validated HTIT-WB32LA/Heltec-style layout, OLED uses SDA `GPIO4`, SCL `GPIO15`, and reset `GPIO16`; LoRa uses MOSI `GPIO27`, MISO `GPIO19`, SCK `GPIO5`, CS `GPIO18`, reset `GPIO14`, and DIO0 `GPIO26`; the status LED is `GPIO25`.
+- Put every board-specific pin in `boards/<board>/cti_board.h`. Do not leave OLED, LoRa, LED, or ADC pins hardcoded in family-level files.
+- Treat `LVBlock` capability responses as a wire-format contract. The declared `len`, the payload byte count, and every embedded count must agree. A mismatch causes SCPI binary-block desynchronization or trailing bytes. Before building, count each descriptor explicitly for GPIO, ADC, PWM, UART, I2C, and SPI, then compare the decoded response with a known-good Pico response.
+- ESP32 ADC resources require two mappings: the advertised physical GPIO and the ESP-IDF ADC channel. Do not pass a logical resource index directly to `adc_oneshot_*`. On classic ESP32, exposed ADC1 GPIOs 36-39 map to ADC1 channels 0-3; avoid ADC2 when Wi-Fi may be enabled.
+- Exclude GPIO6-11 from general-purpose, PWM, and UART capability lists on classic ESP32 modules because they are normally connected to SPI flash. Also exclude board-reserved OLED/LoRa/LED pins from generic GPIO/PWM lists unless the protocol intentionally exposes shared-function pins.
+- Use ESP32 SPI2/SPI3 hosts for user SPI. SPI1 is normally reserved for flash and must not be selected for application transactions. Advertise the actual MOSI/MISO/SCK pins from the board definition, and configure the same host in `spi_bus_initialize` and `spi_bus_add_device`.
+- UART0 is the USB/UART console. A direct `uart_read_bytes(UART_NUM_0, ...)` timeout reader requires a UART driver to be installed; initialize it once and tolerate `ESP_ERR_INVALID_STATE` if the console already owns the driver. Do not advertise UART2 on GPIO16/17 when those pins are used by OLED reset or other board functions.
+- ESP-IDF `GPIO_NUM_MAX` and `CONFIG_SOC_GPIO_IN_RANGE_MAX` are useful bounds, not a board capability list. Build the advertised GPIO list from the module pinout and flash/strap restrictions. A binary list containing nonexistent GPIO50+ values is invalid even if the descriptor length is correct.
+- Keep board selection dynamic in the ESP-IDF component CMake file. Resolve `boards/${CTI_BOARD}`, include its directory, compile its `.cpp` files, and derive `_CTI_BOARD` from the selected board. Never hardcode a legacy board source or board macro in the component registration.
+- Use a clean, board-specific build directory after changing CMake, board selection, or descriptor structure. Verify `*IDN?`, every `*:AVAIL?` response, and representative read/write commands on hardware; a successful link or flash is not resource validation.
+
+## Arduino porting lessons
+
+For Arduino-compatible targets, distinguish the MCU, bootloader, USB bridge, and Arduino core. A board name alone does not define the serial reset behavior, pin numbering, timer layout, ADC reference, or upload protocol.
+
+- Treat the Arduino pin namespace as part of the public contract. Document whether a resource uses raw MCU GPIO numbers or Arduino pin numbers, and keep the conversion in the board definition. Do not mix `A0`/`D13` names with raw GPIO values in capability descriptors.
+- Reserve the control UART before advertising other UART resources. On an Arduino Uno, D0/D1 are owned by the ATmega16U2 USB bridge and SCPI transport, so the firmware must not expose them as a second user UART.
+- Account for bootloader timing and DTR behavior. Optiboot normally resets when the virtual COM port opens and owns the UART briefly; hosts should wait at least one second, preferably two, before sending the first command. A partial command received during reset cannot be repaired by the application.
+- Keep startup output intentional. If the canonical target is silent during reset, do not add debug text that can be mistaken for a SCPI response. Preserve LF bytes exactly; never translate binary payload bytes to CRLF.
+- Derive PWM availability from actual timers and pins, not from a generic Arduino list. On the Uno, D5/D6 share Timer0 with the firmware timebase, D9/D10 share Timer1, and D3/D11 share Timer2. Document shared-timer side effects and reject unsupported phase-correct, top, divider, or frequency operations explicitly.
+- Derive ADC availability from the real ADC mux and reference. Document resolution, voltage reference, attenuation, and whether an analog pin is also advertised as digital I/O. Do not advertise internal temperature or DAC resources unless the MCU provides a dependable implementation.
+- Keep capability descriptors exact on small-memory targets. Check `LVBlock.len`, payload bytes, embedded counts, and the SCPI block header together. Use bounded static buffers and avoid heap-backed parser or transfer structures when the MCU's SRAM is constrained.
+- Keep I2C, SPI, and UART transfers bounded by the board's memory profile. Verify mode, word size, clock-divider quantization, pin ownership, and transaction length against the MCU datasheet; do not assume the ESP32 or Pico implementation can be copied to AVR.
+- Pin the Arduino toolchain and upload protocol in the board README. Record compiler/core version, `avrdude` programmer, baud rate, MCU part, reset behavior, artifact type, and the exact flash command. Build and upload from separate target directories.
+- Validate with one persistent serial session: open the port, wait through reset, send exactly `*IDN?\n`, read through LF, then repeat without reopening. Also test every `*:AVAIL?` response byte-for-byte and verify that binary payloads containing `0x0A` do not desynchronize the parser.
+
 ## Completion checklist
 
 - [ ] New family is a sibling platform; existing targets are not generalized or rewritten.

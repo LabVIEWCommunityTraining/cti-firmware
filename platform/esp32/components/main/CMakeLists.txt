@@ -4,6 +4,18 @@ file(GLOB CTI_SOURCE_FILES
     "${CMAKE_CURRENT_LIST_DIR}/../../../../source/visa/*.cpp"
 )
 
+if(NOT DEFINED CTI_BOARD OR CTI_BOARD STREQUAL "")
+    set(CTI_BOARD "htit-wb32la")
+endif()
+
+set(CTI_BOARD_DIR "${CMAKE_CURRENT_LIST_DIR}/../../boards/${CTI_BOARD}")
+if(NOT EXISTS "${CTI_BOARD_DIR}/cti_board.h")
+    message(FATAL_ERROR "CTI board directory not found for '${CTI_BOARD}': ${CTI_BOARD_DIR}")
+endif()
+
+file(GLOB CTI_BOARD_SOURCE_FILES "${CTI_BOARD_DIR}/*.cpp")
+string(REPLACE "-" "_" CTI_BOARD_DEFINE "${CTI_BOARD}")
+
 idf_component_register(
     SRCS
         "${CMAKE_CURRENT_LIST_DIR}/../../main.cpp"
@@ -14,7 +26,7 @@ idf_component_register(
         "${CMAKE_CURRENT_LIST_DIR}/../../platform/esp32_pwm.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/../../platform/esp32_timer.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/../../platform/esp32_visa.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/../../boards/wishio-lora-915/wishio_board.cpp"
+        ${CTI_BOARD_SOURCE_FILES}
     INCLUDE_DIRS
         "${CMAKE_CURRENT_LIST_DIR}/../../../../include"
         "${CMAKE_CURRENT_LIST_DIR}/../../../../include/cti"
@@ -22,7 +34,7 @@ idf_component_register(
         "${CMAKE_CURRENT_LIST_DIR}/../../../../include/scpi"
         "${CMAKE_CURRENT_LIST_DIR}/../../../../platform/common/include"
         "${CMAKE_CURRENT_LIST_DIR}/../../../../source"
-        "${CMAKE_CURRENT_LIST_DIR}/../../boards/wishio-lora-915"
+        "${CTI_BOARD_DIR}"
     REQUIRES
         driver
         esp_adc
@@ -38,7 +50,7 @@ idf_component_register(
 target_compile_definitions(${COMPONENT_LIB} PUBLIC
     CTI_VISA=1
     _CTI_PLATFORM=esp32
-    _CTI_BOARD=wishio_lora_915
+    _CTI_BOARD=${CTI_BOARD_DEFINE}
     CTI_VER_MAJOR=0
     CTI_VER_MINOR=9
     CTI_VER_PATCH=4

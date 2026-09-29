@@ -1,4 +1,5 @@
 #include "cti/platform.h"
+#include "cti_board.h"
 
 #include <esp_system.h>
 #include <esp_timer.h>
@@ -26,7 +27,7 @@ void Platform::Init() {
 void Platform::Shutdown() {
 }
 
-const char* PlatformInfo::Model() const { return "ESP32-WishioT-LoRa-915-Visa"; }
+const char* PlatformInfo::Model() const { return CTI_HW_BOARD_NAME; }
 const char* PlatformInfo::SerialNum() const { return unique_id; }
 
 CTI::platform_tick_t CTI::PlatformTimer::TickCount() {

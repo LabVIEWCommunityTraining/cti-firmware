@@ -11,11 +11,11 @@ static uart_port_t uarts[] = { UART_NUM_0, UART_NUM_1, UART_NUM_2 };
 static uint8_t uart_terms[] = { 0, 0, 0 };
 static i2c_port_t i2cs[] = { I2C_NUM_0, I2C_NUM_1 };
 static spi_device_handle_t spi_devices[2] = {};
+static constexpr spi_host_device_t spi_hosts[] = { SPI2_HOST, SPI3_HOST };
 
-static LVBlock availableUARTs = { 24, {
-    0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
-    0x03, 0x01, 0x04, 0x05, 0x00, 0x00, 0x00, 0x01,
-    0x02, 0x03, 0x00, 0x00, 0x00, 0x01, 0x06, 0x07
+static LVBlock availableUARTs = { 15, {
+    0x00, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x01, 0x03, 0x00, 0x00, 0x00, 0x01, 0x01
 }};
 
 PlatformUART::PlatformUART() {}
@@ -50,7 +50,15 @@ size_t PlatformUART::read(uint8_t uart, size_t len, uint8_t* buf) {
     return count;
 }
 
-static LVBlock availableI2Cs = { 14, { 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x04, 0x01, 0x05, 0x00 } };
+static LVBlock availableI2Cs = { 24, {
+    0x00, 0x00, 0x00, 0x02,
+    0x00,
+    0x00, 0x00, 0x00, 0x01, 0x0F,
+    0x00, 0x00, 0x00, 0x01, 0x04,
+    0x01,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+}};
 PlatformI2C::PlatformI2C() {}
 LVBlock* PlatformI2C::Available() { return &availableI2Cs; }
 
@@ -75,7 +83,13 @@ size_t PlatformI2C::read(uint8_t bus, uint8_t addr, size_t len, uint8_t* buf, bo
     return i2c_master_read_from_device(i2cs[bus], addr, buf, len, pdMS_TO_TICKS(1000)) == ESP_OK ? len : 0;
 }
 
-static LVBlock availableSPIs = { 10, { 0x00, 0x00, 0x00, 0x01, 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 } };
+static LVBlock availableSPIs = { 20, {
+    0x00, 0x00, 0x00, 0x01,
+    0x00,
+    0x00, 0x00, 0x00, 0x01, 0x1B,
+    0x00, 0x00, 0x00, 0x01, 0x13,
+    0x00, 0x00, 0x00, 0x01, 0x05
+}};
 PlatformSPI::PlatformSPI() {}
 LVBlock* PlatformSPI::Available() { return &availableSPIs; }
 
@@ -84,13 +98,15 @@ uint32_t PlatformSPI::init(uint8_t bus, uint32_t baud, uint8_t mode, uint8_t bit
     bus_config.mosi_io_num = mosiPin;
     bus_config.miso_io_num = misoPin;
     bus_config.sclk_io_num = sckPin;
-    spi_bus_initialize(static_cast<spi_host_device_t>(bus), &bus_config, SPI_DMA_CH_AUTO);
+    if (bus >= sizeof(spi_hosts) / sizeof(spi_hosts[0])) return 0;
+    const spi_host_device_t host = spi_hosts[bus];
+    spi_bus_initialize(host, &bus_config, SPI_DMA_CH_AUTO);
     spi_device_interface_config_t device_config = {};
     device_config.clock_speed_hz = baud;
     device_config.mode = mode;
     device_config.spics_io_num = -1;
     device_config.queue_size = 1;
-    spi_bus_add_device(static_cast<spi_host_device_t>(bus), &device_config, &spi_devices[bus]);
+    spi_bus_add_device(host, &device_config, &spi_devices[bus]);
     return baud;
 }
 

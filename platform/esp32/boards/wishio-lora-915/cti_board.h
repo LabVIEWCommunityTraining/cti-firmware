@@ -10,3 +10,7 @@
 #define CTI_BOARD_LORA_CS_GPIO     18
 #define CTI_BOARD_LORA_RESET_GPIO  14
 #define CTI_BOARD_LORA_DIO0_GPIO   26
+#define CTI_BOARD_ADC0_GPIO        32
+#define CTI_BOARD_ADC1_GPIO        33
+#define CTI_BOARD_ADC2_GPIO        34
+#define CTI_BOARD_ADC3_GPIO        35
