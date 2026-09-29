@@ -1,12 +1,9 @@
-#ifndef SERIAL_H_
-#define SERIAL_H_
+#ifndef CTI_AVR_SERIAL_H
+#define CTI_AVR_SERIAL_H
 
-#include <stdio.h>
+#include <stdint.h>
 
-void initSerial(long baud);
+void initSerial(uint32_t baud);
+int avrSerialGetcharTimeout(uint32_t timeoutUs);
 
-void printDec(const float &val);
-void printDec(float *val);
-void printDec(volatile float *val);
-
-#endif //SERIAL_H_
+#endif

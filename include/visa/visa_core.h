@@ -6,8 +6,6 @@
 
 //#include <vector>
 
-#define SCPI_INPUT_BUFFER_LENGTH 2048
-
 namespace CTI {
 namespace Visa {
     

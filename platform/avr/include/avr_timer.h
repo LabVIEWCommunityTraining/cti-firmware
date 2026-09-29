@@ -1,11 +1,10 @@
-#ifndef TIMER_H_
-#define TIMER_H_
+#ifndef CTI_AVR_TIMER_H
+#define CTI_AVR_TIMER_H
+
+#include <stdint.h>
 
 void initTimer();
+uint32_t millis();
+uint32_t micros();
 
-unsigned long millis();
-unsigned long micros();
-
-void delay_us(unsigned int us);
-
-#endif //TIMER_H_
+#endif

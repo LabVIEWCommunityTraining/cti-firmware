@@ -9,9 +9,10 @@ Current supported platforms/boards:
 * RP2040 (pico-sdk toolchain)
   * Pi Pico (USB only)
   * WizFi360-EVB-Pico (WiFi + USB)
+* AVR (avr-gcc toolchain)
+  * ATmega328P (Arduino Uno, serial VISA/SCPI)
 
 Planned support, in no particular order:
 * AVR (Older Arduinos, avr-gcc toolchain)
-  * ATmega328p (Arduino Uno)
   * ATmega1280/2560 (Arduino Mega)
 * ESP32

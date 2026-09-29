@@ -1,98 +1,65 @@
 #include "avr_serial.h"
-#include "circularbuffer.h"
+#include "avr_timer.h"
 
-#include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/io.h>
+#include <stdio.h>
 
-#include <math.h>
-#include <stdlib.h>
+namespace {
+constexpr uint8_t RxBufferSize = 32;
+volatile uint8_t rxBuffer[RxBufferSize];
+volatile uint8_t rxHead;
+volatile uint8_t rxTail;
 
-//#include <stdint.h>
-
-CircularBuffer _rx(true);
-CircularBuffer _tx(true);
-
-ISR(USART_RX_vect) {
-    _rx.put(UDR0);
-}
-
-ISR(USART_UDRE_vect) {
-    if (_tx.isEmpty()) {
-        UCSR0B &= ~(1<<UDRIE0);
-    } else {
-        UDR0 = _tx.get();
+int uartPutchar(char value, FILE*) {
+    while (!(UCSR0A & _BV(UDRE0))) {
     }
-}
-
-static int uart_putchar(char c, FILE *stream) {
-    if (c == '\n')
-        uart_putchar('\r', stream);
-    
-    while (_tx.isFull());
-    
-    _tx.put(c);
-    
-    UCSR0B |= (1<<UDRIE0);
-    
+    UDR0 = static_cast<uint8_t>(value);
     return 0;
 }
 
-static int uart_getchar(FILE *stream) {
-    while (_rx.isEmpty());
-    
-    return _rx.get();
-}
-
-static FILE *_uartStream;
-
-void initSerial(long baud) {
-    _uartStream = fdevopen(uart_putchar, uart_getchar);
-    
-    uint16_t baud_setting = (F_CPU / 4 / baud - 1) / 2;
-    UCSR0A = 1 << U2X0;
-
-    // hardcoded exception for 57600 for compatibility with the bootloader
-    // shipped with the Duemilanove and previous boards and the firmware
-    // on the 8U2 on the Uno and Mega 2560. Also, The baud_setting cannot
-    // be > 4095, so switch back to non-u2x mode if the baud rate is too
-    // low.
-    if (((F_CPU == 16000000UL) && (baud == 57600)) || (baud_setting >4095)) {
-        UCSR0A = 0;
-        baud_setting = (F_CPU / 8 / baud - 1) / 2;
+int uartGetchar(FILE*) {
+    while (rxHead == rxTail) {
     }
 
-    // assign the baud_setting, a.k.a. ubrr (USART Baud Rate Register)
-    UBRR0H = baud_setting >> 8;
-    UBRR0L = baud_setting;
-    
-    UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);
-
-    UCSR0B |= (1<<RXEN0);
-    UCSR0B |= (1<<TXEN0);
-    UCSR0B |= (1<<RXCIE0);
-    UCSR0B &= ~(1<<UDRIE0);
+    uint8_t value = rxBuffer[rxTail];
+    rxTail = static_cast<uint8_t>((rxTail + 1) % RxBufferSize);
+    return value;
 }
 
-void printDec(const float &val) {
-    if (isnan(val)) {
-        printf("NaN");
-    } else {
-        printf("%c%d.%03d", (val < 0 ? '-' : ' '), abs((int)val), abs((int)(val * 1000) % 1000));
+FILE uartStream;
+}
+
+ISR(USART_RX_vect) {
+    uint8_t next = static_cast<uint8_t>((rxHead + 1) % RxBufferSize);
+    uint8_t value = UDR0;
+    if (next != rxTail) {
+        rxBuffer[rxHead] = value;
+        rxHead = next;
     }
 }
 
-void printDec(const float *val) {
-    if (isnan(*val)) {
-        printf("NaN");
-    } else {
-        printf("%c%d.%03d", (val < 0 ? '-' : ' '), abs((int)*val), abs((int)(*val * 1000) % 1000));
-    }
+void initSerial(uint32_t baud) {
+    uint16_t divisor = static_cast<uint16_t>((F_CPU + (baud * 4UL)) / (baud * 8UL) - 1UL);
+
+    UCSR0A = _BV(U2X0);
+    UBRR0H = static_cast<uint8_t>(divisor >> 8);
+    UBRR0L = static_cast<uint8_t>(divisor);
+    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
+    UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);
+
+    fdev_setup_stream(&uartStream, uartPutchar, uartGetchar, _FDEV_SETUP_RW);
+    stdin = &uartStream;
+    stdout = &uartStream;
+    stderr = &uartStream;
 }
 
-void printDec(volatile float *val) {
-    if (isnan(*val)) {
-        printf("NaN");
-    } else {
-        printf("%c%d.%03d", (val < 0 ? '-' : ' '), abs((int)*val), abs((int)(*val * 1000) % 1000));
+int avrSerialGetcharTimeout(uint32_t timeoutUs) {
+    uint32_t start = micros();
+    while (rxHead == rxTail) {
+        if (static_cast<uint32_t>(micros() - start) >= timeoutUs) {
+            return -1;
+        }
     }
+    return uartGetchar(nullptr);
 }

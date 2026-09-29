@@ -34,7 +34,7 @@ namespace Visa {
         uint16_t val;
         gPlatform.IO.Analog.GetInput(channel, &val);
 
-        gPlatform.IO.Printf("%d\n", val);
+        gPlatform.IO.Printf("%u\n", static_cast<unsigned>(val));
 
         return QueryResult::Success;
     }

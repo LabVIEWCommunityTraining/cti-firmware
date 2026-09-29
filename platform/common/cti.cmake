@@ -4,8 +4,8 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 #determine CTI source root
-get_filename_component(CTI_SOURCE_DIR "./source" ABSOLUTE)
-get_filename_component(CTI_INCLUDE_DIR "./include" ABSOLUTE)
+get_filename_component(CTI_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../source" ABSOLUTE)
+get_filename_component(CTI_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../include" ABSOLUTE)
 
 if (NOT CTI_PLATFORM)
     message("No CTI_PLATFORM set, defaulting to ${DEFAULT_CTI_PLATFORM}")

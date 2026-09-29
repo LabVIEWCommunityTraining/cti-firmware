@@ -33,7 +33,9 @@ int main() {
     gPlatform.Setup();
 
     //TODO: Launch different engines on different cores when available.
+#ifndef CTI_SILENT_STARTUP
     gPlatform.IO.Print("Starting engine\n");
+#endif
     int status = gPlatform.pEngine->Ready();
     if (status == 0) {
         gPlatform.pEngine->MainLoop();
