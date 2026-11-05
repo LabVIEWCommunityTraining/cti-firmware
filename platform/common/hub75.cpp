@@ -76,7 +76,12 @@ bool pinsFree() {
 }
 
 bool claimPio() {
-    PIO candidates[] = {pio0, pio1, pio2};
+    PIO candidates[] = {
+        pio0, pio1,
+#if !PICO_RP2040
+        pio2,
+#endif
+    };
     for (PIO candidate : candidates) {
         if (!pio_can_add_program(candidate, &hub75_program)) continue;
         int candidateSm = pio_claim_unused_sm(candidate, false);
@@ -373,8 +378,13 @@ bool allowPin(SCPI::ScpiParser* parser, int pin) {
 }
 
 bool allowAnalog(SCPI::ScpiParser* parser, int channel) {
-    if (channel < 0 || channel > 2) {
-        parser->enqueueError(-222, "ADC input must be in range 0..2");
+#if PICO_RP2040
+    constexpr int maxChannel = 3;
+#else
+    constexpr int maxChannel = 2;
+#endif
+    if (channel < 0 || channel > maxChannel) {
+        parser->enqueueError(-222, "ADC input channel is out of range");
         return false;
     }
     return allowPin(parser, channel + 26);

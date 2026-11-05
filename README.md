@@ -3,7 +3,7 @@ Microcontroller firmware with simulation modes
 
 [Documentation](./docs/readme.md)
 
-[HUB75 display: Pico 2 wiring, SCPI uploads and smoke test](./docs/hub75.md)
+[HUB75 display: Pico/Pico 2 wiring, SCPI uploads and smoke test](./docs/hub75.md)
 
 ## Building
 

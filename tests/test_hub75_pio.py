@@ -1,6 +1,6 @@
 """Instruction-level checks of the assembled PIO and real C++ packed scan words.
 
-This models the instructions used here, not the RP2350 bus or electrical timing.
+This models the instructions used here, not the hardware bus or electrical timing.
 PIOASM_EXE and HUB75_TEST_BINARY can select tools and alternative geometry builds.
 """
 
@@ -152,8 +152,8 @@ class PioTests(unittest.TestCase):
         cls.scratch = tempfile.TemporaryDirectory()
         cls.directory = Path(cls.scratch.name)
         header = cls.directory / "hub75.pio.h"
-        subprocess.run([PIOASM, "-o", "c-sdk", "-v", "1",
-                        str(ROOT / "platform" / "rp2350" / "hub75.pio"), str(header)], check=True)
+        subprocess.run([PIOASM, "-o", "c-sdk", "-v", "0",
+                        str(ROOT / "platform" / "common" / "hub75.pio"), str(header)], check=True)
         code = header.read_text()
         body = re.search(r"hub75_program_instructions\[\] = \{(.*?)\};", code, re.S)[1]
         cls.instructions = [int(value, 16) for value in re.findall(r"0x([0-9a-fA-F]{4})", body)]

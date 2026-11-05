@@ -84,7 +84,7 @@ add_custom_command(TARGET ${VISA_TARGET} POST_BUILD
     COMMENT "Copying built firmware file to uf2 folder."
 )
 
-if(CTI_PLATFORM STREQUAL "rp2350")
+if(CTI_PLATFORM STREQUAL "rp2350" OR CTI_PLATFORM STREQUAL "rp2040")
     add_custom_command(TARGET ${VISA_TARGET} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${PROJECT_BINARY_DIR}/${VISA_OUTPUT}.uf2

@@ -20,6 +20,7 @@ namespace Visa {
 
     void Visa::_init() {
         addCommand("PICO:TEMP", nullptr, scpi_pico_temp);
+        Hub75::registerCommands(this);
     };
 }
 }

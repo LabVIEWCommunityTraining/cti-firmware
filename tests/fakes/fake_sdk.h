@@ -58,7 +58,10 @@ struct FakeDma { FakeAck ints0; FakeAbort abort; };
 inline FakeDma dmaInstance;
 inline FakeDma* dma_hw = &dmaInstance;
 using PIO = FakePio*;
-inline PIO pio0 = &Fake::pios[0], pio1 = &Fake::pios[1], pio2 = &Fake::pios[2];
+inline PIO pio0 = &Fake::pios[0], pio1 = &Fake::pios[1];
+#if !PICO_RP2040
+inline PIO pio2 = &Fake::pios[2];
+#endif
 
 inline gpio_function_t gpio_get_function(uint pin) { return Fake::functions[pin]; }
 inline bool gpio_get_dir(uint pin) { return Fake::dirs[pin]; }
@@ -134,7 +137,13 @@ inline uint32_t save_and_disable_interrupts() { return 0; }
 inline void restore_interrupts(uint32_t) {}
 inline void __dmb() {}
 constexpr int clk_sys = 0;
-inline uint32_t clock_get_hz(int) { return 150000000; }
+inline uint32_t clock_get_hz(int) {
+#if PICO_RP2040
+    return 125000000;
+#else
+    return 150000000;
+#endif
+}
 inline uint32_t time_us_32() { return Fake::now++; }
 
 namespace Fake {

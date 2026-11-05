@@ -1,6 +1,7 @@
 import contextlib
 import importlib.util
 import io
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -11,9 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("hub75_smoke", ROOT / "tools" / "hub75_smoke.py")
 smoke = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(smoke)
-NATIVE = ROOT / "build" / "host-tests" / "cti_tests.exe"
+NATIVE = Path(os.environ.get("HUB75_TEST_BINARY", ROOT / "build" / "host-tests" / "cti_tests.exe"))
 if not NATIVE.exists():
-    NATIVE = ROOT / "build" / "host-tests" / "cti_tests"
+    NATIVE = NATIVE.with_suffix("")
 
 
 class FakeSerial:
@@ -189,8 +190,8 @@ class SmokeTests(unittest.TestCase):
     @unittest.skipUnless(NATIVE.exists(), "Build native C++ tests first")
     def test_actual_firmware_registration_capacity(self):
         sources = list((ROOT / "source" / "visa").glob("*.cpp"))
-        sources += [ROOT / "platform" / "rp2350" / "platform" / name
-                    for name in ("pi_pico_visa.cpp", "hub75.cpp")]
+        sources += [ROOT / "platform" / "rp2350" / "platform" / "pi_pico_visa.cpp",
+                    ROOT / "platform" / "common" / "hub75.cpp"]
         names = []
         for source in sources:
             text = re.sub(r"//[^\n]*|/\*.*?\*/", "", source.read_text(), flags=re.S)

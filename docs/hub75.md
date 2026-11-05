@@ -1,4 +1,4 @@
-# HUB75 display (Pico 2 / RP2350)
+# HUB75 display (RP2040 / RP2350 Pico boards)
 
 The default build supports one conventional **64x64, 1/32-scan HUB75 panel**, with
 ABCDE row addressing and no special initialization registers. Dimensions, pin
@@ -6,12 +6,15 @@ groups and RGB332/RGB888 image format are selected by SCPI while stopped.
 The normal VISA engine remains in control; HUB75 allocates RAM and loads its
 bundled PIO program only on START, not at boot. It is not a
 generic panel mapper, arbitrary PIO loader, or chained-panel implementation.
-RP2350 builds bundle the PIO program; RP2040 and AVR builds do not register
-display commands. No host-supplied machine code is executed.
+Pico, Pico W, Pico 2 and Pico 2 W builds bundle the same PIO program and
+register the same display commands. AVR builds do not register display
+commands. No host-supplied machine code is executed. The shared engine and
+PIO source are `platform\common\hub75.cpp` and `platform\common\hub75.pio`;
+the RP2040/RP2350 platform implementations remain separate.
 
 ## Wiring
 
-| Panel signal | Pico 2 GPIO |
+| Panel signal | Pico / Pico 2 GPIO |
 |---|---|
 | R0, G0, B0 | GP0, GP1, GP2 |
 | R1, G1, B1 | GP3, GP4, GP5 |
@@ -113,7 +116,7 @@ cleanup; do not assume STOP succeeded if the error queue reports failure.
 
 ## Known-pattern smoke test
 
-Flash the Pico 2 UF2 via BOOTSEL, let USB enumerate, and select its CDC COM
+Flash the UF2 matching your board via BOOTSEL, let USB enumerate, and select its CDC COM
 port. Firmware has an approximately five-second startup LED sequence.
 With Python and pyserial available:
 
@@ -208,8 +211,9 @@ the device but cannot query errors.
 
 The fourteen signals can move, but the compact PIO engine requires three
 ascending consecutive groups: six RGB pins, five address pins, three control
-pins (CLK/LAT/OE). Groups must not overlap. Only exposed Pico 2/Pico 2 W GPIOs
-0..22 and 26..28 are allowed; onboard power/LED/wireless pins are excluded.
+pins (CLK/LAT/OE). Groups must not overlap. Only exposed header GPIOs
+0..22 and 26..28 are allowed on all four supported Pico boards;
+onboard power/LED/wireless pins are excluded.
 Arbitrary per-signal permutations are not supported.
 
 For example, RGB=GP14..19, address=GP0..4, control=GP26..28:
@@ -249,19 +253,23 @@ At 64x64, each row/plane needs 13 pixel words plus three control words:
 **2048 words / 8192 bytes per scan**, compared with the previous expanded
 67584-byte scan. Two scan buffers use 16384 bytes; staging uses 4096 bytes
 in RGB332 or 12288 bytes in RGB888: **20480 / 28672 bytes of image/scan data**,
-plus 20 bytes of buffer-object bookkeeping on RP2350 and allocator overhead.
+plus 20 bytes of buffer-object bookkeeping on either chip and allocator overhead.
 General image/scan storage is
 `width*height*bytesPerPixel + 2*(height/2)*4*(ceil(width/5)+3)*4`.
 At maximum 256x64, that is 72704 bytes in RGB332 or 105472 bytes in RGB888,
 plus bookkeeping. Native tests may have a larger `size_t`.
 RAM is dynamically allocated only while started and released on STOP.
-RP2350 builds disable the SDK's default malloc panic so failed display
+Both RP2040 and RP2350 builds disable the SDK's default malloc panic so failed display
 allocations can be cleaned up and reported through SCPI (-225), rather than
-halting the firmware. RP2040 allocator settings are unchanged.
+halting the firmware. A 64x64 RGB332 display's data buffers need about 20 KiB
+of RP2040's 264 KiB SRAM. Available memory also depends on the normal firmware.
 The parser, command tree, USB buffers, stack, and ordinary firmware heap
 are additional to this display budget.
 
-At the normal 150 MHz Pico 2 system clock, PIO runs at 20 MHz. The pixel
+At the normal 125 MHz Pico / 150 MHz Pico 2 system clocks, the PIO divider
+is configured for an average 20 MHz (6.25 / 7.5 respectively). Fractional
+division produces system-clock-scale timing variation; it does not change
+the nominal refresh budget. The pixel
 loop takes ten cycles per column, giving a nominal **2 MHz shift clock**.
 LAT is high for one cycle after shifting, and drops one cycle before
 illumination. One row/plane takes `10*width + 10 + dwellBudget` cycles,
@@ -298,6 +306,8 @@ the selected OE as SIO output high for safety. Previous OE pins can remain
 high across pin-layout changes until reused; other commands may use these
 pins after a successful STOP.
 PIO programs are firmware-bundled and claimed dynamically, never uploaded.
+RP2040 searches its two PIO blocks; RP2350 searches its three. Both require
+one available state machine, fourteen instruction slots and one DMA channel.
 
 ## Build and regression tests
 
@@ -310,8 +320,17 @@ cmake --build build\hub75-pico2
 
 The ordinary output is `uf2\cti_visa_rp2350_pico2_0.9.4.uf2`. The build also
 copies `uf2\cti_hub75_pico2_64x64.uf2` to distinguish it from older builds.
-Build RP2040 with `-DPICO_BOARD=pico` in a separate build directory to
-check the non-display platform.
+For RP2040 Pico, build the same service with:
+
+```powershell
+cmake -S . -B build\hub75-pico -G Ninja -DPICO_BOARD=pico -DCMAKE_BUILD_TYPE=Release
+cmake --build build\hub75-pico
+```
+
+Its named output is `uf2\cti_hub75_pico_64x64.uf2`. Use `-DPICO_BOARD=pico_w`
+in another build directory for `uf2\cti_hub75_pico_w_64x64.uf2`. Never flash a
+Pico 2 UF2 onto RP2040 or vice versa. The SCPI commands, GP2..GP15 example
+mapping, upload formats and host tool are identical on both chips.
 
 Native tests require a host C++17 compiler, not the Arm cross-compiler:
 
@@ -325,14 +344,17 @@ python -m unittest discover -s tests -p "test_*.py"
 Tests exercise the real parser, packing/upload code and display lifecycle
 with a mock SDK, including all 256 RGB332 values, runtime geometry changes,
 remapped pin ownership, incomplete frames, resource exhaustion, pin conflicts,
-deferred swaps, DMA errors and abort timeouts. With `pioasm` available, Python tests
+deferred swaps, DMA errors and abort timeouts. CTest runs the shared driver
+for both chip configurations, omitting PIO2 from the RP2040 mock and preserving
+its existing ADC channel 3 support. With `pioasm` available, Python tests
 also assemble the actual `.pio` source and run an instruction-level model
 against C++-packed frames, checking every pixel clock edge, row/latch
 ordering, exact dwell times, consecutive frames, padding and blanking when
 every FIFO read is deliberately stalled. Set `PIOASM_EXE` if it is not on
 PATH or in the pinned Pico tool bundle. `HUB75_TEST_BINARY` selects an
-alternative-geometry native test executable for those PIO tests.
-They do not emulate the RP2350 bus,
+alternative-geometry native test executable, or `cti_tests_rp2040`, for those
+PIO tests. Assembly targets PIO version 0 for RP2040 compatibility.
+They do not emulate either chip's bus,
 prove optical timing, or validate a physical panel. A logic analyzer and
 panel bench test are still required before treating this as hardware-
 validated firmware. Check CLK/LAT/ABCDE setup/hold, /OE blanking and levels,

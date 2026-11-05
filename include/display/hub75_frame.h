@@ -53,7 +53,7 @@ struct Configuration {
         uint32_t used = 0;
         for (size_t i = 0; i < 14; ++i) {
             unsigned pin = pins[i];
-            // Pico 2 / Pico 2 W header GPIOs only, never onboard power/LED/wireless pins.
+            // Pico-family header GPIOs only, never onboard power/LED/wireless pins.
             if (pin > 28 || (pin > 22 && pin < 26) || (used & (1u << pin))) return false;
             used |= 1u << pin;
         }

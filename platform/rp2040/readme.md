@@ -1,6 +1,25 @@
 # RP2040 - Raspberry Pi Pico and derivatives
 
-## Building
+## HUB75 display
+
+Pico and Pico W builds include the same optional
+[HUB75 PIO/DMA BCM service](../../docs/hub75.md) as Pico 2. Configure dimensions,
+GPIO groups and RGB332/RGB888 uploads through SCPI, then START; no display
+resources are claimed at boot. The normal CTI VISA/peripheral implementation
+remains RP2040-specific.
+
+From the repository root with the pinned Pico SDK/tool bundle available:
+
+```powershell
+cmake -S . -B build\hub75-pico -G Ninja -DPICO_BOARD=pico -DCMAKE_BUILD_TYPE=Release
+cmake --build build\hub75-pico
+```
+
+Flash `uf2\cti_hub75_pico_64x64.uf2`. For Pico W use a separate build directory
+and `-DPICO_BOARD=pico_w`, producing `uf2\cti_hub75_pico_w_64x64.uf2`.
+Do not flash the Pico 2 firmware onto either RP2040 board.
+
+## Legacy building instructions
 
 Building is accomplished in the terminal and not within VS Code, at least until someone gets the VS Code configuration straightened out.
 
