@@ -109,7 +109,10 @@ namespace Visa {
     }
 
     CommandResult SCPI_CoreRst(ScpiParser* scpi) {
-
+        if (!Hub75::stop()) {
+            scpi->enqueueError(-200, "HUB75 DMA shutdown timed out; display blanked, resources retained");
+            return CommandResult::Error;
+        }
         return CommandResult::Success;
     }
 
@@ -171,6 +174,7 @@ namespace Visa {
         initCommonCommands(this);
         initPlatformCommands(this);
         _init();
+        if (_registrationError) return -1;
 
         //mark _ready as true which means the command list is finalized
         _ready = true;
@@ -182,13 +186,21 @@ namespace Visa {
     void Visa::MainLoop() {
         int val; // timeout read value, will be -1 if timed out
         char c;
+        unsigned idleReads = 0;
 
         while(true) {
+            Hub75::service(&_parser);
             val = gPlatform.IO.FGetCtimeout(20000); //20 ms, dictates when activity status is cleared
 
             if (val == -1) {
                 gPlatform.IO.StatusLED(false, Comms);
+                if (_parser.hasPendingInput() && ++idleReads >= 100) {
+                    _parser.enqueueError(-161, "Incomplete SCPI message timed out after 2 seconds");
+                    _parser.reset();
+                    idleReads = 0;
+                }
             } else {
+                idleReads = 0;
                 c = val;
                 //gPlatform.IO.StatusLED(true, Comms);
                 if (!_parser.bufferInput(&c, 1)) {
@@ -208,7 +220,7 @@ namespace Visa {
     }
 
     const char* Visa::StatusText(int status) {
-        return "";
+        return status == -1 ? "SCPI command registration failed" : "";
     }
 
     void initPlatformCommands(Visa* visa) {

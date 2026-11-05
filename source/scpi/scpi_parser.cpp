@@ -11,17 +11,14 @@ namespace SCPI {
     ScpiChoice EndScpiChoice { nullptr, 0 };
 
     ScpiParser::ScpiParser(int bufCapacity) {
-        _buf = (char*)malloc(bufCapacity);
+        _buf = (char*)calloc(bufCapacity + 1, 1);
         _bufCapacity = bufCapacity;
         _bufSize = 0;
 
         _maxDepth = 0;
 
         _treeRoot = new ScpiNode();
-        _curNode = nullptr;
-
-        _state = ParserState::FindCommand;
-        _paramPos = 0;
+        reset();
     }
 
     ScpiParser::~ScpiParser() {
@@ -34,17 +31,24 @@ namespace SCPI {
         _bufSize = 0;
         _state = ParserState::FindCommand;
         _curNode = nullptr;
+        _paramPos = 0;
+        _isQuery = false;
+        _blockDigits = _blockLength = _blockRemaining = 0;
+        _afterHash = _discard = false;
+        _buf[0] = 0;
     }
 
     int ScpiParser::bufferInput(const char* data, int n) {
         for (int i = 0; i < n; ++i) {
-            if (_bufSize >= _bufCapacity) {
-                return i; //buffer full, return the count of data actually buffered.
+            if (_bufSize >= _bufCapacity && !_discard) {
+                enqueueError(-363, "Input buffer overflow; message discarded");
+                _discard = true;
             }
 
-            _buf[_bufSize] = data[i];
-
-            _bufSize++;
+            if (!_discard) {
+                _buf[_bufSize++] = data[i];
+                _buf[_bufSize] = 0;
+            }
 
             //Parse the tree portion separately from the full message so the
             //buffer can be reset and fully used for any supplied parameters.
@@ -52,27 +56,59 @@ namespace SCPI {
             //length.
             if (_state == ParserState::FindCommand ) {
                 if (data[i] == ' ' || data[i] == '?' || data[i] == '\n') {
-                    ParserStatus res = parseNode();
+                    ParserStatus res = _discard ? ParserStatus::SyntaxError : parseNode();
 
                     if (res != ParserStatus::Success) {
+                        if (!_discard) errUndefinedHeader(this);
                         _state = ParserState::InvalidNode;
+                        _discard = true;
                     }
 
                     _bufSize = 0;
 
                     if (data[i] == '\n') {
-                        res = invokeNode();
+                        if (_state != ParserState::InvalidNode) invokeNode();
                         reset();
                     }
                 }
-            } else if (_state == ParserState::FindEndOfLine) {
-                if (data[i] == '\n') {
-                    ParserStatus res = invokeNode();
-                    reset();
+            } else if (_state == ParserState::FindEndOfLine || _state == ParserState::InvalidNode) {
+                // A definite-length block can contain every byte, including LF.
+                if (_blockRemaining > 0) {
+                    --_blockRemaining;
+                    continue;
                 }
-            } else if (_state == ParserState::InvalidNode) {
+                if (_blockDigits > 0) {
+                    if (data[i] < '0' || data[i] > '9') {
+                        if (!_discard) enqueueError(-161, "Invalid binary block length");
+                        _discard = true;
+                        _blockDigits = 0;
+                    } else {
+                        _blockLength = _blockLength * 10 + data[i] - '0';
+                        if (--_blockDigits == 0) {
+                            _blockRemaining = _blockLength;
+                            if (_blockLength > _bufCapacity - _bufSize && !_discard) {
+                                enqueueError(-223, "Binary block exceeds input buffer");
+                                _discard = true;
+                            }
+                        }
+                        continue;
+                    }
+                } else if (_afterHash) {
+                    _afterHash = false;
+                    if (data[i] >= '1' && data[i] <= '9') {
+                        _blockDigits = data[i] - '0';
+                        _blockLength = 0;
+                        continue;
+                    }
+                    if (data[i] == '0') {
+                        if (!_discard) enqueueError(-161, "Indefinite binary blocks are not supported");
+                        _discard = true;
+                    }
+                } else if (data[i] == '#') {
+                    _afterHash = true;
+                }
                 if (data[i] == '\n') {
-                    _state = ParserState::FindCommand;
+                    if (!_discard) invokeNode();
                     reset();
                 }
             }
@@ -163,15 +199,16 @@ namespace SCPI {
     
     ParseResult ScpiParser::parseBlock(char** buf, int* len) {
         consumeWhiteSpace();
-
-        if (_buf[_paramPos] != '#') {
+        *buf = nullptr;
+        *len = 0;
+        if (_paramPos + 2 > _bufSize || _buf[_paramPos] != '#') {
             return ParseResult::Invalid;
         }
         
         _paramPos++; // consume #
 
         uint8_t digitsLen = 0;
-        if (_buf[_paramPos] <= '9' && _buf[_paramPos] >= '0') {
+        if (_buf[_paramPos] <= '9' && _buf[_paramPos] >= '1') {
             digitsLen = _buf[_paramPos] - '0';
             _paramPos++;
         } else {
@@ -179,17 +216,19 @@ namespace SCPI {
         }
 
         int dataLen = 0;
+        if (digitsLen > _bufSize - _paramPos) return ParseResult::EndOfData;
         for (int i = 0; i < digitsLen; ++i) {
+            if (_buf[_paramPos] < '0' || _buf[_paramPos] > '9') return ParseResult::Invalid;
             dataLen *= 10;
             dataLen += _buf[_paramPos] - '0';
             _paramPos++;
         }
+        if (dataLen > _bufSize - _paramPos) return ParseResult::EndOfData;
 
         //point buffer at visa read buffer, data will remain valid while
         //command/query is invoked. Caller just needs to behave themselves
         //but this means no extra copies or memory space needed for buffer.
-        *buf = _buf + _paramPos;
-        *len = dataLen;
+        char* start = _buf + _paramPos;
 
         //move parse location past end of block
         _paramPos += dataLen;
@@ -197,6 +236,8 @@ namespace SCPI {
         if (!isEndOfParam()) {
             return ParseResult::Invalid;
         }
+        *buf = start;
+        *len = dataLen;
 
         return ParseResult::Success;
     }
@@ -206,8 +247,8 @@ namespace SCPI {
         //determine leaf node, split on ':' or end of string
 
         ScpiNode* node = _treeRoot;
-        uint8_t cur = 0;
-        uint8_t start = 0;
+        int cur = 0;
+        int start = 0;
         uint8_t depth = 0;
 
         if (_buf[0] == ':') { //skip optional leading ':'
@@ -218,6 +259,7 @@ namespace SCPI {
         for (; cur <= _bufSize; ++cur) {
             if (cur == _bufSize || _buf[cur] == ':' || _buf[cur] == '?' || _buf[cur] == ' ' || _buf[cur] == '\n') {
                 //reached end of tree portion, perform lookup
+                if (cur - start > 255) return ParserStatus::SyntaxError;
                 ScpiNode* child = node->lookupChild(_buf + start, cur - start);
 
                 if (child == nullptr) {
@@ -272,6 +314,10 @@ namespace SCPI {
             if (res != QueryResult::Success) {
                 if (res == QueryResult::NoHandler) {
                     errNoQuery(this);
+                } else if (res == QueryResult::MissingParam) {
+                    errMissingParam(this);
+                } else if (res == QueryResult::UnexpectedParam) {
+                    errTooManyParams(this);
                 }
 
                 return ParserStatus::Unknown;
@@ -281,15 +327,13 @@ namespace SCPI {
 
             if (res != CommandResult::Success) {
                 if (res == CommandResult::NoHandler) {
-                    return ParserStatus::UnknownCommand;
+                    errNoCommand(this);
                 } else if (res == CommandResult::MissingParam) {
                     errMissingParam(this);
                 } else if (res == CommandResult::UnexpectedParam) {
                     errTooManyParams(this);
                 } else if (res == CommandResult::SyntaxError) {
                     errSyntax(this);
-                } else if (res == CommandResult::NoHandler) {
-                    errNoCommand(this);
                 }
 
                 return ParserStatus::Unknown;
@@ -305,7 +349,7 @@ namespace SCPI {
     }
 
     bool ScpiParser::enqueueError(int16_t code, const char* str) {
-        return false;
+        return _err.enqueue(code, str);
     }
 
     void ScpiParser::finalize() {
@@ -329,8 +373,9 @@ namespace SCPI {
 
         len++; // account for null terminator
 
-        uint8_t cur = 0;
-        uint8_t start = 0;
+        if (len > 255 || len < 2) return RegistrationResult::SyntaxError;
+        int cur = 0;
+        int start = 0;
         uint8_t depth = 0;
         ScpiNode* curNode = _treeRoot;
 
@@ -346,10 +391,12 @@ namespace SCPI {
 
                 //First check to see if node already has that child
                 ScpiNode* node = curNode->lookupChild(str + start, cur - start);
+                if (node != nullptr && str[cur] == 0) return RegistrationResult::Ambiguous;
                 if (node == nullptr) {
 
+                    bool leaf = str[cur] == 0;
                     node = new ScpiNode(str + start, cur - start, depth,
-                        cmdHandler, queryHandler);
+                        leaf ? cmdHandler : nullptr, leaf ? queryHandler : nullptr);
                     
                     RegistrationResult res = curNode->addChild(node);
 

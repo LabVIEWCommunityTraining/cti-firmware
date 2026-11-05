@@ -29,7 +29,7 @@ bool ScpiErrorQueue::enqueue(int16_t code, const char* str) {
     _err[_head].code = code;
 
     int i = 0;
-    while (str[i] != 0) {
+    while (str[i] != 0 && i < SCPI_ERROR_STR_SIZE - 1) {
         _err[_head].str[i] = str[i];
         ++i;
     }
@@ -63,7 +63,7 @@ bool ScpiErrorQueue::dequeue(int16_t* code, char ** str) {
         return false;
     }
 
-    ScpiError err = _err[_tail];
+    ScpiError& err = _err[_tail];
 
     _tail++;
     if (_tail == _capacity) {

@@ -46,6 +46,7 @@ namespace Visa {
             return CommandResult::Error;
         }
 
+        if (!Hub75::allowAnalog(scpi, channel)) return CommandResult::Error;
         gPlatform.IO.Analog.EnableInput(channel);
 
         return CommandResult::Success;

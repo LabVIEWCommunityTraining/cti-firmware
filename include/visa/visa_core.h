@@ -3,9 +3,11 @@
 
 #include "scpi.h"
 #include "cti/platform.h"
+#include "display/hub75.h"
 
 //#include <vector>
 
+// 2047 parameter bytes plus LF; the parser allocates its NUL sentinel separately.
 #define SCPI_INPUT_BUFFER_LENGTH 2048
 
 namespace CTI {
@@ -20,7 +22,9 @@ namespace Visa {
         virtual const char* StatusText(int status);
 
         SCPI::RegistrationResult addCommand(const char* cmdStr, SCPI::ScpiCommand cmd, SCPI::ScpiQuery query) {
-            return _parser.registerNode(cmdStr, cmd, query);
+            auto result = _parser.registerNode(cmdStr, cmd, query);
+            if (result != SCPI::RegistrationResult::Success) _registrationError = true;
+            return result;
         }
 
     private:
@@ -29,6 +33,7 @@ namespace Visa {
         SCPI::ScpiParser _parser;
         
         bool _ready;
+        bool _registrationError = false;
         const char* _vendor;
         const char* _model;
         const char* _serial;

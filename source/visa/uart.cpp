@@ -44,6 +44,8 @@ CommandResult uart_init(ScpiParser* scpi) {
 
     scpi->parseInt(lineTerm); // optional, doesn't matter if not specified
 
+    if ((txPin != UINT8_MAX && !Hub75::allowPin(scpi, txPin)) ||
+        (rxPin != UINT8_MAX && !Hub75::allowPin(scpi, rxPin))) return CommandResult::Error;
     baud = gPlatform.UART.init(uart, baud, txPin, rxPin, lineTerm);
 
     return CommandResult::Success;

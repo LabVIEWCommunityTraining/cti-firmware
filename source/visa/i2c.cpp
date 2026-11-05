@@ -32,6 +32,8 @@ CommandResult i2c_init(ScpiParser* scpi) {
         return CommandResult::MissingParam;
     }
 
+    if ((sclPin != UINT8_MAX && !Hub75::allowPin(scpi, sclPin)) ||
+        (sdaPin != UINT8_MAX && !Hub75::allowPin(scpi, sdaPin))) return CommandResult::Error;
     baud = gPlatform.I2C.init(bus, baud, sclPin, sdaPin);
 
     return CommandResult::Success;
