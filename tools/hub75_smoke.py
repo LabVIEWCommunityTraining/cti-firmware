@@ -102,8 +102,9 @@ def scpi_stream(image, brightness, width=WIDTH, height=HEIGHT, pixel_format="RGB
 
 
 class Session:
-    def __init__(self, link):
+    def __init__(self, link, device="HUB75"):
         self.link = link
+        self.device = device
 
     def write(self, command):
         if self.link.write(command) != len(command):
@@ -131,9 +132,9 @@ class Session:
         self.check_error()
 
     def status(self):
-        values = tuple(int(v) for v in self.query("DISP:HUB75:STAT?").split(","))
+        values = tuple(int(v) for v in self.query(f"DISP:{self.device}:STAT?").split(","))
         if len(values) != 5:
-            raise RuntimeError(f"Invalid HUB75 status: {values}")
+            raise RuntimeError(f"Invalid {self.device} status: {values}")
         return values
 
     def wait_swap(self):
@@ -145,7 +146,7 @@ class Session:
             if not status[2]:
                 return status
             time.sleep(0.01)
-        raise TimeoutError("HUB75 frame swap did not complete")
+        raise TimeoutError(f"{self.device} frame transmission/swap did not complete")
 
 
 def upload(link, image, brightness, width=WIDTH, height=HEIGHT, pixel_format="RGB888",

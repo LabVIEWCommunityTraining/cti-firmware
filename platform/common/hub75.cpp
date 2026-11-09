@@ -1,4 +1,5 @@
 #include "display/hub75.h"
+#include "display/ws2811.h"
 #include "display/hub75_frame.h"
 #include "visa/visa_core.h"
 #include "hub75.pio.h"
@@ -103,6 +104,9 @@ CommandResult init(ScpiParser* parser) {
     if (running) return CommandResult::Success;
     if (buffers && !stop()) return error(parser, "HUB75 DMA shutdown still pending", -200);
     if (!config.validDimensions() || !config.validPins()) return error(parser, "Invalid HUB75 configuration", -222);
+    for (unsigned pin : config.pins) {
+        if (!WS2811::allowPin(parser, pin)) return CommandResult::Error;
+    }
     if (!pinsFree()) return error(parser, "HUB75 pins are in use; release GPIO/peripherals first");
     if (irq_get_exclusive_handler(DMA_IRQ_0)) return error(parser, "DMA IRQ0 has an exclusive owner", -225);
 
@@ -369,6 +373,7 @@ bool allowPin(SCPI::ScpiParser* parser, int pin) {
         parser->enqueueError(-222, "GPIO must be in range 0..29");
         return false;
     }
+    if (!WS2811::allowPin(parser, pin)) return false;
     if (ownsPins && (config.pinMask() & (1u << pin))) {
         parser->enqueueError(-221, "GPIO is owned by HUB75; STOP display first");
         return false;

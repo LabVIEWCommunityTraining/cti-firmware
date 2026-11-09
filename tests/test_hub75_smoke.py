@@ -191,7 +191,8 @@ class SmokeTests(unittest.TestCase):
     def test_actual_firmware_registration_capacity(self):
         sources = list((ROOT / "source" / "visa").glob("*.cpp"))
         sources += [ROOT / "platform" / "rp2350" / "platform" / "pi_pico_visa.cpp",
-                    ROOT / "platform" / "common" / "hub75.cpp"]
+                    ROOT / "platform" / "common" / "hub75.cpp",
+                    ROOT / "platform" / "common" / "ws2811.cpp"]
         names = []
         for source in sources:
             text = re.sub(r"//[^\n]*|/\*.*?\*/", "", source.read_text(), flags=re.S)

@@ -196,15 +196,15 @@ For example, use the same firmware with a conventional 64x32 panel:
 python tools\hub75_smoke.py --port COM7 --width 64 --height 32 --pattern bars
 ```
 
-Optional CMake settings change only the **boot defaults** and artifact name:
+Optional CMake settings change only the **boot defaults**, not the firmware name:
 
 ```powershell
 cmake -S . -B build\hub75-64x32 -G Ninja -DPICO_BOARD=pico2 -DCTI_HUB75_WIDTH=64 -DCTI_HUB75_HEIGHT=32 -DCMAKE_BUILD_TYPE=Release
 cmake --build build\hub75-64x32
 ```
 
-Its named output is `uf2\cti_hub75_pico2_64x32.uf2`; runtime DIM can still change
-it. For offline generation, pass `--width` and `--height`; that stream configures
+Its output is the standard `uf2\cti_visa_rp2350_pico2_0.9.4.uf2`; runtime DIM
+can still change the geometry. For offline generation, pass `--width` and `--height`; that stream configures
 the device but cannot query errors.
 
 ## Runtime pin mapping
@@ -318,8 +318,9 @@ cmake -S . -B build\hub75-pico2 -G Ninja -DPICO_BOARD=pico2 -DCMAKE_BUILD_TYPE=R
 cmake --build build\hub75-pico2
 ```
 
-The ordinary output is `uf2\cti_visa_rp2350_pico2_0.9.4.uf2`. The build also
-copies `uf2\cti_hub75_pico2_64x64.uf2` to distinguish it from older builds.
+The output is `uf2\cti_visa_rp2350_pico2_0.9.4.uf2`. This standard firmware
+includes both HUB75 and [WS2811](ws2811.md); neither service starts at boot.
+Display-specific `cti_hub75_...` duplicate names are no longer generated.
 For RP2040 Pico, build the same service with:
 
 ```powershell
@@ -327,8 +328,8 @@ cmake -S . -B build\hub75-pico -G Ninja -DPICO_BOARD=pico -DCMAKE_BUILD_TYPE=Rel
 cmake --build build\hub75-pico
 ```
 
-Its named output is `uf2\cti_hub75_pico_64x64.uf2`. Use `-DPICO_BOARD=pico_w`
-in another build directory for `uf2\cti_hub75_pico_w_64x64.uf2`. Never flash a
+Its output is `uf2\cti_visa_rp2040_pico_0.9.4.uf2`. Use `-DPICO_BOARD=pico_w`
+in another build directory for `uf2\cti_visa_rp2040_pico_w_0.9.4.uf2`. Never flash a
 Pico 2 UF2 onto RP2040 or vice versa. The SCPI commands, GP2..GP15 example
 mapping, upload formats and host tool are identical on both chips.
 

@@ -1,0 +1,13 @@
+.program ws2811
+.side_set 1
+
+; 20 cycles/bit: T0H=4, T1H=10; 16 MHz for 800 kHz, 8 MHz for 400 kHz.
+; MSB-first, autopull at 24 bits. An empty FIFO stalls OUT with data low.
+.wrap_target
+bitloop:
+    out x, 1             side 0 [9]
+    jmp !x bit_zero      side 1 [3]
+    jmp bitloop          side 1 [5]
+bit_zero:
+    nop                  side 0 [5]
+.wrap

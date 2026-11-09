@@ -83,12 +83,3 @@ add_custom_command(TARGET ${VISA_TARGET} POST_BUILD
         ${PROJECT_SOURCE_DIR}/uf2/${VISA_OUTPUT}.uf2
     COMMENT "Copying built firmware file to uf2 folder."
 )
-
-if(CTI_PLATFORM STREQUAL "rp2350" OR CTI_PLATFORM STREQUAL "rp2040")
-    add_custom_command(TARGET ${VISA_TARGET} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${PROJECT_BINARY_DIR}/${VISA_OUTPUT}.uf2
-            ${PROJECT_SOURCE_DIR}/uf2/cti_hub75_${CTI_BOARD}_${CTI_HUB75_WIDTH}x${CTI_HUB75_HEIGHT}.uf2
-        COMMENT "Copying named HUB75 firmware."
-    )
-endif()

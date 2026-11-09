@@ -4,7 +4,7 @@
 
 using uint = unsigned;
 enum gpio_function_t { GPIO_FUNC_NULL, GPIO_FUNC_SIO, GPIO_FUNC_PIO0, GPIO_FUNC_UART };
-constexpr int GPIO_OVERRIDE_HIGH = 1, GPIO_OVERRIDE_NORMAL = 0;
+constexpr int GPIO_OVERRIDE_HIGH = 1, GPIO_OVERRIDE_NORMAL = 0, GPIO_OVERRIDE_LOW = 2;
 constexpr bool GPIO_OUT = true, GPIO_IN = false;
 constexpr int DMA_IRQ_0 = 0, DMA_SIZE_32 = 2;
 constexpr int PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY = 0;
@@ -14,6 +14,7 @@ struct pio_sm_config {
     int outBase = -1, outCount = -1, setBase = -1, setCount = -1;
     int sideBase = -1, shiftThreshold = -1;
     bool shiftRight = false, autoPull = true;
+    float clockDivider = 0;
 };
 struct dma_channel_config {};
 struct pio_program {};
@@ -33,7 +34,16 @@ inline const void* source = nullptr;
 inline unsigned transfers = 0;
 inline void (*handler)() = nullptr;
 inline FakePio pios[3];
+inline unsigned claimedSms[3] = {}, enabledSms[3] = {};
 inline FakeDmaChannel channel;
+struct DmaState {
+    bool busy = false;
+    const void* source = nullptr;
+    unsigned transfers = 0;
+    FakeDmaChannel channel;
+};
+inline DmaState secondaryDma[12];
+inline uint32_t allocatedDma = 0;
 inline pio_sm_config config;
 inline bool oeHigh() {
     return overrides[13] == GPIO_OVERRIDE_HIGH ||
@@ -51,7 +61,11 @@ struct FakeAbort {
     operator uint32_t() const { return bits; }
     void operator=(uint32_t mask) {
         bits = Fake::stuck ? mask : 0;
-        if (!Fake::stuck) Fake::busy = false;
+        if (!Fake::stuck) {
+            if (mask & 1) Fake::busy = false;
+            for (unsigned i = 1; i < 12; ++i)
+                if (mask & (1u << i)) Fake::secondaryDma[i].busy = false;
+        }
     }
 };
 struct FakeDma { FakeAck ints0; FakeAbort abort; };
@@ -77,10 +91,25 @@ inline void gpio_put(uint pin, bool value) { Fake::outputs[pin] = value; }
 inline void gpio_set_dir(uint pin, bool value) { Fake::dirs[pin] = value; }
 inline void gpio_deinit(uint pin) { gpio_set_function(pin, GPIO_FUNC_NULL); }
 inline bool pio_can_add_program(PIO, const pio_program*) { return Fake::pioAvailable; }
-inline int pio_claim_unused_sm(PIO, bool) { if (!Fake::pioAvailable) return -1; ++Fake::sms; return 0; }
+inline int pio_claim_unused_sm(PIO pio, bool) {
+    if (!Fake::pioAvailable) return -1;
+    for (unsigned sm = 0; sm < 4; ++sm) {
+        unsigned& mask = Fake::claimedSms[pio - Fake::pios];
+        if (mask & (1u << sm)) continue;
+        mask |= 1u << sm;
+        ++Fake::sms;
+        return sm;
+    }
+    return -1;
+}
 inline int pio_add_program(PIO, const pio_program*) { ++Fake::programs; return 3; }
 inline void pio_remove_program(PIO, const pio_program*, int) { --Fake::programs; }
-inline void pio_sm_unclaim(PIO, int) { --Fake::sms; }
+inline void pio_sm_unclaim(PIO pio, int sm) {
+    unsigned& mask = Fake::claimedSms[pio - Fake::pios];
+    assert(mask & (1u << sm));
+    mask &= ~(1u << sm);
+    --Fake::sms;
+}
 inline void sm_config_set_out_pins(pio_sm_config* config, int base, int count) {
     config->outBase = base;
     config->outCount = count;
@@ -97,38 +126,59 @@ inline void sm_config_set_out_shift(pio_sm_config* config, bool right, bool auto
 }
 constexpr int PIO_FIFO_JOIN_TX = 1;
 inline void sm_config_set_fifo_join(pio_sm_config*, int) {}
-inline void sm_config_set_clkdiv(pio_sm_config*, float) {}
+inline void sm_config_set_clkdiv(pio_sm_config* config, float divider) { config->clockDivider = divider; }
 inline void pio_sm_init(PIO, int, int, const pio_sm_config* config) { Fake::config = *config; }
 inline void pio_sm_set_pins_with_mask(PIO, int, uint32_t pins, uint32_t) { Fake::smPins = pins; }
 inline void pio_sm_set_consecutive_pindirs(PIO, int, int, int, bool) {}
 inline void pio_gpio_init(PIO, uint pin) { gpio_set_function(pin, GPIO_FUNC_PIO0); }
-inline void pio_sm_set_enabled(PIO, int, bool enabled) { Fake::pioEnabled = enabled; }
+inline void pio_sm_set_enabled(PIO pio, int sm, bool enabled) {
+    Fake::pioEnabled = enabled;
+    unsigned& mask = Fake::enabledSms[pio - Fake::pios];
+    if (enabled) mask |= 1u << sm;
+    else mask &= ~(1u << sm);
+}
 inline void pio_sm_clear_fifos(PIO, int) {}
 inline int pio_get_dreq(PIO, int, bool) { return 0; }
 inline int dma_claim_unused_channel(bool) {
     if (!Fake::dmaAvailable) return -1;
-    ++Fake::channels;
-    return 0;
+    for (unsigned i = 0; i < 12; ++i) {
+        if (Fake::allocatedDma & (1u << i)) continue;
+        Fake::allocatedDma |= 1u << i;
+        ++Fake::channels;
+        return i;
+    }
+    return -1;
 }
-inline void dma_channel_unclaim(int) { --Fake::channels; }
+inline void dma_channel_unclaim(int channel) {
+    assert(Fake::allocatedDma & (1u << channel));
+    Fake::allocatedDma &= ~(1u << channel);
+    --Fake::channels;
+}
 inline dma_channel_config dma_channel_get_default_config(int) { return {}; }
 inline void channel_config_set_transfer_data_size(dma_channel_config*, int) {}
 inline void channel_config_set_read_increment(dma_channel_config*, bool) {}
 inline void channel_config_set_write_increment(dma_channel_config*, bool) {}
 inline void channel_config_set_dreq(dma_channel_config*, int) {}
-inline void dma_channel_configure(int, const dma_channel_config*, void*, const void* source, unsigned count, bool) {
-    Fake::source = source;
-    Fake::transfers = count;
+inline void dma_channel_configure(int channel, const dma_channel_config*, void*, const void* source, unsigned count, bool) {
+    if (channel == 0) { Fake::source = source; Fake::transfers = count; }
+    else { Fake::secondaryDma[channel].source = source; Fake::secondaryDma[channel].transfers = count; }
 }
-inline void dma_channel_set_read_addr(int, const void* source, bool) { Fake::source = source; }
-inline void dma_channel_set_trans_count(int, unsigned count, bool start) {
-    Fake::transfers = count;
-    Fake::busy = start;
+inline void dma_channel_set_read_addr(int channel, const void* source, bool) {
+    if (channel == 0) Fake::source = source;
+    else Fake::secondaryDma[channel].source = source;
+}
+inline void dma_channel_set_trans_count(int channel, unsigned count, bool start) {
+    if (channel == 0) { Fake::transfers = count; Fake::busy = start; }
+    else { Fake::secondaryDma[channel].transfers = count; Fake::secondaryDma[channel].busy = start; }
 }
 inline void dma_channel_set_irq0_enabled(int, bool enabled) { Fake::irqEnabled = enabled; }
 inline void dma_start_channel_mask(uint32_t) { Fake::busy = true; }
-inline bool dma_channel_is_busy(int) { return Fake::busy; }
-inline FakeDmaChannel* dma_channel_hw_addr(int) { return &Fake::channel; }
+inline bool dma_channel_is_busy(int channel) {
+    return channel == 0 ? Fake::busy : Fake::secondaryDma[channel].busy;
+}
+inline FakeDmaChannel* dma_channel_hw_addr(int channel) {
+    return channel == 0 ? &Fake::channel : &Fake::secondaryDma[channel].channel;
+}
 inline void irq_add_shared_handler(int, void (*handler)(), int) { assert(!Fake::handler); Fake::handler = handler; }
 inline void irq_remove_handler(int, void (*)()) { Fake::handler = nullptr; }
 inline void irq_set_enabled(int, bool) {}

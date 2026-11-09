@@ -7,6 +7,7 @@
 #include "visa/spi.h"
 
 #include "scpi.h"
+#include "display/ws2811.h"
 
 #include <cstring>
 
@@ -109,8 +110,15 @@ namespace Visa {
     }
 
     CommandResult SCPI_CoreRst(ScpiParser* scpi) {
-        if (!Hub75::stop()) {
+        bool hubStopped = Hub75::stop();
+        bool stripStopped = WS2811::stop();
+        if (!hubStopped) {
             scpi->enqueueError(-200, "HUB75 DMA shutdown timed out; display blanked, resources retained");
+        }
+        if (!stripStopped) {
+            scpi->enqueueError(-200, "WS2811 DMA shutdown timed out; data low, resources retained");
+        }
+        if (!hubStopped || !stripStopped) {
             return CommandResult::Error;
         }
         return CommandResult::Success;
@@ -190,6 +198,7 @@ namespace Visa {
 
         while(true) {
             Hub75::service(&_parser);
+            WS2811::service(&_parser);
             val = gPlatform.IO.FGetCtimeout(20000); //20 ms, dictates when activity status is cleared
 
             if (val == -1) {

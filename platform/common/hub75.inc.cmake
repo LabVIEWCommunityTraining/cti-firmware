@@ -10,11 +10,12 @@ if(CTI_HUB75_WIDTH LESS 8 OR CTI_HUB75_WIDTH GREATER 256)
 endif()
 
 function(configure_hub75 TARGET)
-    target_sources(${TARGET} PRIVATE ${CTI_HUB75_DIR}/hub75.cpp)
-    target_compile_definitions(${TARGET} PRIVATE CTI_HUB75=1 PICO_MALLOC_PANIC=0
+    target_sources(${TARGET} PRIVATE ${CTI_HUB75_DIR}/hub75.cpp ${CTI_HUB75_DIR}/ws2811.cpp)
+    target_compile_definitions(${TARGET} PRIVATE CTI_HUB75=1 CTI_WS2811=1 PICO_MALLOC_PANIC=0
         CTI_HUB75_WIDTH=${CTI_HUB75_WIDTH} CTI_HUB75_HEIGHT=${CTI_HUB75_HEIGHT})
     pico_generate_pio_header(${TARGET} ${CTI_HUB75_DIR}/hub75.pio)
+    pico_generate_pio_header(${TARGET} ${CTI_HUB75_DIR}/ws2811.pio)
     target_link_libraries(${TARGET} hardware_pio hardware_dma)
     pico_set_program_description(${TARGET}
-        "CTI VISA with runtime HUB75 RGB332/RGB888 PIO/DMA; default ${CTI_HUB75_WIDTH}x${CTI_HUB75_HEIGHT}")
+        "CTI VISA with runtime HUB75 and WS2811 PIO/DMA displays")
 endfunction()

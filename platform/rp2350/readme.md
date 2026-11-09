@@ -11,6 +11,11 @@ format while stopped, then START loads the bundled PIO strategy.
 The default geometry is 64x64; `CTI_HUB75_WIDTH` and `CTI_HUB75_HEIGHT`
 can change the boot defaults at build time.
 
+The same standard firmware also includes runtime
+[WS2811 strip support](../../docs/ws2811.md), using one configurable data
+GPIO and a dynamically loaded PIO/DMA transmitter. There are no separate
+HUB75 or WS2811 firmware variants.
+
 ## Prerequisites
 
 The repository is pinned to Pico SDK 2.3.1, Arm GNU Toolchain 15.2.Rel1,

@@ -1,5 +1,6 @@
 #include "cti/platform.h"
 #include "visa/visa_core.h"
+#include "display/ws2811.h"
 
 #include <hardware/adc.h>
 
@@ -21,6 +22,7 @@ namespace Visa {
     void Visa::_init() {
         addCommand("PICO:TEMP", nullptr, scpi_pico_temp);
         Hub75::registerCommands(this);
+        WS2811::registerCommands(this);
     };
 }
 }
