@@ -40,6 +40,7 @@ namespace Visa {
 
         // gPlatform.IO.Printf("val: %d\n\n", val ? 1 : 0);
 
+        if (!Hub75::allowPin(scpi, channel)) return CommandResult::Error;
         gPlatform.IO.Digital.SetOutput(channel, val);
 
         return CommandResult::Success;
@@ -82,6 +83,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, channel)) return CommandResult::Error;
         gPlatform.IO.Digital.SetDirection(channel, choice == 1);
 
         return CommandResult::Success;
@@ -124,6 +126,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, channel)) return CommandResult::Error;
         gPlatform.IO.Digital.SetPull(channel, (PlatformDigital::PullDirection)choice);
 
         return CommandResult::Success;

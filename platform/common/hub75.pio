@@ -1,0 +1,26 @@
+.program hub75
+.side_set 3
+
+; Side-set bits: CLK, LAT, /OE on the configured group. All pulls are blanked.
+; Header: firmware-encoded SET row instruction, then column count minus one.
+; Pixel words: five 6-bit RGB pairs, with two unused high bits (threshold 30).
+.wrap_target
+    pull block           side 4
+    out exec, 16         side 4
+    out y, 16            side 4
+pixels:
+    pull ifempty block   side 4
+    out pins, 6          side 4 [2]
+    nop                  side 5 [3]
+    jmp y-- pixels       side 4 [1]
+    pull block           side 4
+    out x, 32            side 6
+    jmp !x blank         side 4
+illuminate:
+    jmp x-- illuminate   side 0
+blank:
+    pull block           side 4
+    out x, 32            side 4
+blank_delay:
+    jmp x-- blank_delay  side 4
+.wrap

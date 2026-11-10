@@ -47,6 +47,9 @@ CommandResult spi_init(ScpiParser* scpi) {
         return CommandResult::MissingParam;
     }
 
+    if ((mosiPin != UINT8_MAX && !Hub75::allowPin(scpi, mosiPin)) ||
+        (misoPin != UINT8_MAX && !Hub75::allowPin(scpi, misoPin)) ||
+        (sckPin != UINT8_MAX && !Hub75::allowPin(scpi, sckPin))) return CommandResult::Error;
     baud = gPlatform.SPI.init(bus, baud, spiMode, bits, mosiPin, misoPin, sckPin);
 
     return CommandResult::Success;

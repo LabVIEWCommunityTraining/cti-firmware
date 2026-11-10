@@ -1,4 +1,5 @@
 set (RP2040_PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
+include(${RP2040_PLATFORM_DIR}/../common/hub75.inc.cmake)
 
 function (configure_rp2040 RP2040_TARGET)
 
@@ -54,6 +55,7 @@ set(PICO_SDK_COMPONENTS
 target_link_libraries(${RP2040_TARGET}
     ${PICO_SDK_COMPONENTS}
 )
+configure_hub75(${RP2040_TARGET})
 
 #tell the pico-sdk to generate the additional Pi Pico output files (uf2)
 #for the created executable build spec target

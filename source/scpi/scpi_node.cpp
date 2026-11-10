@@ -13,6 +13,8 @@ namespace SCPI {
         _hasNum = false;
         _depth = 0;
         _parent = nullptr;
+        _cmdHandler = nullptr;
+        _queryHandler = nullptr;
     }
 
     ScpiNode::ScpiNode(const char* nodeStr, uint8_t strLen, uint8_t depth,
@@ -51,7 +53,7 @@ namespace SCPI {
         if (_hasNum) {
             //check for numeric at end of candidate string
             //also checks for '#' so can match against specifier syntax
-            for (uint8_t i = len - 1; i >= 0; --i) {
+            for (int i = len - 1; i >= 0; --i) {
                 if ((candidate[i] > '9' || candidate[i] < '0') && candidate[i] != '#') {
                     break;
                 }
@@ -125,7 +127,7 @@ namespace SCPI {
 
         uint8_t numStart = len;
 
-        for (uint8_t i = len - 1; i >= 0; --i) {
+        for (int i = len - 1; i >= 0; --i) {
             if (str[i] > '9' || str[i] < '0') {
                 break;
             }
@@ -134,14 +136,14 @@ namespace SCPI {
         }
 
         if (numStart < len) {
-            int8_t num = 0;
+            int num = 0;
             for (uint8_t i = numStart; i < len; ++i) {
                 int8_t digit = str[i] - '0';
                 num *= 10;
                 num += (digit);
 
-                if (num < 0) {
-                    return -3; //number was too big and rolled over
+                if (num > INT8_MAX) {
+                    return -3;
                 }
             }
 
@@ -173,8 +175,8 @@ namespace SCPI {
         // this would be more likely when there's an optional level and the 
         // child node is being passed up to an ancestor for registration.
         for(ScpiNode* c : _children) {
-            if (c->_strLen == _strLen) {
-                if (std::strncmp(c->_nodeStr, _nodeStr, _strLen) == 0) {
+            if (c->_strLen == child->_strLen && c->_hasNum == child->_hasNum) {
+                if (std::strncmp(c->_nodeStr, child->_nodeStr, child->_strLen) == 0) {
                     return RegistrationResult::Ambiguous;
                 }
             }

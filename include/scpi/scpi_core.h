@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <vector>
+#include <limits>
 
 #ifndef SCPI_ERROR_QUEUE_SIZE
 #define SCPI_ERROR_QUEUE_SIZE 10
@@ -284,13 +285,18 @@ namespace SCPI {
         }
 
         void reset();
+        bool hasPendingInput() const { return _bufSize != 0 || _state != ParserState::FindCommand; }
+        bool endOfParameters() {
+            consumeWhiteSpace();
+            return _paramPos == _bufSize || _buf[_paramPos] == '\n';
+        }
 
-        int16_t position() {
+        int position() {
             return _paramPos;
         }
 
         char curChar() {
-            return _buf[_paramPos];
+            return _paramPos < _bufSize ? _buf[_paramPos] : 0;
         }
 
         ScpiNode* curNode() {
@@ -314,7 +320,7 @@ namespace SCPI {
         }
 
         bool isEndOfParam() {
-            char c = _buf[_paramPos];
+            char c = curChar();
             bool isEnd = (_paramPos == _bufSize || 
                 c == ' ' ||
                 c == '\n' ||
@@ -402,23 +408,26 @@ namespace SCPI {
                 _paramPos++;
             }
 
-            for (int i = 0; i < maxDigits && _paramPos < _bufSize; ++i) {
+            uint64_t magnitude = 0;
+            int digits = 0;
+            for (; digits < maxDigits && _paramPos < _bufSize; ++digits) {
                 if (_buf[_paramPos] <= '9' && _buf[_paramPos] >= '0') {
-                    val *= 10;
-                    val += (_buf[_paramPos] - '0');
+                    magnitude = magnitude * 10 + (_buf[_paramPos] - '0');
                     _paramPos++;
                 } else {
                     break;
                 }
             }
 
-            if (!isEndOfParam()) {
+            uint64_t limit = static_cast<uint64_t>(std::numeric_limits<T>::max());
+            if (neg) {
+                ++limit;
+            }
+            if (digits == 0 || magnitude > limit || !isEndOfParam()) {
                 return ParseResult::Invalid;
             }
 
-            if (neg) {
-                val *= -1;
-            }
+            val = neg ? static_cast<T>(-static_cast<int64_t>(magnitude)) : static_cast<T>(magnitude);
 
             return ParseResult::Success;
         }
@@ -452,7 +461,7 @@ namespace SCPI {
         ParseResult parseHex(T& val, uint8_t maxDigits) {
             val = 0;
 
-            for (int i = 0; i < maxDigits & _paramPos < _bufSize; ++i) {
+            for (int i = 0; i < maxDigits && _paramPos < _bufSize; ++i) {
                 char c = _buf[_paramPos];
                 val = val << 4;
 
@@ -481,7 +490,7 @@ namespace SCPI {
         ParseResult parseOct(T& val, uint8_t maxDigits) {
             val = 0;
 
-            for (int i = 0; i < maxDigits & _paramPos < _bufSize; ++i) {
+            for (int i = 0; i < maxDigits && _paramPos < _bufSize; ++i) {
                 char c = _buf[_paramPos];
                 val = val << 3;
 
@@ -559,11 +568,16 @@ namespace SCPI {
         int _bufSize;
         int _bufCapacity;
 
-        uint8_t _paramPos;
+        int _paramPos;
+        int _blockDigits = 0;
+        int _blockLength = 0;
+        int _blockRemaining = 0;
+        bool _afterHash = false;
+        bool _discard = false;
 
-        bool _finalized;
+        bool _finalized = false;
 
-        bool _isQuery;
+        bool _isQuery = false;
 
         uint8_t _maxDepth;
 

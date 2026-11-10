@@ -22,6 +22,7 @@ namespace Visa {
             scpi->parseBool(enable);
         }
 
+        if (!Hub75::allowPin(scpi, gpio)) return CommandResult::Error;
         if (!gPlatform.IO.PWM.InitPWM(gpio, phaseCorrect, enable)) {
             errCommand(scpi);
             return CommandResult::Error;
@@ -44,6 +45,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, gpio)) return CommandResult::Error;
         if (!gPlatform.IO.PWM.SetDuty(gpio, duty)) {
             errCommand(scpi);
             return CommandResult::Error;
@@ -65,6 +67,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, gpio)) return CommandResult::Error;
         if (!gPlatform.IO.PWM.SetFreq(gpio, freq)) {
             errCommand(scpi);
             return CommandResult::Error;
@@ -86,6 +89,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, gpio)) return CommandResult::Error;
         if (!gPlatform.IO.PWM.SetTop(gpio, top)) {
             errCommand(scpi);
             return CommandResult::Error;
@@ -144,6 +148,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, gpio)) return CommandResult::Error;
         gPlatform.IO.PWM.SetEnable(gpio, enable);
 
         return CommandResult::Success;
@@ -162,6 +167,7 @@ namespace Visa {
             return CommandResult::MissingParam;
         }
 
+        if (!Hub75::allowPin(scpi, gpio)) return CommandResult::Error;
         if (!gPlatform.IO.PWM.SetDivider(gpio, divider)) {
             errCommand(scpi);
             return CommandResult::Error;
