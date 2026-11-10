@@ -35,14 +35,20 @@ def data_commands(image, count):
         yield (f"DISP:WS2811:DATA {offset},#{len(length)}{length}".encode("ascii") + chunk + b"\n")
 
 
-def upload(link, image, count=64, pin=2, rate=800000, order="RGB", brightness=25):
+def upload(link, image, count=64, pin=2, rate=800000, order="RGB", brightness=25, timing=None):
     validate(count, pin, rate, order, brightness)
+    if timing is not None and (len(timing) != 5 or any(not isinstance(value, int) or value <= 0 for value in timing)):
+        raise ValueError("Timing requires five positive integers: T0H_ns T0L_ns T1H_ns T1L_ns RESET_us")
     payload = b"".join(data_commands(image, count))
     session = Session(link, "WS2811")
     print(session.query("*IDN?", timeout=8, prefix="CTI,"))
     session.checked(b"DISP:WS2811:STOP\n")
     try:
-        for setting in (f"COUNT {count}", f"PIN {pin}", f"RATE {rate}", f"ORD {order}", "START"):
+        settings = [f"COUNT {count}", f"PIN {pin}", f"RATE {rate}", f"ORD {order}"]
+        if timing is not None:
+            settings.append("TIMING " + ",".join(map(str, timing)))
+        settings.append("START")
+        for setting in settings:
             session.checked(f"DISP:WS2811:{setting}\n".encode("ascii"))
         session.wait_swap()  # START transmits black after the initial reset-low interval.
         session.checked(f"DISP:WS2811:BRIG {brightness}\n".encode("ascii"))
@@ -71,12 +77,15 @@ def main():
     parser.add_argument("--rate", type=int, choices=(400000, 800000), default=800000)
     parser.add_argument("--order", choices=("RGB", "RBG", "GRB", "GBR", "BRG", "BGR"), default="RGB")
     parser.add_argument("--brightness", type=int, default=25)
+    parser.add_argument("--timing", type=int, nargs=5,
+                        metavar=("T0H_NS", "T0L_NS", "T1H_NS", "T1L_NS", "RESET_US"),
+                        help="Override --rate pulse timing; firmware validates and rounds to 62.5ns ticks")
     args = parser.parse_args()
     validate(args.count, args.pin, args.rate, args.order, args.brightness)
     import serial
     with serial.Serial(args.port, 115200, timeout=0.25, write_timeout=2) as link:
         link.reset_input_buffer()
-        upload(link, pattern(args.count), args.count, args.pin, args.rate, args.order, args.brightness)
+        upload(link, pattern(args.count), args.count, args.pin, args.rate, args.order, args.brightness, args.timing)
 
 
 if __name__ == "__main__":

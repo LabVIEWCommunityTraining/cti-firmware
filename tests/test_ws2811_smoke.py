@@ -26,7 +26,8 @@ class FakeSerial:
             self.received = 0
         elif data.startswith(b"DISP:WS2811:COUNT "):
             self.count = int(data.split()[-1])
-        elif data.startswith((b"DISP:WS2811:PIN ", b"DISP:WS2811:RATE ", b"DISP:WS2811:ORD ")):
+        elif data.startswith((b"DISP:WS2811:PIN ", b"DISP:WS2811:RATE ", b"DISP:WS2811:ORD ",
+                              b"DISP:WS2811:TIMING ")):
             pass
         elif data == b"DISP:WS2811:START\n":
             self.running = True
@@ -83,10 +84,24 @@ class Ws2811SmokeTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 smoke.upload(link, b"", *args)
             self.assertEqual(link.writes, [])
+
         link = FakeSerial()
         with self.assertRaises(ValueError):
             smoke.upload(link, b"wrong")
         self.assertEqual(link.writes, [])
+
+    def test_explicit_timing_is_set_after_rate_before_start(self):
+        link = FakeSerial()
+        with contextlib.redirect_stdout(io.StringIO()):
+            smoke.upload(link, smoke.pattern(4), count=4, timing=(500, 2000, 1200, 1300, 500))
+        timing = b"DISP:WS2811:TIMING 500,2000,1200,1300,500\n"
+        self.assertLess(link.writes.index(b"DISP:WS2811:RATE 800000\n"), link.writes.index(timing))
+        self.assertLess(link.writes.index(timing), link.writes.index(b"DISP:WS2811:START\n"))
+        for invalid in ((250, 1000), (0, 1000, 625, 625, 400), (250, 1000, 625, 625, 1.5)):
+            link = FakeSerial()
+            with self.assertRaises(ValueError):
+                smoke.upload(link, smoke.pattern(4), count=4, timing=invalid)
+            self.assertEqual(link.writes, [])
 
 
 if __name__ == "__main__":

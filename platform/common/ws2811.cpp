@@ -15,6 +15,8 @@ namespace {
 using namespace SCPI;
 
 Configuration config;
+uint16_t instructions[ProgramLength];
+pio_program program;
 Buffers* buffers = nullptr;
 PIO pio = nullptr;
 int sm = -1, dma = -1, offset = -1;
@@ -65,18 +67,22 @@ CommandResult start(ScpiParser* parser) {
         stop();
         return error(parser, "WS2811 framebuffer allocation failed", -225);
     }
+    static_assert(ws2811_wrap + 1 == ProgramLength);
+    config.timing.patch(ws2811_program.instructions, instructions);
+    program = ws2811_program;
+    program.instructions = instructions;
     PIO candidates[] = {pio0, pio1,
 #if !PICO_RP2040
         pio2,
 #endif
     };
     for (PIO candidate : candidates) {
-        if (!pio_can_add_program(candidate, &ws2811_program)) continue;
+        if (!pio_can_add_program(candidate, &program)) continue;
         int candidateSm = pio_claim_unused_sm(candidate, false);
         if (candidateSm < 0) continue;
         pio = candidate;
         sm = candidateSm;
-        offset = pio_add_program(pio, &ws2811_program);
+        offset = pio_add_program(pio, &program);
         break;
     }
     if (sm < 0) {
@@ -92,8 +98,7 @@ CommandResult start(ScpiParser* parser) {
     sm_config_set_sideset_pins(&smConfig, config.pin);
     sm_config_set_out_shift(&smConfig, false, true, 24);
     sm_config_set_fifo_join(&smConfig, PIO_FIFO_JOIN_TX);
-    sm_config_set_clkdiv(&smConfig, static_cast<float>(clock_get_hz(clk_sys)) /
-        (config.rate * CyclesPerBit));
+    sm_config_set_clkdiv(&smConfig, static_cast<float>(clock_get_hz(clk_sys)) / PioClockHz);
     pio_sm_init(pio, sm, offset, &smConfig);
     pio_sm_set_pins_with_mask(pio, sm, 0, 1u << config.pin);
     pio_sm_set_consecutive_pindirs(pio, sm, config.pin, 1, true);
@@ -154,13 +159,40 @@ CommandResult rate(ScpiParser* parser) {
     if (!parser->endOfParameters()) return CommandResult::UnexpectedParam;
     if (!configurable(parser)) return CommandResult::Error;
     if (value != 400000 && value != 800000) return error(parser, "WS2811 rate must be 400000 or 800000", -222);
-    config.rate = value;
+    config.setRate(value);
     return CommandResult::Success;
 }
 
 QueryResult queryRate(ScpiParser* parser) {
     if (!parser->endOfParameters()) return QueryResult::UnexpectedParam;
-    gPlatform.IO.Printf("%u\n", config.rate);
+    gPlatform.IO.Printf("%lu\n", static_cast<unsigned long>(config.rate()));
+    return QueryResult::Success;
+}
+
+CommandResult timing(ScpiParser* parser) {
+    uint32_t ns[4], reset;
+    for (auto& value : ns)
+        if (parser->parseInt(value) != ParseResult::Success) return CommandResult::SyntaxError;
+    if (parser->parseInt(reset) != ParseResult::Success) return CommandResult::SyntaxError;
+    if (!parser->endOfParameters()) return CommandResult::UnexpectedParam;
+    if (!configurable(parser)) return CommandResult::Error;
+    Timing next{Timing::cycles(ns[0]), Timing::cycles(ns[1]),
+        Timing::cycles(ns[2]), Timing::cycles(ns[3]), reset};
+    if (!next.valid()) return error(parser,
+        "WS2811 timing outside PIO bounds: T0H 1..16 ticks, T1H-T0H 1..16, lows 4..49; tick 62.5ns; reset 50..100000us", -222);
+    config.timing = next;
+    return CommandResult::Success;
+}
+
+QueryResult queryTiming(ScpiParser* parser) {
+    if (!parser->endOfParameters()) return QueryResult::UnexpectedParam;
+    const Timing& value = config.timing;
+    gPlatform.IO.Printf("%lu,%lu,%lu,%lu,%lu\n",
+        static_cast<unsigned long>(Timing::nanoseconds(value.zeroHigh)),
+        static_cast<unsigned long>(Timing::nanoseconds(value.zeroLow)),
+        static_cast<unsigned long>(Timing::nanoseconds(value.oneHigh)),
+        static_cast<unsigned long>(Timing::nanoseconds(value.oneLow)),
+        static_cast<unsigned long>(value.resetUs));
     return QueryResult::Success;
 }
 
@@ -258,7 +290,7 @@ bool stop() {
     if (sm >= 0) {
         pio_sm_set_enabled(pio, sm, false);
         pio_sm_clear_fifos(pio, sm);
-        pio_remove_program(pio, &ws2811_program, offset);
+        pio_remove_program(pio, &program, offset);
         pio_sm_unclaim(pio, sm);
     }
     if (ownsPin) {
@@ -283,7 +315,7 @@ void service(SCPI::ScpiParser* parser) {
     }
     uint32_t now = time_us_32();
     uint32_t elapsed = now - phaseAt;
-    if (phase == Phase::Reset && elapsed >= ResetUs) {
+    if (phase == Phase::Reset && elapsed >= config.timing.resetUs) {
         dma_channel_set_read_addr(dma, buffers->wire, false);
         dma_channel_set_trans_count(dma, config.count, true);
         phase = Phase::Sending;
@@ -300,8 +332,8 @@ void service(SCPI::ScpiParser* parser) {
         }
     } else if (phase == Phase::Draining) {
         // DMA completion precedes up to eight TX FIFO words plus one OSR word.
-        uint32_t tailUs = 9 * 24 * (config.rate == 800000 ? 125 : 250) / 100;
-        if (elapsed >= tailUs + ResetUs) {
+        uint32_t tailUs = config.timing.wireUs(9);
+        if (elapsed >= tailUs + config.timing.resetUs) {
             phase = Phase::Idle;
             ++frames;
         }
@@ -312,6 +344,7 @@ void registerCommands(Visa::Visa* visa) {
     visa->addCommand("DISPlay:WS2811:COUNt", count, queryCount);
     visa->addCommand("DISPlay:WS2811:PIN", pin, queryPin);
     visa->addCommand("DISPlay:WS2811:RATE", rate, queryRate);
+    visa->addCommand("DISPlay:WS2811:TIMing", timing, queryTiming);
     visa->addCommand("DISPlay:WS2811:ORDer", order, queryOrder);
     visa->addCommand("DISPlay:WS2811:START", start, nullptr);
     visa->addCommand("DISPlay:WS2811:DATA", data, nullptr);

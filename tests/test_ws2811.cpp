@@ -70,7 +70,7 @@ void ws2811Tests() {
     }
     config.count = MaxLeds;
     assert(config.valid() && config.transferUs() == 122880);
-    config.rate = 400000;
+    config.setRate(400000);
     assert(config.transferUs() == 245760);
     Buffers large(MaxLeds);
     assert(large.valid());
@@ -97,6 +97,22 @@ void ws2811Tests() {
     };
     assert(query("COUNT?") == "64\n" && query("PIN?") == "2\n");
     assert(query("RATE?") == "800000\n" && query("ORD?") == "RGB\n");
+    assert(query("TIM?") == "250,1000,625,625,400\n");
+    command("TIM 500,2000,1200,1300,500");
+    assert(pop(parser) == 0 && query("TIM?") == "500,2000,1188,1313,500\n");
+    assert(query("RATE?") == "400000\n");
+    for (const char* invalid : {
+        "TIM 0,1000,625,625,400", "TIM 2000,1000,2200,625,400",
+        "TIM 250,100,625,625,400", "TIM 250,4000,625,625,400",
+        "TIM 250,1000,250,625,400", "TIM 250,1000,2000,625,400",
+        "TIM 250,1000,625,625,49", "TIM 250,1000,625,625,100001",
+        "TIM 250,1000,625,625", "TIM 250,1000,625,625,400,1",
+        "TIM 4294967295,1000,625,625,400"}) {
+        command(invalid);
+        assert(pop(parser) != 0 && query("TIM?") == "500,2000,1188,1313,500\n");
+    }
+    command("RATE 800000");
+    assert(pop(parser) == 0 && query("TIM?") == "250,1000,625,625,400\n");
     for (const char* invalid : {"COUNT 0", "COUNT 4097", "PIN 23", "PIN 29", "RATE 1000000",
                                  "ORD RGBW", "COUNT 1,2", "START extra"}) {
         command(invalid);
@@ -133,7 +149,8 @@ void ws2811Tests() {
     assert(Hub75::allowPin(&parser, 20));
     send(parser, "DISP:HUB75:START\n");
     assert(pop(parser) == -221 && Fake::channels == 1);
-    for (const char* change : {"COUNT 5", "PIN 3", "RATE 400000", "ORD GRB"}) {
+    for (const char* change : {"COUNT 5", "PIN 3", "RATE 400000", "ORD GRB",
+                              "TIM 250,1000,625,625,500"}) {
         command(change);
         assert(pop(parser) == -221);
     }
@@ -146,7 +163,7 @@ void ws2811Tests() {
     Fake::now += 500;
     service(&parser);
     assert(query("STAT?") == "1,0,1,25,0\n"); // FIFO/OSR drain plus reset-low is not complete.
-    Fake::now += 100;
+    Fake::now += 200;
     service(&parser);
     assert(query("STAT?") == "1,0,0,25,1\n");
     command("SHOW");
@@ -261,6 +278,43 @@ void ws2811Tests() {
     assert(wire[0] == 0x10080800 && wire[1] == 0x08100800);
     assert(wire[2] == 0x08081000 && wire[3] == 0x10101000);
     completeTransfer(parser);
+    assert(stop());
+
+    command("COUNT 4096");
+    command("TIMING 1000,3062,2000,3062,5000");
+    assert(pop(parser) == 0 && query("TIMING?") == "1000,3063,2000,3063,5000\n");
+    assert(query("RATE?") == "197530\n");
+    command("START");
+    assert(pop(parser) == 0);
+    auto duration = [](unsigned index) { return 1u + ((Fake::loadedInstructions[index] >> 8) & 15u); };
+    assert(duration(1) == 16 && duration(2) == 16);
+    assert(duration(3) + duration(4) + duration(5) + 1 == 49);
+    assert(duration(6) + duration(7) + duration(8) + 1 == 49);
+    Fake::now += 4900;
+    service(&parser);
+    assert(!Fake::busy);
+    Fake::now += 100;
+    service(&parser);
+    assert(Fake::busy);
+    Fake::now += 250000;
+    service(&parser);
+    assert(pop(parser) == 0 && Fake::busy); // Custom wire budget, not the old 800k timeout.
+    Fake::busy = false;
+    service(&parser);
+    Fake::now += 6000;
+    service(&parser);
+    assert(query("STAT?") == "1,0,1,25,0\n"); // 1094us worst-case tail plus 5000us reset.
+    Fake::now += 100;
+    service(&parser);
+    assert(query("STAT?") == "1,0,0,25,1\n");
+    command("STOP");
+    assert(pop(parser) == 0 && query("TIM?") == "1000,3063,2000,3063,5000\n");
+    command("TIM 250,1000,625,625,50");
+    command("START");
+    assert(pop(parser) == 0);
+    Fake::now += 50;
+    service(&parser);
+    assert(Fake::busy); // A shorter explicit reset replaces the default too.
     assert(stop());
     std::cout << "WS2811: encoding/orders/brightness, fragmented uploads, timing states, ownership, coexistence and failures passed\n";
 }

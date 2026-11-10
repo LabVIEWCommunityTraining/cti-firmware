@@ -17,7 +17,7 @@ struct pio_sm_config {
     float clockDivider = 0;
 };
 struct dma_channel_config {};
-struct pio_program {};
+struct pio_program { const uint16_t* instructions = nullptr; uint8_t length = 0; };
 struct FakePio { uint32_t txf[4] = {}; };
 struct FakeDmaChannel { uint32_t ctrl_trig = 0; };
 
@@ -35,6 +35,7 @@ inline unsigned transfers = 0;
 inline void (*handler)() = nullptr;
 inline FakePio pios[3];
 inline unsigned claimedSms[3] = {}, enabledSms[3] = {};
+inline uint16_t loadedInstructions[32] = {};
 inline FakeDmaChannel channel;
 struct DmaState {
     bool busy = false;
@@ -102,7 +103,11 @@ inline int pio_claim_unused_sm(PIO pio, bool) {
     }
     return -1;
 }
-inline int pio_add_program(PIO, const pio_program*) { ++Fake::programs; return 3; }
+inline int pio_add_program(PIO, const pio_program* program) {
+    for (unsigned i = 0; i < program->length; ++i) Fake::loadedInstructions[i] = program->instructions[i];
+    ++Fake::programs;
+    return 3;
+}
 inline void pio_remove_program(PIO, const pio_program*, int) { --Fake::programs; }
 inline void pio_sm_unclaim(PIO pio, int sm) {
     unsigned& mask = Fake::claimedSms[pio - Fake::pios];

@@ -1,5 +1,6 @@
 #include "display/hub75.h"
 #include "display/hub75_frame.h"
+#include "display/ws2811_frame.h"
 #include "visa/visa_core.h"
 #include "fake_sdk.h"
 
@@ -479,6 +480,21 @@ void rgb332Tests() {
 }
 
 int main(int argc, char** argv) {
+    if (argc == 9 && std::string(argv[1]) == "--ws-timing") {
+        std::array<uint16_t, WS2811::ProgramLength> source{}, patched{};
+        std::ifstream input(argv[2], std::ios::binary);
+        input.read(reinterpret_cast<char*>(source.data()), sizeof(source));
+        assert(input.gcount() == sizeof(source));
+        WS2811::Timing timing{
+            WS2811::Timing::cycles(std::stoul(argv[4])), WS2811::Timing::cycles(std::stoul(argv[5])),
+            WS2811::Timing::cycles(std::stoul(argv[6])), WS2811::Timing::cycles(std::stoul(argv[7])),
+            static_cast<uint32_t>(std::stoul(argv[8]))};
+        assert(timing.valid());
+        timing.patch(source.data(), patched.data());
+        std::ofstream output(argv[3], std::ios::binary);
+        output.write(reinterpret_cast<const char*>(patched.data()), sizeof(patched));
+        return output.good() ? 0 : 1;
+    }
     if (argc >= 4 && std::string(argv[1]) == "--scan") {
         Hub75::Configuration config;
         if (argc >= 6) {
